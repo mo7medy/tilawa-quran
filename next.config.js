@@ -33,6 +33,11 @@ const withPWAConfig = withPWA({
 const nextConfig = {
   typescript: { tsconfigPath: 'tsconfig.build.json' },
   output: isCloudflare ? 'standalone' : undefined,
+  ...(isCloudflare && {
+    outputFileTracingIncludes: {
+      '*': ['node_modules/@sentry/nextjs/build/**/*', 'node_modules/@sentry/vercel-edge/build/**/*'],
+    },
+  }),
   reactStrictMode: true,
   productionBrowserSourceMaps: true,
   images: {
