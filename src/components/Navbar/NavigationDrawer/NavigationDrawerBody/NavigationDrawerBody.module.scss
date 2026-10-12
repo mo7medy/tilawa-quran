@@ -1,5 +1,3 @@
-@use 'src/styles/utility';
-
 .listItemsContainer {
   block-size: 100%;
   position: relative;
@@ -35,31 +33,6 @@
   user-select: none;
 }
 
-.projectsDesc {
-  font-size: var(--font-size-xxsmall-px);
-  margin-block-end: var(--spacing-small-px);
-  padding-inline-start: var(--spacing-large-px);
-}
-
-.accordionHeaderLeft {
-  gap: var(--spacing-xxsmall-px);
-  align-items: center;
-}
-
-.accordionContent {
-  margin-block-start: var(--spacing-medium2-px);
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-medium2-px);
-  > a {
-    padding-inline-start: var(--spacing-large-px);
-  }
-}
-
-.accordionItemTitle {
-  font-weight: var(--font-weight-normal);
-}
-
 .ctaContainer {
   margin-inline: auto;
   max-inline-size: fit-content;
@@ -70,25 +43,6 @@
   display: grid;
   grid-template-columns: auto 1fr;
   gap: var(--spacing-small-px);
-  margin-block-end: var(--spacing-small-px);
-}
-
-.ctaDonateButton {
-  inline-size: 100%;
-  color: var(--color-text-white);
-  background-color: var(--color-blue-buttons-and-icons);
-
-  &:hover {
-    background-color: var(--color-blue-buttons-and-icons);
-    color: var(--color-text-white);
-    filter: brightness(var(--opacity-85));
-  }
-
-  svg {
-    path {
-      fill: var(--color-text-white) !important;
-    }
-  }
 }
 
 .languageTrigger {

@@ -20,7 +20,6 @@ import { getPreparingForRamadanOgImageUrl } from '@/lib/og';
 import styles from '@/pages/contentPage.module.scss';
 import pageStyles from '@/pages/ramadan/RamadanActivities.module.scss';
 import AyahLevelSettings from '@/public/images/ayah-level-settings.jpeg';
-import { makeDonatePageUrl } from '@/utils/apiPaths';
 import { isLoggedIn } from '@/utils/auth/login';
 import { logButtonClick } from '@/utils/eventLogger';
 import { getLanguageAlternates } from '@/utils/locale';
@@ -345,34 +344,6 @@ const PreparingForRamadanPage: NextPage = (): JSX.Element => {
               May Allah make this Ramadan a time of profound growth, deep reflection, and meaningful
               connection with the Quran. Start preparing today and join us on this transformative
               journey.
-            </div>
-          </div>
-          <div className={styles.subSection}>
-            <h1>Support Quran.Foundation ❤️</h1>
-            <div>
-              We remain committed to our mission to empower every human being to benefit from the
-              Quran. The modern technology and human talent needed to accomplish our mission
-              requires resources. Monthly donations help us retain top talent and sustain operations
-              so we focus less on fundraising and more on creating impact. To learn more and donate,
-              visit:
-              <InlineLink
-                text="donate.quran.foundation"
-                href="https://donate.quran.foundation"
-                isNewTab
-              />
-            </div>
-            <div className={styles.ctaContainer}>
-              <Button
-                onClick={() => {
-                  onButtonClicked('become_a_monthly_donor');
-                }}
-                variant={ButtonVariant.Shadow}
-                href={makeDonatePageUrl(false, true)}
-                isNewTab
-                className={styles.button}
-              >
-                Become a Monthly Donor
-              </Button>
             </div>
           </div>
         </div>

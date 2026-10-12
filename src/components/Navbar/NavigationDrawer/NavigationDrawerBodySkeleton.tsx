@@ -2,7 +2,7 @@ import Skeleton from '../../dls/Skeleton/Skeleton';
 
 import styles from './NavigationDrawerBodySkeleton.module.scss';
 
-const NAV_ROW_COUNT = 6;
+const NAV_ROW_COUNT = 3;
 const rowsArr = Array(NAV_ROW_COUNT).fill(null);
 
 const renderLinesSkeleton = (index) => {
@@ -13,13 +13,7 @@ const renderLinesSkeleton = (index) => {
 };
 
 const NavigationDrawerBodySkeleton = () => {
-  return (
-    <span className={styles.skeletonContainer}>
-      <Skeleton isActive isSquared className={styles.blockRow} />
-      {renderLinesSkeleton(1)}
-      {renderLinesSkeleton(2)}
-    </span>
-  );
+  return <span className={styles.skeletonContainer}>{renderLinesSkeleton(1)}</span>;
 };
 
 export default NavigationDrawerBodySkeleton;

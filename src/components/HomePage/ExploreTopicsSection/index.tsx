@@ -1,6 +1,5 @@
 import React from 'react';
 
-import classNames from 'classnames';
 import useTranslation from 'next-translate/useTranslation';
 
 import styles from './ExploreTopicsSection.module.scss';
@@ -10,12 +9,6 @@ import ArrowIcon from '@/public/icons/arrow.svg';
 import { logButtonClick } from '@/utils/eventLogger';
 
 const TOPICS = [
-  {
-    slug: 'what-is-ramadan',
-    logKey: 'what-is-ramadan',
-    key: 'what-is-ramadan',
-    isHighlighted: true,
-  },
   {
     slug: 'about-the-quran',
     logKey: 'about-quran',
@@ -49,9 +42,7 @@ const ExploreTopicsSection = () => {
                 logButtonClick(`explore_topics_${topic.logKey}`);
               }}
               isNewTab
-              className={classNames(styles.topic, {
-                [styles.highlighted]: topic.isHighlighted,
-              })}
+              className={styles.topic}
             >
               <div>
                 {t(topic.key)} <ArrowIcon />

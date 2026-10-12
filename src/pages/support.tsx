@@ -109,15 +109,6 @@ const SupportPage: NextPage = (): JSX.Element => {
               ]}
             />
           </p>
-          {/* <h2>
-        <Trans i18nKey="support:donate-q" />
-      </h2>
-      <p>
-        <Trans
-          i18nKey="support:donate-a"
-          components={[<Link href="/donations" variant={LinkVariant.Blend} prefetch={false} />]}
-        />
-      </p> */}
         </div>
       </PageContainer>
     </>

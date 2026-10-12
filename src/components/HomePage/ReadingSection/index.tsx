@@ -7,7 +7,6 @@ import { useSelector } from 'react-redux';
 import useSWR from 'swr';
 
 import ChapterCard from './ChapterCard';
-import NewCard from './NewCard';
 import NoGoalOrStreakCard from './NoGoalOrStreakCard';
 import styles from './ReadingSection.module.scss';
 import StreakOrGoalCard from './StreakOrGoalCard';
@@ -167,6 +166,7 @@ const ReadingSection: React.FC<Props> = () => {
     />
   );
 
+  const shouldShowGoalsCard = Boolean(streak || goal) || !isMobile();
   const goalsOrStreakCard =
     streak || goal ? (
       <Card className={styles.streakCard}>
@@ -180,18 +180,13 @@ const ReadingSection: React.FC<Props> = () => {
       <>{!isMobile() && <NoGoalOrStreakCard />}</>
     );
 
-  const newCard = <NewCard />;
-
   if (isGuestWithReadingSessions) {
     return (
       <>
         {header}
         <div className={styles.cardsContainer}>
           <div className={styles.cardContainer}>{continueReadingCard}</div>
-          <div className={styles.cardContainer}>
-            {goalsOrStreakCard}
-            {newCard}
-          </div>
+          {shouldShowGoalsCard && <div className={styles.cardContainer}>{goalsOrStreakCard}</div>}
         </div>
       </>
     );
@@ -205,10 +200,7 @@ const ReadingSection: React.FC<Props> = () => {
           <div className={styles.cardContainer}>
             <ChapterCard surahNumber={1} />
           </div>
-          <div className={styles.cardContainer}>
-            {newCard}
-            {goalsOrStreakCard}
-          </div>
+          {shouldShowGoalsCard && <div className={styles.cardContainer}>{goalsOrStreakCard}</div>}
         </div>
       </>
     );
@@ -221,8 +213,7 @@ const ReadingSection: React.FC<Props> = () => {
           {header}
           <div className={styles.cardsContainer}>
             <div className={styles.cardContainer}>{continueReadingCard}</div>
-            <div className={styles.cardContainer}>{goalsOrStreakCard}</div>
-            <div className={styles.cardContainer}>{newCard}</div>
+            {shouldShowGoalsCard && <div className={styles.cardContainer}>{goalsOrStreakCard}</div>}
           </div>
         </>
       );
@@ -232,10 +223,7 @@ const ReadingSection: React.FC<Props> = () => {
         {header}
         <div className={styles.cardsContainer}>
           <div className={styles.cardContainer}>{continueReadingCard}</div>
-          <div className={styles.cardContainer}>
-            {goalsOrStreakCard}
-            {newCard}
-          </div>
+          {shouldShowGoalsCard && <div className={styles.cardContainer}>{goalsOrStreakCard}</div>}
         </div>
       </>
     );
@@ -249,10 +237,7 @@ const ReadingSection: React.FC<Props> = () => {
           <div className={styles.cardContainer}>
             <ChapterCard surahNumber={1} />
           </div>
-          <div className={styles.cardContainer}>
-            {newCard}
-            {goalsOrStreakCard}
-          </div>
+          {shouldShowGoalsCard && <div className={styles.cardContainer}>{goalsOrStreakCard}</div>}
         </div>
       </>
     );

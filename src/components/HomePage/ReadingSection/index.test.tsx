@@ -44,7 +44,6 @@ vi.mock('@/components/HomePage/ReadingSection/ChapterCard', () => ({
     />
   ),
 }));
-vi.mock('@/components/HomePage/ReadingSection/NewCard', () => ({ default: () => <div /> }));
 vi.mock('@/components/HomePage/ReadingSection/NoGoalOrStreakCard', () => ({
   default: () => <div />,
 }));

@@ -12,7 +12,7 @@
     position: fixed;
     inset-block-end: var(--spacing-mega);
     transition: var(--transition-regular);
-    // Keep page controls above reader content but below floating donation card and header layers.
+    // Keep page controls above reader content but below header layers.
     z-index: 298;
     inset-inline-end: var(--spacing-large);
   }

@@ -7,13 +7,11 @@ import { useSelector } from 'react-redux';
 
 import styles from './ChapterHeader.module.scss';
 import BismillahSection from './components/BismillahSection';
-import ChapterEvent from './components/ChapterEvent';
 import ChapterTitle from './components/ChapterTitle';
 import TranslationSettingsButton from './components/TranslationSettingsButton';
 import ReadingModeActions from './ReadingModeActions';
 
 import PlayChapterAudioButton from '@/components/QuranReader/PlayChapterAudioButton';
-import useChapterEvent from '@/hooks/useChapterEvent';
 import useDirection from '@/hooks/useDirection';
 import { selectReadingPreference } from '@/redux/slices/QuranReader/readingPreferences';
 import Language from '@/types/Language';
@@ -45,7 +43,6 @@ const ChapterHeader: React.FC<ChapterHeaderProps> = ({
   const isArabicOrUrdu = lang === Language.AR || lang === Language.UR;
   const direction = useDirection();
   const readingPreference = useSelector(selectReadingPreference);
-  const { showEvent, title, description, ctaText, ctaLink } = useChapterEvent(chapterId);
 
   // Check if we're in Reading mode (Arabic or Translation)
   const isReadingMode = isInReadingMode(readingPreference);
@@ -60,10 +57,6 @@ const ChapterHeader: React.FC<ChapterHeaderProps> = ({
           {isReadingMode ? <ReadingModeActions /> : <TranslationSettingsButton />}
         </div>
       </div>
-
-      {showEvent && (
-        <ChapterEvent title={title} description={description} ctaText={ctaText} ctaLink={ctaLink} />
-      )}
 
       <div className={classNames(styles.container, className)}>
         {/* Chapter title section */}

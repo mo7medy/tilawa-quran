@@ -17,7 +17,6 @@ import { getRamadan2026OgImageUrl } from '@/lib/og';
 import styles from '@/pages/contentPage.module.scss';
 import pageStyles from '@/pages/ramadan2026/ramadan2026.module.scss';
 import newFeatureImage from '@/public/images/new-features.png';
-import { makeDonatePageUrl, makeDonateUrl } from '@/utils/apiPaths';
 import { logButtonClick } from '@/utils/eventLogger';
 import { getLanguageAlternates } from '@/utils/locale';
 import {
@@ -436,33 +435,6 @@ const Ramadan2026Page: NextPage = (): JSX.Element => {
             <div>
               May Allah make this Ramadan a time of profound growth, deep reflection, and meaningful
               connection with the Quran.
-            </div>
-          </div>
-          <hr />
-          <div className={styles.subSection}>
-            <h1>Support Quran.Foundation ❤️</h1>
-            <div>
-              We remain committed to our mission to empower every human being to benefit from the
-              Quran. The modern technology and human talent needed to accomplish our mission
-              requires resources. Monthly donations help us retain top talent and sustain operations
-              so we focus less on fundraising and more on creating impact. To learn more and donate,
-              visit:{' '}
-              <Link href={makeDonateUrl()} isNewTab>
-                donate.quran.foundation
-              </Link>
-            </div>
-            <div className={styles.ctaContainer}>
-              <Button
-                onClick={() => {
-                  onButtonClicked('donate');
-                }}
-                variant={ButtonVariant.Shadow}
-                href={makeDonatePageUrl(false, true)}
-                isNewTab
-                className={styles.button}
-              >
-                Donate Today
-              </Button>
             </div>
           </div>
         </div>

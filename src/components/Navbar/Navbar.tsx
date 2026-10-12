@@ -13,7 +13,6 @@ import SettingsDrawer from './SettingsDrawer/SettingsDrawer';
 
 import { useOnboarding } from '@/components/Onboarding/OnboardingProvider';
 import useDebounceNavbarVisibility from '@/hooks/useDebounceNavbarVisibility';
-import { selectIsBannerVisible } from '@/redux/slices/banner';
 import {
   selectIsLanguageDrawerOpen,
   selectIsNavigationDrawerOpen,
@@ -24,7 +23,6 @@ import {
 const Navbar = () => {
   const { isActive } = useOnboarding();
   const { isVisible: isNavbarVisible } = useSelector(selectNavbar, shallowEqual);
-  const isBannerVisible = useSelector(selectIsBannerVisible);
   const isNavigationDrawerOpen = useSelector(selectIsNavigationDrawerOpen);
   const isSettingsDrawerOpen = useSelector(selectIsSettingsDrawerOpen);
   const isLanguageDrawerOpen = useSelector(selectIsLanguageDrawerOpen);
@@ -43,7 +41,7 @@ const Navbar = () => {
         data-testid="navbar"
         data-isvisible={showNavbar}
       >
-        <NavbarBody isBannerVisible={isBannerVisible} />
+        <NavbarBody />
       </nav>
       {/* Drawers rendered outside nav to avoid transform containment issues */}
       <SearchDrawer />

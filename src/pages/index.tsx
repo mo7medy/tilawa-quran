@@ -6,12 +6,10 @@ import classNames from 'classnames';
 import { NextPage, GetStaticProps } from 'next';
 import Head from 'next/head';
 import useTranslation from 'next-translate/useTranslation';
-import { useSelector } from 'react-redux';
 
 import styles from './index.module.scss';
 
 import ChapterAndJuzListWrapper from '@/components/chapters/ChapterAndJuzList';
-import HomepageFundraisingBanner from '@/components/Fundraising/HomepageFundraisingBanner';
 import CommunitySection from '@/components/HomePage/CommunitySection';
 import ExploreTopicsSection from '@/components/HomePage/ExploreTopicsSection';
 import HomePageApps from '@/components/HomePage/HomePageApps';
@@ -21,7 +19,6 @@ import MobileHomepageSections from '@/components/HomePage/MobileHomepageSections
 import QuranInYearSection from '@/components/HomePage/QuranInYearSection';
 import ReadingSection from '@/components/HomePage/ReadingSection';
 import NextSeoWrapper from '@/components/NextSeoWrapper';
-import { selectIsHomepageBannerVisible } from '@/redux/slices/fundraisingBanner';
 import { isLoggedIn } from '@/utils/auth/login';
 import { getAllChaptersData } from '@/utils/chapter';
 import { getLanguageAlternates } from '@/utils/locale';
@@ -43,7 +40,6 @@ const Index: NextPage<IndexProps> = ({
   const { t, lang } = useTranslation('home');
   const isUserLoggedIn = isLoggedIn();
   const todayAyah = useMemo(() => getCurrentDayAyah(), []);
-  const isBannerVisible = useSelector(selectIsHomepageBannerVisible);
 
   return (
     <>
@@ -62,18 +58,6 @@ const Index: NextPage<IndexProps> = ({
             <div className={classNames(styles.flowItem, styles.fullWidth, styles.homepageCard)}>
               <ReadingSection />
             </div>
-            {isBannerVisible && (
-              <div
-                className={classNames(
-                  styles.flowItem,
-                  styles.fullWidth,
-                  styles.homepageCard,
-                  styles.homepageFundraisingCard,
-                )}
-              >
-                <HomepageFundraisingBanner />
-              </div>
-            )}
             {isMobile() ? (
               <MobileHomepageSections
                 isUserLoggedIn={isUserLoggedIn}
