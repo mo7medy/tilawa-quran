@@ -1,0 +1,59 @@
+name: Cloudflare compatibility build
+
+on:
+  push:
+    branches: [codex/cloudflare-actions]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      CI: 'true'
+      HUSKY: '0'
+      NEXT_TELEMETRY_DISABLED: '1'
+      WRANGLER_SEND_METRICS: 'false'
+      NEXT_PUBLIC_DEPLOYMENT_TARGET: cloudflare
+      NEXT_PUBLIC_VERCEL_ENV: production
+      NEXT_PUBLIC_VERCEL_URL: tilawa-quran.vercel.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Enable Yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+      - name: Resolve upgraded dependencies on GitHub
+        run: yarn install --non-interactive --ignore-scripts
+      - name: Check production TypeScript
+        run: yarn tsc --project tsconfig.build.json --noEmit
+      - name: Check content API and saved reading behavior
+        run: yarn test src/lib/quranFoundation src/components/HomePage/ReadingSection/index.test.tsx
+      - name: Build Next.js and Cloudflare Worker
+        run: yarn build:cloudflare
+      - name: Validate Worker packaging without deploying
+        run: yarn wrangler deploy --dry-run --outdir /tmp/tilawa-worker
+      - name: Save resolved lockfile
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloudflare-yarn-lock
+          path: yarn.lock
+          retention-days: 7
+      - name: Save Cloudflare build
+        uses: actions/upload-artifact@v4
+        with:
+          name: tilawa-cloudflare-build
+          path: .open-next/
+          include-hidden-files: true
+          retention-days: 7
