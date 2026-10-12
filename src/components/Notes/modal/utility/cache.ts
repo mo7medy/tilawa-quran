@@ -1,9 +1,11 @@
-import { ScopedMutator, Cache } from 'swr/dist/types';
+import type { Cache, useSWRConfig } from 'swr';
 
 import { GetAllNotesResponse, Note } from '@/types/auth/Note';
 import { makeGetNoteByIdUrl, makeGetNotesByVerseUrl, makeNotesUrl } from '@/utils/auth/apiPaths';
 import { makeGetUserReflectionsUrl } from '@/utils/quranReflect/apiPaths';
 import { isVerseKeyWithinRanges } from '@/utils/verse';
+
+type NotesCacheMutator = ReturnType<typeof useSWRConfig>['mutate'];
 
 /**
  * Enum representing the type of cache mutation action.
@@ -36,7 +38,7 @@ export const invalidateCache = ({
   flushNotesList = false,
   action,
 }: {
-  mutate: ScopedMutator<unknown>;
+  mutate: NotesCacheMutator;
   cache?: Cache<unknown>;
   verseKeys?: string[];
   note?: Note;
@@ -60,7 +62,7 @@ export const invalidateCache = ({
  * When cache is not available, invalidates exact single-verse count caches.
  */
 const invalidateCountCaches = (
-  mutate: ScopedMutator<unknown>,
+  mutate: NotesCacheMutator,
   cache: Cache<unknown> | undefined,
   verseKeys: string[],
 ): void => {
@@ -90,7 +92,7 @@ const invalidateCountCaches = (
  * Updates note-by-verse caches for the given verse keys.
  */
 const updateVerseCaches = (
-  mutate: ScopedMutator<unknown>,
+  mutate: NotesCacheMutator,
   verseKeys: string[],
   note?: Note,
   action?: CacheAction,
@@ -120,7 +122,7 @@ const updateVerseCaches = (
  * Updates individual note and general notes list caches.
  */
 const updateNoteCaches = (
-  mutate: ScopedMutator<unknown>,
+  mutate: NotesCacheMutator,
   cache: Cache<unknown> | undefined,
   note: Note | undefined,
   action?: CacheAction,
@@ -193,7 +195,7 @@ const updatePaginatedNotes = (
  * Invalidates reflections caches for the given verse keys.
  */
 const invalidateReflectionsCaches = (
-  mutate: ScopedMutator<unknown>,
+  mutate: NotesCacheMutator,
   cache?: Cache<unknown>,
 ): void => {
   const cacheKeys = (cache as unknown as { keys?: () => string[] })?.keys?.();
