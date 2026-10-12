@@ -10,9 +10,7 @@ import useTranslation from 'next-translate/useTranslation';
 import styles from './index.module.scss';
 
 import ChapterAndJuzListWrapper from '@/components/chapters/ChapterAndJuzList';
-import CommunitySection from '@/components/HomePage/CommunitySection';
 import ExploreTopicsSection from '@/components/HomePage/ExploreTopicsSection';
-import HomePageApps from '@/components/HomePage/HomePageApps';
 import HomePageHero from '@/components/HomePage/HomePageHero';
 import LearningPlansSection from '@/components/HomePage/LearningPlansSection';
 import MobileHomepageSections from '@/components/HomePage/MobileHomepageSections';
@@ -89,11 +87,6 @@ const Index: NextPage<IndexProps> = ({
                     >
                       <ExploreTopicsSection />
                     </div>
-                    <div
-                      className={classNames(styles.flowItem, styles.fullWidth, styles.homepageCard)}
-                    >
-                      <CommunitySection />
-                    </div>
                   </>
                 ) : (
                   <>
@@ -118,26 +111,10 @@ const Index: NextPage<IndexProps> = ({
                         <QuranInYearSection chaptersData={chaptersData} />
                       </div>
                     )}
-                    <div
-                      className={classNames(styles.flowItem, styles.fullWidth, styles.homepageCard)}
-                    >
-                      <CommunitySection />
-                    </div>
                   </>
                 )}
               </>
             )}
-
-            <div
-              className={classNames(
-                styles.flowItem,
-                styles.fullWidth,
-                styles.homepageCard,
-                styles.appsSection,
-              )}
-            >
-              <HomePageApps />
-            </div>
 
             <div className={styles.flowItem}>
               <ChapterAndJuzListWrapper chapters={chapters} />
