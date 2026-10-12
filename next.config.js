@@ -16,6 +16,7 @@ const runtimeCaching = require('./pwa-runtime-config.js');
 
 const isDev = process.env.NEXT_PUBLIC_VERCEL_ENV === 'development';
 const isProduction = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production';
+const isCloudflare = process.env.NEXT_PUBLIC_DEPLOYMENT_TARGET === 'cloudflare';
 const withPWAConfig = withPWA({
   dest: 'public',
   disable: !isProduction,
@@ -30,12 +31,10 @@ const withPWAConfig = withPWA({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  typescript: { tsconfigPath: 'tsconfig.build.json' },
+  output: isCloudflare ? 'standalone' : undefined,
   reactStrictMode: true,
   productionBrowserSourceMaps: true,
-  swcMinify: true,
-  experimental: {
-    instrumentationHook: true,
-  },
   images: {
     formats: ['image/avif', 'image/webp'],
     domains: [
@@ -59,6 +58,7 @@ const nextConfig = {
       alias: {
         ...webpackConfig.resolve.alias,
         'audio-worklet': path.resolve(__dirname, 'src/audioInput/audio-worklet.ts'),
+        ...(isCloudflare && { '@sentry/profiling-node': false }),
       },
     };
     webpackConfig.module.parser = {

@@ -40,6 +40,10 @@ node_modules/
 
 # next.js build output
 .next
+.open-next/
+.wrangler/
+.dev.vars
+.dev.vars.*
 out
 tsconfig.tsbuildinfo
 
