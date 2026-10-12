@@ -2,6 +2,7 @@
 import { camelizeKeys } from 'humps';
 import { NextApiRequest } from 'next';
 
+import { getFoundationServicePath } from '@/lib/quranFoundation/routes';
 import {
   AyahHadithsBackendResponse,
   AyahHadithsResponse,
@@ -73,6 +74,28 @@ import AudioData from 'types/AudioData';
 
 export const OFFLINE_ERROR = 'OFFLINE';
 
+const fetchFoundationOnServer = async (
+  input: RequestInfo,
+  init: RequestInit,
+): Promise<Response | null> => {
+  if (
+    typeof window !== 'undefined' ||
+    !process.env.QURAN_CLIENT_ID ||
+    !process.env.QURAN_CLIENT_SECRET
+  ) {
+    return null;
+  }
+  const servicePath = getFoundationServicePath(typeof input === 'string' ? input : input.url);
+  if (!servicePath || !/^(content|search)\//.test(servicePath)) {
+    return null;
+  }
+  if (init.method && init.method !== 'GET') {
+    throw new Error('Quran Foundation content requests must use GET.');
+  }
+  const { fetchQuranFoundation } = await import('@/lib/quranFoundation/client');
+  return fetchQuranFoundation(servicePath);
+};
+
 export const fetcher = async function fetcher<T>(
   input: RequestInfo,
   init: RequestInit = {},
@@ -100,7 +123,8 @@ export const fetcher = async function fetcher<T>(
     },
   };
 
-  const res = await fetch(input, reqInit);
+  // SSG/ISR must not call this deployment's HTTP proxy during its own build.
+  const res = (await fetchFoundationOnServer(input, init)) || (await fetch(input, reqInit));
   if (fullResponse) return res as unknown as T;
   if (!res.ok || res.status === 500 || res.status === 404) {
     throw res;

@@ -62,16 +62,29 @@ export const navigateToExternalUrl = (url: string) => {
  * @see https://vercel.com/docs/concepts/projects/environment-variables
  * @returns {string}
  */
-export const getBasePath = (): string =>
-  `${process.env.NEXT_PUBLIC_VERCEL_ENV === 'development' ? 'http' : 'https'}://${
-    process.env.NEXT_PUBLIC_VERCEL_URL
-  }`;
+export const getBasePath = (): string => {
+  if (typeof window !== 'undefined') {
+    return window.location.origin;
+  }
+  const host =
+    process.env.NEXT_PUBLIC_VERCEL_URL ||
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+    process.env.VERCEL_URL ||
+    'localhost:3000';
+  if (/^https?:\/\//.test(host)) {
+    return host.replace(/\/$/, '');
+  }
+  return `${
+    host.startsWith('localhost') || host.startsWith('127.0.0.1') ? 'http' : 'https'
+  }://${host}`;
+};
 
 export const getProxiedServiceUrl = (service: QuranFoundationService, path: string): string => {
   const PROXY_PATH = `/api/proxy/${service}`;
-  const BASE_PATH = isStaticBuild
-    ? `${process.env.API_GATEWAY_URL}/${service}`
-    : `${getBasePath()}${PROXY_PATH}`;
+  const BASE_PATH =
+    isStaticBuild && process.env.API_GATEWAY_URL
+      ? `${process.env.API_GATEWAY_URL}/${service}`
+      : `${getBasePath()}${PROXY_PATH}`;
   return `${BASE_PATH}${path}`;
 };
 
