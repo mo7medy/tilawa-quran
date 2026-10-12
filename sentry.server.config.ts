@@ -3,13 +3,20 @@
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
 import * as Sentry from '@sentry/nextjs';
-import { nodeProfilingIntegration } from '@sentry/profiling-node';
 
 const SENTRY_DSN = process.env.SENTRY_DSN || process.env.NEXT_PUBLIC_SENTRY_DSN;
 const SENTRY_ENABLED = process.env.NEXT_PUBLIC_SERVER_SENTRY_ENABLED === 'true';
-const isCloudflare = process.env.NEXT_PUBLIC_DEPLOYMENT_TARGET === 'cloudflare';
 const isDev = process.env.NODE_ENV === 'development';
 const version = `quran.com-frontend-next@${process.env.NEXT_PUBLIC_APP_VERSION}`;
+const integrations = [];
+
+// Keep the native addon out of the dependency graph emitted for Workers.
+if (process.env.NEXT_PUBLIC_DEPLOYMENT_TARGET !== 'cloudflare') {
+  // eslint-disable-next-line global-require, @typescript-eslint/no-var-requires
+  const { nodeProfilingIntegration } =
+    require('@sentry/profiling-node') as typeof import('@sentry/profiling-node');
+  integrations.push(nodeProfilingIntegration());
+}
 
 Sentry.init({
   enabled: SENTRY_ENABLED,
@@ -24,5 +31,5 @@ Sentry.init({
   replaysOnErrorSampleRate: isDev ? 1 : 0.1,
   debug: isDev,
   release: version,
-  integrations: isCloudflare ? [] : [nodeProfilingIntegration()],
+  integrations,
 });
