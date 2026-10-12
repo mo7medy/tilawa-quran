@@ -34,7 +34,7 @@ jobs:
           corepack enable
           corepack prepare yarn@1.22.22 --activate
       - name: Resolve upgraded dependencies on GitHub
-        run: yarn install --non-interactive --ignore-scripts
+        run: yarn install --frozen-lockfile --non-interactive --ignore-scripts
       - name: Check production TypeScript
         run: yarn tsc --project tsconfig.build.json --noEmit
       - name: Check content API and saved reading behavior
