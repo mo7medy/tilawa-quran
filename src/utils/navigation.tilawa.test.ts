@@ -21,9 +21,12 @@ describe('Tilawa home routes', () => {
     expect(getTeachersNavigationUrl()).toBe('/teachers');
   });
 
-  it('should leave the login redirect helper behavior unchanged', () => {
-    expect(getLoginNavigationUrl()).toBe('/login');
-    expect(getLoginNavigationUrl('/quran')).toBe('/login?r=%2Fquran');
+  it('routes Quran login links to the shared account page and preserves the return path', () => {
+    expect(getLoginNavigationUrl()).toBe('/sign-in');
+    expect(getLoginNavigationUrl('/quran')).toBe('/sign-in?r=%2Fquran');
+    expect(getLoginNavigationUrl('/ar/2?startingVerse=5#reading')).toBe(
+      '/sign-in?r=%2Far%2F2%3FstartingVerse%3D5%23reading',
+    );
   });
 
   it('should build verse share URLs on this deployment, never the legacy host', () => {

@@ -60,6 +60,8 @@ vi.mock('@/utils/auth/login', () => ({
 
 vi.mock('@/utils/cookies', () => ({
   setLocaleCookie: vi.fn(),
+  getLocaleCookie: vi.fn(),
+  clearLocaleCookie: vi.fn(),
 }));
 
 vi.mock('@/utils/eventLogger', () => ({

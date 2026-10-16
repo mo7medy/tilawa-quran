@@ -21,6 +21,7 @@
     "vi"
   ],
   "defaultLocale": "en",
+  "localeDetection": false,
   "pages": {
     "*": ["common", "error", "radio", "quick-links", "onboarding", "login"],
     "/": ["academy"],

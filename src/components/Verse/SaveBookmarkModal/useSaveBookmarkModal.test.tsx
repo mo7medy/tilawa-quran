@@ -105,7 +105,7 @@ describe('useSaveBookmarkModal guest sign-in', () => {
     screen.getByTestId('run').click();
     expect(router.push).toHaveBeenCalled();
     const arg = (router.push as any).mock.calls.pop()[0] as string;
-    expect(arg).toMatch(/\/login\?r=/);
+    expect(arg).toMatch(/\/sign-in\?r=/);
     const redirectUrl = decodeURIComponent(arg.slice(arg.indexOf('=') + 1));
     expect(redirectUrl).toMatch(/\/2\?startingVerse=255/);
 
@@ -127,7 +127,7 @@ describe('useSaveBookmarkModal guest sign-in', () => {
     runs[runs.length - 1].click();
     expect(router.push).toHaveBeenCalled();
     const arg = (router.push as any).mock.calls.pop()[0] as string;
-    expect(arg).toMatch(/\/login\?r=/);
+    expect(arg).toMatch(/\/sign-in\?r=/);
     expect(decodeURIComponent(arg.split('=')[1])).toMatch(/\/page\/5/);
     expect(window.sessionStorage.getItem('pending-bookmark-modal-restore')).toBeNull();
     unmount();

@@ -2,7 +2,8 @@
 import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
 
-import { getAcademyRegistrationUrl, readAcademyPlanSelection } from '../../tilawa/academyPlans';
+import { readAcademyPlanSelection } from '../../tilawa/academyPlans';
+import getAccountQuerySuffix from '../../tilawa/accountNavigation';
 
 import styles from './AcademyAccount.module.scss';
 import AcademyAccountForm from './AcademyAccountForm';
@@ -19,13 +20,7 @@ const AcademyAccount = ({ mode }: AcademyAccountProps): JSX.Element => {
   const selection = readAcademyPlanSelection(query);
   const isRecovery = mode === 'sign-in' && query.recovery === '1';
   const formMode = isRecovery ? 'recovery' : mode;
-  const suffix = selection
-    ? getAcademyRegistrationUrl(
-        selection.plan,
-        selection.subject,
-        selection.gift ?? 'recitation',
-      ).replace('/register', '')
-    : '';
+  const suffix = getAccountQuerySuffix(query);
   return (
     <div className={styles.page}>
       <div className={`${styles.layout} ${selection ? styles.withSelection : ''}`}>

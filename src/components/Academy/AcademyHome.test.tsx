@@ -18,6 +18,8 @@ import AcademyShell from './AcademyShell';
 import { academyTestRouterState, setAcademyTestRoute } from './academyTestRouter';
 
 // Next's SVG loader produces a component; Vitest's asset loader produces a URL.
+vi.mock('@/icons/globe.svg', () => ({ default: () => <svg aria-hidden="true" /> }));
+
 vi.mock('@/icons/arrow-right.svg', () => ({
   default: () => <svg aria-hidden="true" />,
 }));
@@ -163,14 +165,9 @@ describe('Academy route in English', () => {
         container.querySelector('[data-testid="academy-header"] nav')?.getAttribute('aria-label'),
       ).toBe(lookup(dictionaries.en, 'nav-label'));
 
-      // Language switch keeps the current route and offers Arabic only
-      // (`fr` is not an academy locale and English is already active).
       const languageSwitch = container.querySelector('[data-testid="academy-language-switch"]');
-      expect(languageSwitch).not.toBeNull();
-      const switchLinks = Array.from(languageSwitch?.querySelectorAll('a') ?? []);
-      expect(switchLinks).toHaveLength(1);
-      expect(switchLinks[0].getAttribute('href')).toBe('/ar');
-      expect(switchLinks[0].textContent).toBe('العربية');
+      expect(languageSwitch?.tagName).toBe('BUTTON');
+      expect(languageSwitch?.querySelector('svg')).not.toBeNull();
 
       await hydrateAndAssertClean(container, route);
     } finally {
@@ -220,13 +217,9 @@ describe('Academy route in Arabic', () => {
         container.querySelector('[data-testid="academy-header"] nav')?.getAttribute('aria-label'),
       ).toBe(lookup(dictionaries.ar, 'nav-label'));
 
-      // Switch retains the current route (`/ar` -> `/`) and offers English.
       const languageSwitch = container.querySelector('[data-testid="academy-language-switch"]');
-      expect(languageSwitch).not.toBeNull();
-      const switchLinks = Array.from(languageSwitch?.querySelectorAll('a') ?? []);
-      expect(switchLinks).toHaveLength(1);
-      expect(switchLinks[0].getAttribute('href')).toBe('/');
-      expect(switchLinks[0].textContent).toBe('English');
+      expect(languageSwitch?.tagName).toBe('BUTTON');
+      expect(languageSwitch?.querySelector('svg')).not.toBeNull();
 
       await hydrateAndAssertClean(container, route);
     } finally {
@@ -242,9 +235,8 @@ describe('Academy route in Arabic', () => {
     try {
       // Header/footer/CTA links keep /ar prefix even off the homepage.
       assertSemanticLinks(container, '/ar');
-      // Switch from /ar/teachers returns to /teachers (same route, English).
-      const switchLink = container.querySelector('[data-testid="academy-language-switch"] a');
-      expect(switchLink?.getAttribute('href')).toBe('/teachers');
+      const languageSwitch = container.querySelector('[data-testid="academy-language-switch"]');
+      expect(languageSwitch?.tagName).toBe('BUTTON');
     } finally {
       container.remove();
     }

@@ -4,6 +4,7 @@ import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 
 interface AcademyLinkProps {
+  id?: string;
   href: string;
   className?: string;
   ariaLabel?: string;
@@ -24,6 +25,7 @@ interface AcademyLinkProps {
  * @returns {JSX.Element} localized link
  */
 const AcademyLink = ({
+  id,
   href,
   className,
   ariaLabel,
@@ -35,6 +37,7 @@ const AcademyLink = ({
   const { locale } = useRouter();
   return (
     <NextLink
+      id={id}
       href={href}
       locale={locale}
       className={className}

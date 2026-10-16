@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import AcademyMobileMenu from './AcademyMobileMenu';
 
+vi.mock('@/icons/globe.svg', () => ({ default: () => <svg aria-hidden="true" /> }));
+
 vi.mock('next-translate/useTranslation', () => ({
   default: () => ({ t: (key: string) => key, lang: 'en' }),
 }));

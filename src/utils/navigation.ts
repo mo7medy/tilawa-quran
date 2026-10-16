@@ -24,7 +24,9 @@ export const ROUTES = {
   /** Preserved original Quran homepage (moved from `/`). */
   QURAN_HOME: '/quran',
   TEACHERS: '/teachers',
-  LOGIN: '/login',
+  LOGIN: '/sign-in',
+  REGISTER: '/register',
+  LEGACY_LOGIN: '/login',
   LOGOUT: '/logout',
   AUTH: '/auth',
   MY_QURAN: '/my-quran',
@@ -47,6 +49,8 @@ export const ROUTES = {
  */
 export const AUTH_ROUTES = [
   ROUTES.LOGIN,
+  ROUTES.REGISTER,
+  ROUTES.LEGACY_LOGIN,
   ROUTES.FORGET_PASSWORD,
   ROUTES.RESET_PASSWORD,
   ROUTES.COMPLETE_SIGNUP,
@@ -523,8 +527,10 @@ export const getRamadanNavigationUrl = () => '/ramadan';
 export const getBeyondRamadanNavigationUrl = () => '/beyond-ramadan';
 export const getWhatIsRamadanNavigationUrl = () => '/what-is-ramadan';
 export const getTakeNotesNavigationUrl = () => '/take-notes';
-export const getLoginNavigationUrl = (redirectTo?: string) =>
-  `/login${redirectTo ? `?${QueryParam.REDIRECT_TO}=${encodeURIComponent(redirectTo)}` : ''}`;
+export const getLoginNavigationUrl = (redirectTo?: string): string =>
+  `${ROUTES.LOGIN}${
+    redirectTo ? `?${QueryParam.REDIRECT_TO}=${encodeURIComponent(redirectTo)}` : ''
+  }`;
 
 /** Tilawa academy teachers browse. Currently an honest empty scaffold (backend later).
  *

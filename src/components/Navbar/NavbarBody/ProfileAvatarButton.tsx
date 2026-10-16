@@ -7,7 +7,9 @@ import { useDispatch } from 'react-redux';
 
 import styles from './ProfileAvatarButton.module.scss';
 
-import Button, { ButtonShape, ButtonSize, ButtonVariant } from '@/dls/Button/Button';
+import accountHeaderStyles from '@/components/Academy/AcademyHeader.module.scss';
+import AcademyLink from '@/components/Academy/AcademyLink';
+import Button, { ButtonShape, ButtonVariant } from '@/dls/Button/Button';
 import PopoverMenu from '@/dls/PopoverMenu/PopoverMenu';
 import useLogout from '@/hooks/auth/useLogout';
 import BookmarkFilledIcon from '@/icons/bookmark_filled.svg';
@@ -134,18 +136,16 @@ const ProfileAvatarButton: React.FC<ProfileAvatarButtonProps> = ({ isPopoverPort
 
   return (
     <div className={styles.loginButtonContainer}>
-      <Button
-        tooltip={t('sign-in')}
+      <AcademyLink
+        id="login-button"
+        title={t('sign-in')}
         ariaLabel={t('sign-in')}
-        variant={ButtonVariant.SimplifiedAccent}
-        size={ButtonSize.Small}
         href={getLoginNavigationUrl(router.asPath)}
         onClick={onLoginButtonClicked}
-        id="login-button"
-        className={styles.loginButton}
+        className={accountHeaderStyles.login}
       >
         {t('sign-in')}
-      </Button>
+      </AcademyLink>
     </div>
   );
 };

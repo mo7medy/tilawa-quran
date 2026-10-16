@@ -1,56 +1,52 @@
-import React from 'react';
+import { useState } from 'react';
 
-import NextLink from 'next/link';
-import { useRouter } from 'next/router';
+import * as Dialog from '@radix-ui/react-dialog';
 import useTranslation from 'next-translate/useTranslation';
 
 import styles from './AcademyLanguageSwitch.module.scss';
+import SiteLanguageOptions from './SiteLanguageOptions';
 
-import { getLocaleName } from '@/utils/locale';
-import { ACADEMY_LOCALES, stripLocalePrefix, withLocalePrefix } from '@/utils/tilawaRoutes';
-
-const SUPPORTED_LOCALES: readonly string[] = ACADEMY_LOCALES;
+import useSiteLanguageChange from '@/hooks/useSiteLanguageChange';
+import GlobeIcon from '@/icons/globe.svg';
 
 interface AcademyLanguageSwitchProps {
   onNavigate?: () => void;
 }
 
-/**
- * Academy language switch (English/Arabic).
- *
- * Links to the same route in the other academy locale — the target href is
- * computed explicitly (strip current prefix, add target prefix) so switching
- * never drops the visitor to the wrong locale or homepage. Renders nothing
- * when there is no other academy locale.
- *
- * @returns {JSX.Element | null} language switch or null
- */
-const AcademyLanguageSwitch = ({ onNavigate }: AcademyLanguageSwitchProps): JSX.Element | null => {
-  const { t } = useTranslation('common');
-  const { locale, locales, asPath } = useRouter();
-  const targets = (locales ?? []).filter(
-    (candidate) => candidate !== locale && SUPPORTED_LOCALES.includes(candidate),
-  );
-  if (targets.length === 0) return null;
-
-  const unprefixedPath = stripLocalePrefix(asPath || '/', locales ?? []);
+const AcademyLanguageSwitch = ({ onNavigate }: AcademyLanguageSwitchProps): JSX.Element => {
+  const { t, lang } = useTranslation('common');
+  const [isOpen, setIsOpen] = useState(false);
+  const { changingLocale, onLanguageChange } = useSiteLanguageChange();
+  const handleSelect = (locale: string): Promise<void> =>
+    onLanguageChange(locale, () => {
+      setIsOpen(false);
+      onNavigate?.();
+    });
 
   return (
-    <nav aria-label={t('site-nav.language-switch.label')} data-testid="academy-language-switch">
-      {targets.map((target) => (
-        <NextLink
-          key={target}
-          href={withLocalePrefix(unprefixedPath, target)}
-          locale={target}
-          lang={target}
-          hrefLang={target}
-          className={styles.switchLink}
-          onClick={onNavigate}
-        >
-          {getLocaleName(target)}
-        </NextLink>
-      ))}
-    </nav>
+    <Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog.Trigger
+        className={styles.trigger}
+        aria-label={t('languages')}
+        title={t('languages')}
+        data-testid="academy-language-switch"
+      >
+        <GlobeIcon aria-hidden="true" />
+      </Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className={styles.overlay} />
+        <Dialog.Content className={styles.drawer} dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+          <div className={styles.heading}>
+            <Dialog.Title>{t('select-language')}</Dialog.Title>
+            <Dialog.Close className={styles.close} aria-label={t('close')}>
+              <span aria-hidden="true">×</span>
+            </Dialog.Close>
+          </div>
+          <Dialog.Description className={styles.srOnly}>{t('languages')}</Dialog.Description>
+          <SiteLanguageOptions changingLocale={changingLocale} onSelect={handleSelect} />
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 };
 
