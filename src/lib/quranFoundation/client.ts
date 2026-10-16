@@ -2,6 +2,7 @@
 /* eslint-disable import/prefer-default-export */
 import { getQuranFoundationConfig, QuranFoundationError } from './config';
 import { getAccessToken, invalidateAccessToken } from './oauth';
+import rejectFoundationRedirect from './redirects';
 import { adaptFoundationResponse, FoundationBody } from './response';
 import { FoundationRoute, mapFoundationRoute } from './routes';
 
@@ -9,17 +10,20 @@ const requestPage = async (route: FoundationRoute): Promise<Response> => {
   const config = getQuranFoundationConfig();
   const url = new URL(route.path, config.apiOrigin);
   url.search = route.query.toString();
-  const send = (token: string): Promise<Response> =>
-    fetch(url.toString(), {
+  const send = async (token: string): Promise<Response> => {
+    const response = await fetch(url.toString(), {
       headers: {
         'x-client-id': config.clientId,
         'x-auth-token': token,
         Accept: 'application/json',
       },
       signal: AbortSignal.timeout(15000),
-      redirect: 'error',
+      redirect: 'manual',
       cache: 'no-store',
     });
+    await rejectFoundationRedirect(response, 'API');
+    return response;
+  };
   const token = await getAccessToken(route.scope);
   const response = await send(token);
   if (response.status !== 401) {

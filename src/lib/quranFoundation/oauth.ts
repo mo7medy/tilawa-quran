@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention -- OAuth protocol field names and headers. */
 import { getQuranFoundationConfig, QuranFoundationError } from './config';
+import rejectFoundationRedirect from './redirects';
 
 export type QuranFoundationScope = 'content' | 'search';
 
@@ -23,9 +24,10 @@ const requestToken = async (scope: QuranFoundationScope): Promise<CachedToken> =
     },
     body: new URLSearchParams({ grant_type: 'client_credentials', scope }).toString(),
     signal: AbortSignal.timeout(15000),
-    redirect: 'error',
+    redirect: 'manual',
     cache: 'no-store',
   });
+  await rejectFoundationRedirect(response, 'token endpoint');
   if (!response.ok) {
     throw new QuranFoundationError(
       `Quran Foundation token request failed (${response.status}). Check credentials, environment and ${scope} permission.`,
