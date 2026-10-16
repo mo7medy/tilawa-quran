@@ -194,10 +194,7 @@ const updatePaginatedNotes = (
 /**
  * Invalidates reflections caches for the given verse keys.
  */
-const invalidateReflectionsCaches = (
-  mutate: NotesCacheMutator,
-  cache?: Cache<unknown>,
-): void => {
+const invalidateReflectionsCaches = (mutate: NotesCacheMutator, cache?: Cache<unknown>): void => {
   const cacheKeys = (cache as unknown as { keys?: () => string[] })?.keys?.();
 
   if (cacheKeys) {
