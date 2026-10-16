@@ -4,7 +4,8 @@ import { cleanup, render, screen } from '@testing-library/react';
 import type { GetStaticPropsContext } from 'next';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import QuranPage, { getStaticProps } from './quran';
+import QuranPage, { getStaticProps } from '../../pages/quran';
+
 import {
   quranPageTestState,
   resetQuranPageTestState,

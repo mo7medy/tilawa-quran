@@ -2,7 +2,6 @@
   "extends": [
     "next",
     "airbnb",
-    "airbnb/hooks",
     "plugin:import/recommended",
     "plugin:import/typescript",
     "prettier",
@@ -11,6 +10,9 @@
   ],
   "plugins": ["prettier", "react", "react-func", "sonarjs", "unicorn", "jsdoc", "@remotion"],
   "rules": {
+    // Next owns the hooks plugin; keep Airbnb's stricter severities without loading it twice.
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "error",
     "i18next/no-literal-string": [
       "error",
       {

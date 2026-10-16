@@ -7,8 +7,7 @@ import {
   academyTestRouterState,
   setAcademyTestRoute,
 } from '../../components/Academy/academyTestRouter';
-
-import TeachersPage from './index';
+import TeachersPage from '../../pages/teachers';
 
 vi.mock('next/router', () => ({
   useRouter: () => ({

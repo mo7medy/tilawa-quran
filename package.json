@@ -10,7 +10,7 @@
     "dev": "next dev",
     "dev:https": "node server.js",
     "prod": "node server-http.js",
-    "build": "IS_BUILD_TIME=true next build",
+    "build": "node scripts/check-next-pages.mjs && IS_BUILD_TIME=true next build",
     "build:cloudflare": "cross-env NEXT_PUBLIC_DEPLOYMENT_TARGET=cloudflare opennextjs-cloudflare build",
     "media-maker:studio": "npx remotion studio src/components/MediaMaker/index.ts",
     "media-maker:deploy": "node scripts/media/deploy.mjs",
