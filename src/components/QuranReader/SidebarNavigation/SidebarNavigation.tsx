@@ -28,11 +28,13 @@ import {
 } from '@/redux/slices/QuranReader/sidebarNavigation';
 import { selectIsReadingByRevelationOrder } from '@/redux/slices/revelationOrder';
 import { logButtonClick, logEvent, logValueChange } from '@/utils/eventLogger';
+import { ROUTES } from '@/utils/navigation';
 import { isMobile } from '@/utils/responsive';
 
 const SidebarNavigation = () => {
   const router = useRouter();
-  const isHomePage = router.pathname === '/';
+  // The preserved Quran homepage moved from `/` (now Tilawa Academy) to `/quran`.
+  const isHomePage = router.pathname === ROUTES.QURAN_HOME;
   const isSidebarVisible = useSelector(selectIsSidebarNavigationVisible);
   const { isVisible: isNavbarVisible } = useSelector(selectNavbar, shallowEqual);
   const selectedNavigationItem = useSelector(selectSelectedNavigationItem);

@@ -74,6 +74,9 @@ playwright/.auth/user.json
 
 keys
 
+# Local runtime downloads and backups
+.local-runtime/
+
 # Sentry
 .sentryclirc
 

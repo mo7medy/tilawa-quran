@@ -2,23 +2,30 @@
 import { NextSeoProps } from 'next-seo';
 
 import { getOpenGraphLocale } from './locale';
+import { getBasePath } from './url';
 
-import { getDefaultOgImageUrl } from '@/lib/og';
 import { VersesResponse } from 'types/ApiResponses';
 
 export const config = {
-  siteName: 'Quran.com',
-  twitterHandle: '@app_quran',
-  twitterCardType: 'summary_large_image',
-  facebookApp: '342185219529773',
-  facebookPage: '603289706669016',
-  appleAppName: 'Quran - by Quran.com - قرآن',
-  appleAppId: '1118663303',
-  appleAppUrl: 'https://apps.apple.com/us/app/quran-by-quran-com-qran/id1118663303',
-  androidAppName: 'Quran for Android',
-  androidPackage: 'com.quran.labs.androidquran',
-  androidAppUrl: 'https://play.google.com/store/apps/details?id=com.quran.labs.androidquran',
+  siteName: 'Tilawa',
 };
+
+/**
+ * Default social preview image: the Tilawa app icon served from this
+ * deployment (actual 499x500 PNG — dimensions declared honestly).
+ * Replaces the old remote branded OG service for default page metadata.
+ * Quran content/audio API endpoints are untouched.
+ */
+export const TILAWA_OG_IMAGE_PATH = '/tilawa/app_icon.png';
+export const TILAWA_OG_IMAGE_WIDTH = 499;
+export const TILAWA_OG_IMAGE_HEIGHT = 500;
+
+/**
+ * Absolute URL of the default Tilawa preview image on the current origin.
+ *
+ * @returns {string} absolute preview image URL
+ */
+export const getTilawaDefaultOgImageUrl = (): string => `${getBasePath()}${TILAWA_OG_IMAGE_PATH}`;
 
 type SeoConfigType = {
   path?: string;
@@ -45,7 +52,7 @@ export function createSEOConfig({
   return {
     title: seoTitle,
     description,
-    titleTemplate: '%s - Quran.com',
+    titleTemplate: '%s - Tilawa',
     defaultTitle: config.siteName,
     dangerouslySetAllPagesToNoFollow: !isProduction, // @see https://github.com/garmeeh/next-seo#dangerouslySetAllPagesToNoFollow
     dangerouslySetAllPagesToNoIndex: !isProduction, // @see https://github.com/garmeeh/next-seo#dangerouslySetAllPagesToNoIndex
@@ -58,56 +65,16 @@ export function createSEOConfig({
       description,
       images: [
         {
-          url: getDefaultOgImageUrl({ locale }),
-          width: 1200,
-          height: 630,
+          url: getTilawaDefaultOgImageUrl(),
+          width: TILAWA_OG_IMAGE_WIDTH,
+          height: TILAWA_OG_IMAGE_HEIGHT,
           alt: config.siteName,
         },
       ],
       // eslint-disable-next-line @typescript-eslint/naming-convention
       site_name: config.siteName,
     },
-    facebook: {
-      appId: config.facebookApp,
-    },
-    twitter: {
-      handle: config.twitterHandle,
-      site: config.twitterHandle,
-      cardType: config.twitterCardType,
-    },
     additionalMetaTags: [
-      {
-        property: 'fb:pages',
-        content: config.facebookPage,
-      },
-      // {
-      //   name: 'al:ios:url',
-      //   content: config.appleAppUrl,
-      // },
-      // {
-      //   name: 'al:ios:app_name',
-      //   content: config.appleAppName,
-      // },
-      // {
-      //   name: 'al:ios:app_store_id',
-      //   content: config.appleAppId,
-      // },
-      // {
-      //   name: 'al:android:url',
-      //   content: config.androidAppUrl,
-      // },
-      // {
-      //   name: 'al:android:app_name',
-      //   content: config.androidAppName,
-      // },
-      // {
-      //   name: 'al:android:package',
-      //   content: config.androidPackage,
-      // },
-      // {
-      //   name: 'apple-itunes-app',
-      //   content: `app-id=${config.appleAppId}`,
-      // },
       {
         name: 'Charset',
         content: 'UTF-8',
@@ -122,7 +89,7 @@ export function createSEOConfig({
       },
       {
         name: 'theme-color',
-        content: '#fff', // placeholder
+        content: '#037F70',
       },
       {
         name: 'viewport',

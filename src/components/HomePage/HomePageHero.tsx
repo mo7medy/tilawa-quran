@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-import Head from 'next/head';
 import useTranslation from 'next-translate/useTranslation';
 
 import NavigationButton from './HeroButtons/NavigationButton';
@@ -9,8 +8,6 @@ import styles from './HomePageHero.module.scss';
 
 import PopularDropdown from '@/components/HomePage/PopularDropdown';
 import SearchInput from '@/components/Search/SearchInput';
-import Background from '@/icons/background.svg';
-import Logo from '@/icons/logo_main.svg';
 
 const HomePageHero = () => {
   const { t } = useTranslation('common');
@@ -26,17 +23,15 @@ const HomePageHero = () => {
 
   return (
     <div className={styles.outerContainer}>
-      <Head>
-        <link rel="preload" as="image" href="/images/background.png" />
-      </Head>
-      <div className={styles.backgroundImage}>
-        <Background />
-      </div>
+      <div className={styles.backgroundImage} aria-hidden="true" />
       <div>
         <div className={styles.innerContainer}>
           <div className={styles.logoContainer}>
-            <Logo />
+            <img src="/tilawa/logo.svg" alt="" width={42} height={42} />
+            <span>{t('tilawa')}</span>
           </div>
+          <h1 className={styles.title}>{t('read-quran')}</h1>
+          <p className={styles.description}>{t('quran-intro')}</p>
           <SearchInput
             placeholder={t('command-bar.placeholder')}
             shouldExpandOnClick

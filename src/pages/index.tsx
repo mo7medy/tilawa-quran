@@ -1,145 +1,35 @@
-/* eslint-disable max-lines */
-/* eslint-disable react/no-multi-comp */
-import React, { useMemo } from 'react';
-
-import classNames from 'classnames';
-import { NextPage, GetStaticProps } from 'next';
-import Head from 'next/head';
+import { NextPage } from 'next';
 import useTranslation from 'next-translate/useTranslation';
 
-import styles from './index.module.scss';
-
-import ChapterAndJuzListWrapper from '@/components/chapters/ChapterAndJuzList';
-import ExploreTopicsSection from '@/components/HomePage/ExploreTopicsSection';
-import HomePageHero from '@/components/HomePage/HomePageHero';
-import LearningPlansSection from '@/components/HomePage/LearningPlansSection';
-import MobileHomepageSections from '@/components/HomePage/MobileHomepageSections';
-import QuranInYearSection from '@/components/HomePage/QuranInYearSection';
-import ReadingSection from '@/components/HomePage/ReadingSection';
+import AcademyHome from '@/components/Academy/AcademyHome';
 import NextSeoWrapper from '@/components/NextSeoWrapper';
-import { isLoggedIn } from '@/utils/auth/login';
-import { getAllChaptersData } from '@/utils/chapter';
 import { getLanguageAlternates } from '@/utils/locale';
 import { getCanonicalUrl } from '@/utils/navigation';
-import getCurrentDayAyah from '@/utils/quranInYearCalendar';
-import { isMobile } from '@/utils/responsive';
-import { ChaptersResponse } from 'types/ApiResponses';
-import ChaptersData from 'types/ChaptersData';
 
-type IndexProps = {
-  chaptersResponse: ChaptersResponse;
-  chaptersData: ChaptersData;
-};
-
-const Index: NextPage<IndexProps> = ({
-  chaptersResponse: { chapters },
-  chaptersData,
-}): JSX.Element => {
-  const { t, lang } = useTranslation('home');
-  const isUserLoggedIn = isLoggedIn();
-  const todayAyah = useMemo(() => getCurrentDayAyah(), []);
+/**
+ * Tilawa academy homepage (`/` and `/ar`).
+ *
+ * Programs-first: adult Quran + Arabic teaching, then teachers, how lessons
+ * work, CTA, and FAQ. Rendered in the standalone academy shell (see
+ * `_app.tsx`): no Quran navbar/footer/audio/font stack on this route.
+ * The original Quran homepage lives at `/quran` (`src/pages/quran.tsx`).
+ *
+ * @returns {JSX.Element} the academy homepage
+ */
+const AcademyIndex: NextPage = (): JSX.Element => {
+  const { t, lang } = useTranslation('academy');
 
   return (
     <>
-      <Head>
-        <link rel="preload" as="image" href="/images/background.png" crossOrigin="anonymous" />
-      </Head>
       <NextSeoWrapper
-        title={t('home:noble-quran')}
+        title={t('seo-title')}
+        description={t('seo-description')}
         url={getCanonicalUrl(lang, '')}
         languageAlternates={getLanguageAlternates('')}
       />
-      <div className={styles.pageContainer}>
-        <div className={styles.flow}>
-          <HomePageHero />
-          <div className={styles.bodyContainer}>
-            <div className={classNames(styles.flowItem, styles.fullWidth, styles.homepageCard)}>
-              <ReadingSection />
-            </div>
-            {isMobile() ? (
-              <MobileHomepageSections
-                isUserLoggedIn={isUserLoggedIn}
-                todayAyah={todayAyah}
-                chaptersData={chaptersData}
-              />
-            ) : (
-              <>
-                {isUserLoggedIn ? (
-                  <>
-                    <div
-                      className={classNames(styles.flowItem, styles.fullWidth, styles.homepageCard)}
-                    >
-                      <LearningPlansSection />
-                    </div>
-                    {todayAyah && (
-                      <div
-                        className={classNames(
-                          styles.flowItem,
-                          styles.fullWidth,
-                          styles.homepageCard,
-                        )}
-                      >
-                        <QuranInYearSection chaptersData={chaptersData} />
-                      </div>
-                    )}
-                    <div
-                      className={classNames(styles.flowItem, styles.fullWidth, styles.homepageCard)}
-                    >
-                      <ExploreTopicsSection />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div
-                      className={classNames(styles.flowItem, styles.fullWidth, styles.homepageCard)}
-                    >
-                      <ExploreTopicsSection />
-                    </div>
-                    <div
-                      className={classNames(styles.flowItem, styles.fullWidth, styles.homepageCard)}
-                    >
-                      <LearningPlansSection />
-                    </div>
-                    {todayAyah && (
-                      <div
-                        className={classNames(
-                          styles.flowItem,
-                          styles.fullWidth,
-                          styles.homepageCard,
-                        )}
-                      >
-                        <QuranInYearSection chaptersData={chaptersData} />
-                      </div>
-                    )}
-                  </>
-                )}
-              </>
-            )}
-
-            <div className={styles.flowItem}>
-              <ChapterAndJuzListWrapper chapters={chapters} />
-            </div>
-          </div>
-        </div>
-      </div>
+      <AcademyHome />
     </>
   );
 };
 
-export const getStaticProps: GetStaticProps = async ({ locale }) => {
-  const allChaptersData = await getAllChaptersData(locale);
-
-  return {
-    props: {
-      chaptersData: allChaptersData,
-      chaptersResponse: {
-        chapters: Object.keys(allChaptersData).map((chapterId) => {
-          const chapterData = allChaptersData[chapterId];
-          return { ...chapterData, id: Number(chapterId) };
-        }),
-      },
-    },
-  };
-};
-
-export default Index;
+export default AcademyIndex;

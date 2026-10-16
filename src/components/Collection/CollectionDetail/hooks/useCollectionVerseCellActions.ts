@@ -12,7 +12,7 @@ import { areArraysEqual } from '@/utils/array';
 import { textToBlob } from '@/utils/blob';
 import copyText from '@/utils/copyText';
 import { logButtonClick } from '@/utils/eventLogger';
-import { QURAN_URL, getVerseNavigationUrlByVerseKey } from '@/utils/navigation';
+import { getShareableVerseUrl } from '@/utils/navigation';
 import Chapter from 'types/Chapter';
 
 type UseCollectionVerseCellActionsProps = {
@@ -69,7 +69,7 @@ const useCollectionVerseCellActions = ({
     // Build the blob promise and invoke clipboard copy immediately to preserve user activation.
     const textBlobPromise = (async () => {
       const verse = await fetchVerseForCopy(verseKey, (selectedTranslations as number[]) || []);
-      const qdcUrl = `${QURAN_URL}${getVerseNavigationUrlByVerseKey(verseKey)}`;
+      const qdcUrl = getShareableVerseUrl(verseKey);
       const text = buildVerseCopyText({ verse, chapter: chapterData, lang, qdcUrl });
       return textToBlob(text);
     })();

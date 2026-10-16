@@ -119,6 +119,7 @@ vi.mock('@/utils/chapter', () => ({
 vi.mock('@/utils/navigation', () => ({
   QURAN_URL: 'https://quran.com',
   getVerseNavigationUrlByVerseKey: vi.fn(() => '/1/1'),
+  getShareableVerseUrl: vi.fn(() => 'https://tilawa.test/1/1'),
 }));
 
 vi.mock('@/utils/auth/pinnedItems', () => ({

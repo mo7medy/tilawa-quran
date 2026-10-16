@@ -4,6 +4,16 @@
 
 .loginButton {
   min-inline-size: max-content;
+  background: var(--tilawa-button);
+  color: var(--tilawa-on-primary);
+  border-color: var(--tilawa-button);
+  min-block-size: 40px;
+  padding-inline: 16px;
+
+  &:hover {
+    background: var(--tilawa-button);
+    color: var(--tilawa-on-primary);
+  }
 }
 
 .bookmarkIcon > path {

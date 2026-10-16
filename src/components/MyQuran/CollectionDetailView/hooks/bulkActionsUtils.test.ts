@@ -15,7 +15,7 @@ import Verse from '@/types/Verse';
 import { deleteCollectionBookmarkById } from '@/utils/auth/api';
 import { textToBlob } from '@/utils/blob';
 import { getChapterData } from '@/utils/chapter';
-import { getVerseNavigationUrlByVerseKey, QURAN_URL } from '@/utils/navigation';
+import { getShareableVerseUrl } from '@/utils/navigation';
 
 vi.mock('@/components/Collection/CollectionDetail/utils/fetchVerseForCopy', () => ({
   default: vi.fn(),
@@ -34,8 +34,8 @@ vi.mock('@/utils/chapter', () => ({
 }));
 
 vi.mock('@/utils/navigation', () => ({
-  QURAN_URL: 'https://quran.com',
-  getVerseNavigationUrlByVerseKey: vi.fn((vk: string) => `/v/${vk}`),
+  // Deployment-origin share URLs (never the legacy quran.com host).
+  getShareableVerseUrl: vi.fn((vk: string) => `https://tilawa.test/v/${vk}`),
 }));
 
 vi.mock('@/utils/auth/api', () => ({
@@ -77,11 +77,11 @@ describe('bulkActionsUtils', () => {
       expect(fetchVerseForCopy).toHaveBeenCalledWith('1:1', [20, 131]);
       expect(fetchVerseForCopy).toHaveBeenCalledWith('1:2', [20, 131]);
       expect(getChapterData).toHaveBeenCalledWith(chaptersData, '1');
-      expect(getVerseNavigationUrlByVerseKey).toHaveBeenCalledWith('1:1');
-      expect(getVerseNavigationUrlByVerseKey).toHaveBeenCalledWith('1:2');
+      expect(getShareableVerseUrl).toHaveBeenCalledWith('1:1');
+      expect(getShareableVerseUrl).toHaveBeenCalledWith('1:2');
 
-      const expected1 = `${QURAN_URL}/v/1:1`;
-      const expected2 = `${QURAN_URL}/v/1:2`;
+      const expected1 = 'https://tilawa.test/v/1:1';
+      const expected2 = 'https://tilawa.test/v/1:2';
       expect(buildVerseCopyText).toHaveBeenCalledWith(
         expect.objectContaining({ lang: 'en', qdcUrl: expected1 }),
       );
@@ -121,7 +121,9 @@ describe('bulkActionsUtils', () => {
 
       await vi.runAllTimersAsync();
 
-      await expect(p).resolves.toEqual({ text: `${QURAN_URL}/v/1:1\n\n${QURAN_URL}/v/1:2` });
+      await expect(p).resolves.toEqual({
+        text: 'https://tilawa.test/v/1:1\n\nhttps://tilawa.test/v/1:2',
+      });
 
       vi.useRealTimers();
     });

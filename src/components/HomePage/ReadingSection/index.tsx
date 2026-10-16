@@ -16,6 +16,7 @@ import Link, { LinkVariant } from '@/dls/Link/Link';
 import useGetRecentlyReadVerseKeys from '@/hooks/auth/useGetRecentlyReadVerseKeys';
 import useGetStreakWithMetadata from '@/hooks/auth/useGetStreakWithMetadata';
 import useGlobalReadingBookmark from '@/hooks/auth/useGlobalReadingBookmark';
+import useIsMobile from '@/hooks/useIsMobile';
 import useMappedBookmark from '@/hooks/useMappedBookmark';
 import BookmarkRemoveIcon from '@/icons/bookmark_remove.svg';
 import { selectGuestReadingBookmark } from '@/redux/slices/guestBookmark';
@@ -26,13 +27,13 @@ import { getMushafId } from '@/utils/api';
 import { GuestReadingBookmark } from '@/utils/bookmark';
 import { logButtonClick } from '@/utils/eventLogger';
 import { MY_QURAN_URL } from '@/utils/navigation';
-import { isMobile } from '@/utils/responsive';
 import { getPageFirstVerseKey } from '@/utils/verse';
 
 interface Props {}
 
 const ReadingSection: React.FC<Props> = () => {
   const { t } = useTranslation('home');
+  const isMobileViewport = useIsMobile();
   const { isFirstTimeGuest, isGuest } = useSelector(selectUserState);
   const quranReaderStyles = useSelector(selectQuranReaderStyles);
   const guestReadingBookmark = useSelector(selectGuestReadingBookmark);
@@ -166,7 +167,7 @@ const ReadingSection: React.FC<Props> = () => {
     />
   );
 
-  const shouldShowGoalsCard = Boolean(streak || goal) || !isMobile();
+  const shouldShowGoalsCard = Boolean(streak || goal) || !isMobileViewport;
   const goalsOrStreakCard =
     streak || goal ? (
       <Card className={styles.streakCard}>
@@ -177,7 +178,7 @@ const ReadingSection: React.FC<Props> = () => {
         </div>
       </Card>
     ) : (
-      <>{!isMobile() && <NoGoalOrStreakCard />}</>
+      <>{!isMobileViewport && <NoGoalOrStreakCard />}</>
     );
 
   if (isGuestWithReadingSessions) {
@@ -207,7 +208,7 @@ const ReadingSection: React.FC<Props> = () => {
   }
 
   if (!isGuest) {
-    if (isMobile()) {
+    if (isMobileViewport) {
       return (
         <>
           {header}

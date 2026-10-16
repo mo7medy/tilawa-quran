@@ -2,9 +2,13 @@
 @use 'src/styles/constants';
 
 .container {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  background: var(--color-background-elevated);
+  background: var(--tilawa-drawer);
+  backdrop-filter: blur(24px) saturate(140%);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  border-inline: 1px solid var(--tilawa-glass-border);
   position: fixed;
   block-size: 100vh;
   inline-size: 100%;
@@ -225,7 +229,7 @@
   flex-direction: column;
   justify-content: center;
   inline-size: 100%;
-  background-color: var(--color-background-elevated);
+  background: var(--tilawa-glass);
 }
 
 .headerContent {
@@ -249,5 +253,30 @@
 .navbarInvisible {
   @include breakpoints.smallerThanTablet {
     padding-block-start: 0;
+  }
+}
+
+.container.navigationDrawer {
+  inset-block: 12px;
+  block-size: calc(100dvh - 24px);
+  inline-size: min(380px, calc(100vw - 24px));
+  border-radius: 24px;
+  border: 1px solid var(--tilawa-glass-border);
+
+  .header {
+    inline-size: 100%;
+  }
+
+  &.containerOpen.right {
+    inset-inline-end: 12px;
+  }
+  &.containerOpen.left {
+    inset-inline-start: 12px;
+  }
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .container {
+    background: var(--tilawa-card);
   }
 }

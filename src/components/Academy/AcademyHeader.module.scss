@@ -1,0 +1,198 @@
+@use './tokens' as tilawa;
+.header {
+  @include tilawa.academy-tokens;
+  position: sticky;
+  inset-block-start: 12px;
+  z-index: 30;
+  margin-block: 12px 0;
+  padding-inline: clamp(12px, 2vw, 28px);
+  background: transparent;
+  color: var(--tilawa-ink);
+  font-family: var(--tilawa-ui-font);
+  box-sizing: border-box;
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+}
+.fixed {
+  position: fixed;
+  inset-inline: 0;
+  margin-block: 0;
+  z-index: var(--z-index-header);
+  transition: transform 180ms ease;
+}
+.hidden {
+  transform: translateY(calc(-100% - 16px));
+  pointer-events: none;
+}
+.dimmed {
+  opacity: 0.5;
+}
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  max-inline-size: 1380px;
+  margin-inline: auto;
+  padding-block: 14px;
+  padding-inline: clamp(16px, 3vw, 32px);
+  background: var(--tilawa-glass);
+  border: 1px solid var(--tilawa-glass-border);
+  border-radius: 24px;
+  box-shadow: var(--tilawa-glass-shadow);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
+  backdrop-filter: blur(18px) saturate(145%);
+}
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  min-block-size: 44px;
+  color: var(--tilawa-ink);
+  text-decoration: none;
+  flex-shrink: 0;
+  @include tilawa.academy-focus-visible;
+}
+.logo {
+  inline-size: 38px;
+  block-size: 38px;
+  border-radius: 10px;
+}
+.brandName {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 34px;
+  font-weight: 600;
+}
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  a {
+    min-block-size: 44px;
+    display: inline-flex;
+    align-items: center;
+    color: var(--tilawa-ink);
+    text-decoration: none;
+    font-family: var(--tilawa-ui-font);
+    font-size: 16px;
+    font-weight: 500;
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 6px;
+    }
+    @include tilawa.academy-focus-visible;
+  }
+}
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  :global(a[hreflang]) {
+    color: var(--tilawa-ink);
+    background: var(--tilawa-glass-chip);
+    border: 1px solid var(--tilawa-glass-border);
+    border-radius: 999px;
+    padding-inline: 12px;
+  }
+}
+.readerActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.readQuran {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 44px;
+  color: var(--tilawa-ink);
+  text-decoration: none;
+  font-family: var(--tilawa-ui-font);
+  white-space: nowrap;
+  @include tilawa.academy-focus-visible;
+}
+.login {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 44px;
+  padding-block: 10px;
+  padding-inline: 24px;
+  background: var(--tilawa-button);
+  color: var(--tilawa-on-primary);
+  border-radius: 999px;
+  text-decoration: none;
+  white-space: nowrap;
+  font-family: var(--tilawa-ui-font);
+  font-weight: 600;
+  &:hover {
+    background: var(--tilawa-deep);
+  }
+  @include tilawa.academy-focus-visible;
+}
+:global([dir='rtl']) {
+  .brandName,
+  .nav a,
+  .readQuran,
+  .login {
+    font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  }
+  .brandName {
+    font-size: 28px;
+  }
+}
+@media (max-width: 1200px) {
+  .nav,
+  .actions {
+    display: none;
+  }
+  .readerQuranLink {
+    display: none;
+  }
+  .inner {
+    gap: 16px;
+    padding-block: 12px;
+  }
+}
+@media (max-width: 360px) {
+  .fixed .brandName {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fixed {
+    transition: none;
+  }
+}
+@media (max-width: 520px) {
+  .header.fixed {
+    margin-block: 0;
+  }
+  .header {
+    inset-block-start: 8px;
+    margin-block-start: 8px;
+    padding-inline: 10px;
+  }
+  .inner {
+    padding: 10px 14px;
+    border-radius: 20px;
+  }
+  .brand {
+    gap: 8px;
+  }
+  .header .brandName {
+    font-size: 26px;
+  }
+  .logo {
+    inline-size: 30px;
+    block-size: 30px;
+  }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .inner {
+    background: var(--tilawa-card);
+  }
+}

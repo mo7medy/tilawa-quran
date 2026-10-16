@@ -35,13 +35,14 @@
 
 .ctaContainer {
   margin-inline: auto;
-  max-inline-size: fit-content;
+  inline-size: 100%;
+  box-sizing: border-box;
   padding: var(--spacing-medium2-px) var(--spacing-medium3-px);
 }
 
 .ctaTop {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: 1fr;
   gap: var(--spacing-small-px);
 }
 

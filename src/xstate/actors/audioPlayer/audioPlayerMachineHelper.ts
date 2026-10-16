@@ -121,12 +121,13 @@ export const getMediaSessionMetaData = async (
   return new MediaMetadata({
     title: `Surah ${context.audioData.chapterId}`,
     artist: reciterName,
-    album: 'Quran.com',
+    album: 'Tilawa',
     artwork: [
       {
-        src: 'https://quran.com/images/logo/Logo@192x192.png',
+        // Tilawa app icon served from this deployment (actual 499x500 PNG).
+        src: '/tilawa/app_icon.png',
         type: 'image/png',
-        sizes: '192x192',
+        sizes: '499x500',
       },
     ],
   });

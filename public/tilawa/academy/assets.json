@@ -1,0 +1,74 @@
+[
+  {
+    "name": "hero-teacher",
+    "url": "/tilawa/academy/hero-teacher.webp",
+    "width": 1100,
+    "height": 733,
+    "bytes": 65790,
+    "generated": true
+  },
+  {
+    "name": "lesson-student",
+    "url": "/tilawa/academy/lesson-student.webp",
+    "width": 360,
+    "height": 360,
+    "bytes": 18384,
+    "generated": true
+  },
+  {
+    "name": "program-arabic",
+    "url": "/tilawa/academy/program-arabic.webp",
+    "width": 900,
+    "height": 600,
+    "bytes": 36676,
+    "generated": true
+  },
+  {
+    "name": "program-tajweed",
+    "url": "/tilawa/academy/program-tajweed.webp",
+    "width": 700,
+    "height": 467,
+    "bytes": 26666,
+    "generated": true
+  },
+  {
+    "name": "program-memorization",
+    "url": "/tilawa/academy/program-memorization.webp",
+    "width": 700,
+    "height": 467,
+    "bytes": 26986,
+    "generated": true
+  },
+  {
+    "name": "teacher-a",
+    "url": "/tilawa/academy/teacher-a.webp",
+    "width": 600,
+    "height": 450,
+    "bytes": 27304,
+    "generated": true
+  },
+  {
+    "name": "teacher-b",
+    "url": "/tilawa/academy/teacher-b.webp",
+    "width": 600,
+    "height": 450,
+    "bytes": 32234,
+    "generated": true
+  },
+  {
+    "name": "teacher-c",
+    "url": "/tilawa/academy/teacher-c.webp",
+    "width": 600,
+    "height": 450,
+    "bytes": 36478,
+    "generated": true
+  },
+  {
+    "name": "hero-teacher-young",
+    "url": "/tilawa/academy/hero-teacher-young.webp",
+    "width": 1100,
+    "height": 733,
+    "bytes": 67158,
+    "generated": true
+  }
+]

@@ -1,16 +1,16 @@
 /* eslint-disable max-lines */
 import { memo, useEffect, useRef, useState } from 'react';
 
-import classNames from 'classnames';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
+import { createPortal } from 'react-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import styles from './NavbarBody.module.scss';
 import ProfileAvatarButton from './ProfileAvatarButton';
 
-import NavbarLogoWrapper from '@/components/Navbar/Logo/NavbarLogoWrapper';
+import AcademyThemeControl from '@/components/Academy/AcademyThemeControl';
 import Button, { ButtonShape, ButtonVariant } from '@/dls/Button/Button';
 import Spinner from '@/dls/Spinner/Spinner';
 import useIsLoggedIn from '@/hooks/auth/useIsLoggedIn';
@@ -118,18 +118,12 @@ const NavbarBody = (): JSX.Element => {
   return (
     <>
       <div
-        className={classNames(styles.itemsContainer, {
-          [styles.dimmed]: isNavigationDrawerOpen || isSettingsDrawerOpen || isLanguageDrawerOpen,
-        })}
+        className={styles.itemsContainer}
         inert={isNavigationDrawerOpen || isSettingsDrawerOpen || isLanguageDrawerOpen || undefined}
       >
         <div className={styles.centerVertically}>
-          <div className={styles.leftCTA}>
-            <NavbarLogoWrapper />
-          </div>
-        </div>
-        <div className={styles.centerVertically}>
           <div className={styles.rightCTA}>
+            <AcademyThemeControl isCompact />
             {!isLoggedIn && <ProfileAvatarButton />}
             <Button
               tooltip={t('languages')}
@@ -154,7 +148,14 @@ const NavbarBody = (): JSX.Element => {
               <IconSearch />
             </Button>
 
-            {shouldRenderSidebarNavigation && <SidebarNavigation />}
+            {shouldRenderSidebarNavigation &&
+              typeof document !== 'undefined' &&
+              createPortal(
+                <div data-tilawa-reader>
+                  <SidebarNavigation />
+                </div>,
+                document.body,
+              )}
             {isLoggedIn && <ProfileAvatarButton />}
 
             <Button

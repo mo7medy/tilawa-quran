@@ -1,5 +1,38 @@
 {
+  "site-nav": {
+    "header": {
+      "academy": "Academy",
+      "faq": "FAQ",
+      "how-it-works": "How it works",
+      "login": "Log in",
+      "programs": "Programs",
+      "read-quran": "Read Quran",
+      "teachers": "Teachers",
+      "pricing": "Pricing",
+      "open-menu": "Open menu",
+      "close-menu": "Close menu",
+      "menu-title": "Explore Tilawa",
+      "menu-description": "Your next step in Arabic and Quran learning."
+    },
+    "nav-label": "Academy",
+    "language-switch": {
+      "label": "Language"
+    },
+    "account": {
+      "register-link": "Create an account"
+    }
+  },
+  "quran-intro": "Read, listen, and continue your journey with the Quran.",
+  "appearance": {
+    "label": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "Auto",
+    "switch-light": "Switch to light mode",
+    "switch-dark": "Switch to dark mode"
+  },
   "about": "About Us",
+  "academy": "Academy",
   "allow": "Allow",
   "and": "and",
   "announcements": {
@@ -250,10 +283,10 @@
   },
   "footer": {
     "apps-disclaimer": "Each application is independently owned and maintained by its developer. For support, bug reports, or feature requests, please contact the app creator directly.",
-    "description": "Quran.com is a trusted platform used by millions worldwide to read, search, listen to, and reflect on the Quran in multiple languages. It provides translations, tafsir, recitations, word-by-word translation, and tools for deeper study, making the Quran accessible to everyone. <br/> <br/> As a Sadaqah Jariyah, Quran.com is dedicated to helping people connect deeply with the Quran. Supported by <link>Quran.Foundation</link>, a 501(c)(3) non-profit organization, Quran.com continues to grow as a free and valuable resource for all, Alhamdulillah.",
+    "description": "Tilawa Academy offers live online Quran and Arabic lessons for adults, alongside trusted tools to read, search, listen to, and reflect on the Quran in multiple languages. Quran text, translations, and audio are served through Quran Foundation services.",
     "hiring": "We're hiring! Join the QuranFoundation team and contribute to our mission. <link>Apply now!</link>",
     "rights": "All Rights Reserved",
-    "title": "Read, Listen, Search, and Reflect on the Quran"
+    "title": "Read, Learn, and Reflect on the Quran with Tilawa"
   },
   "form": {
     "body": "Body",
@@ -380,10 +413,11 @@
   "projects-desc": "Non-profit projects owned, managed, or sponsored by <link>Quran.Foundation</link>",
   "q-reflect": "QuranReflect",
   "quran-apps": "Quran Apps",
-  "quran-com": "Quran.com",
+  "quran-com": "Tilawa",
   "quran-radio": "Quran Radio",
   "read": "Read",
   "read-more": "Read More",
+  "read-quran": "Read Quran",
   "reading-history": "Reading history",
   "reading-preference": {
     "arabic": "Arabic",
@@ -553,5 +587,6 @@
     "title": "Word Click"
   },
   "word-tooltip": "Word Tooltip",
+  "tilawa": "Tilawa",
   "yes": "Yes"
 }

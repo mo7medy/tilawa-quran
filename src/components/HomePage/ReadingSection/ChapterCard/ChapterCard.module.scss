@@ -56,6 +56,14 @@
 
 .translatedName {
   color: var(--color-text-faded-new);
+  @include breakpoints.tablet {
+    &::before {
+      content: '(';
+    }
+    &::after {
+      content: ')';
+    }
+  }
   @include breakpoints.smallerThanTablet {
     display: block;
     font-size: var(--font-size-xsmall-px);

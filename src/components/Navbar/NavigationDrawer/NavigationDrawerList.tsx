@@ -1,7 +1,10 @@
 import React, { useCallback } from 'react';
 
+import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
 import { useDispatch } from 'react-redux';
+
+import SITE_NAVIGATION_LINKS from '../../../tilawa/siteNavigation';
 
 import NavigationDrawerItem from './NavigationDrawerItem';
 
@@ -11,14 +14,34 @@ import IconHeadphonesFilled from '@/icons/headphones-filled.svg';
 import IconHome from '@/icons/home.svg';
 import { setIsNavigationDrawerOpen } from '@/redux/slices/navbar';
 import { logButtonClick } from '@/utils/eventLogger';
-import { getMyQuranNavigationUrl, RECITERS_URL } from '@/utils/navigation';
+import { getMyQuranNavigationUrl, RECITERS_URL, ROUTES } from '@/utils/navigation';
+import { stripLocalePrefix, withLocalePrefix } from '@/utils/tilawaRoutes';
 
 const NavigationDrawerList = (): JSX.Element => {
   const { t } = useTranslation('common');
   const dispatch = useDispatch();
+  const { locale, locales } = useRouter();
   const continueReadingUrl = useGetContinueReadingUrl();
 
   const ITEMS = [
+    {
+      title: t('academy'),
+      icon: <IconHome />,
+      href: ROUTES.ACADEMY_HOME,
+      eventName: 'navigation_drawer_academy',
+    },
+    ...SITE_NAVIGATION_LINKS.map(({ href, key }) => ({
+      title: t(`site-nav.header.${key}`),
+      icon: <IconHome />,
+      href,
+      eventName: `navigation_drawer_${key}`,
+    })),
+    {
+      title: t('read-quran'),
+      icon: <IconHome />,
+      href: ROUTES.QURAN_HOME,
+      eventName: 'navigation_drawer_quran_home',
+    },
     {
       title: t('read'),
       icon: <IconHome />,
@@ -55,7 +78,7 @@ const NavigationDrawerList = (): JSX.Element => {
             key={item.eventName}
             title={item.title}
             icon={item.icon}
-            href={item.href}
+            href={withLocalePrefix(stripLocalePrefix(item.href, locales ?? []), locale)}
             onClick={() => handleItemClick(item.eventName)}
           />
         );

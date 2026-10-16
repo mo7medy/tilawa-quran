@@ -1,0 +1,108 @@
+@use '../components/Academy/tokens' as tilawa;
+
+/* One palette for both shells, including dialogs/drawers portalled into body. */
+html[data-tilawa-theme] {
+  @include tilawa.academy-light-tokens;
+  --tilawa-ui-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+html[lang='ar'][data-tilawa-theme] {
+  --tilawa-ui-font: 'Cairo', Tahoma, Arial, sans-serif;
+}
+
+html[data-tilawa-theme='dark'] {
+  @include tilawa.academy-dark-tokens;
+  font-palette: --Dark;
+}
+
+html[data-tilawa-theme='light'] {
+  font-palette: --Light;
+}
+
+html[data-tilawa-theme] body {
+  --color-primary-medium: var(--tilawa-ink);
+  --color-secondary-faded: var(--tilawa-notice);
+  --color-secondary-faint: var(--tilawa-muted);
+  --color-secondary-medium: var(--tilawa-notice);
+  --color-secondary-deep: var(--tilawa-ink);
+  --color-text-default: var(--tilawa-ink);
+  --color-text-default-new: var(--tilawa-ink);
+  --color-text-faded: var(--tilawa-muted);
+  --color-text-faded-new: var(--tilawa-muted);
+  --color-text-gray: var(--tilawa-muted);
+  --color-text-inverse: var(--tilawa-card);
+  --color-text-link: var(--tilawa-link);
+  --color-text-link-new: var(--tilawa-link);
+  --color-text-error: var(--tilawa-error);
+  --color-background-default: var(--tilawa-bg);
+  --color-background-elevated: var(--tilawa-card);
+  --color-background-elevated-new: var(--tilawa-card);
+  --color-background-gradient: var(--tilawa-card);
+  --color-background-alternative-faded: var(--tilawa-bg);
+  --color-background-alternative-faint: var(--tilawa-notice);
+  --color-background-alternative-faint-new: var(--tilawa-notice);
+  --color-background-alternative-medium: var(--tilawa-notice);
+  --color-background-alternative-deep: var(--tilawa-border);
+  --color-background-inverse: var(--tilawa-ink);
+  --color-background-backdrop: var(--tilawa-overlay);
+  --color-background-lighten: var(--tilawa-glass-chip);
+  --color-borders-hairline: var(--tilawa-border);
+  --color-border-gray-faded: var(--tilawa-border);
+  --color-border-gray-lighter: var(--tilawa-border);
+  --color-separators: var(--tilawa-bg);
+  --color-separators-new: var(--tilawa-bg);
+  --color-separators-ayah-level: var(--tilawa-border);
+  --color-search-background: var(--tilawa-bg);
+  --color-topics-grey: var(--tilawa-notice);
+  --color-grey-icons: var(--tilawa-muted);
+  --color-grey-icons-new: var(--tilawa-muted);
+  --color-blue-buttons-and-icons: var(--tilawa-link);
+  --color-faint-blue-icons: var(--tilawa-container);
+  --color-qdc-blue: var(--tilawa-link);
+  --color-qdc-faded-blue: var(--tilawa-notice);
+  --color-qdc-faint-blue: var(--tilawa-container);
+  --color-qdc-deep-blue: var(--tilawa-link);
+  --color-bookmark-icon: var(--tilawa-link);
+  --color-success-faded: var(--tilawa-notice);
+  --color-success-faint: var(--tilawa-container);
+  --color-success-medium: var(--tilawa-button);
+  --color-success-deep: var(--tilawa-secondary-text);
+  --color-highlight: var(--tilawa-container);
+  --color-highlight-dark: var(--tilawa-link);
+  --color-calligraphy: var(--tilawa-container);
+  --border-radius-default: 12px;
+  --border-radius-rounded: 20px;
+  --scrollbar-background: var(--tilawa-bg);
+  --scrollbar-thumb: var(--tilawa-border);
+  color-scheme: var(--tilawa-color-scheme);
+  font-palette: inherit;
+}
+
+/* UI typography only. Never override verse, tajweed or surah-name fonts. */
+[data-tilawa-reader] {
+  /* The same header is used in both shells. Keep all reader offsets aligned. */
+  --navbar-height: 98px;
+  --navbar-container-height: var(--navbar-height);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+
+  @media (max-width: 1200px) {
+    --navbar-height: 94px;
+  }
+  @media (max-width: 520px) {
+    --navbar-height: 86px;
+  }
+}
+
+html[lang='ar'] [data-tilawa-reader] {
+  font-family: 'Cairo', Tahoma, Arial, sans-serif;
+}
+
+html[lang='ar']
+  [data-tilawa-reader]
+  :where(h1, h2, h3, button, input, select, textarea, legend, label) {
+  font-family: 'Cairo', Tahoma, Arial, sans-serif;
+}
+
+html[data-tilawa-theme] body :focus-visible {
+  outline-color: var(--tilawa-focus);
+}

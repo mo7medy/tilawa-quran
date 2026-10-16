@@ -1,16 +1,9 @@
 @use 'src/styles/breakpoints';
-@use 'src/styles/theme';
 
 .headerOuterContainer {
-  @include theme.light {
-    background: var(--color-background-elevated);
-  }
-  @include theme.sepia {
-    background: var(--color-background-elevated);
-  }
-  @include theme.dark {
-    background: rgba(52, 58, 64, 1);
-  }
+  background: var(--tilawa-card);
+  border: 1px solid var(--tilawa-border);
+  box-sizing: border-box;
   position: relative;
   border-radius: var(--border-radius-pill);
   box-shadow: var(--shadow-small);
@@ -18,7 +11,7 @@
   margin: 0 auto;
   z-index: 1;
   @include breakpoints.tablet {
-    inline-size: 750px;
+    inline-size: min(750px, 100%);
     block-size: 49px;
   }
 }

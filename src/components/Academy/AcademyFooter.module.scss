@@ -1,0 +1,93 @@
+@use './tokens' as tilawa;
+.footer {
+  @include tilawa.academy-tokens;
+  background: var(--tilawa-container);
+  color: var(--tilawa-ink);
+
+  @media (max-width: 900px) {
+    :global(body:has([data-testid='teacher-profile'])) & {
+      padding-block-end: 100px;
+    }
+  }
+}
+.appearance {
+  grid-column: 1 / -1;
+  inline-size: min(100%, 300px);
+}
+.inner {
+  max-inline-size: 1380px;
+  margin-inline: auto;
+  padding-block: 44px;
+  padding-inline: clamp(20px, 4vw, 56px);
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 28px 40px;
+}
+.brand {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.logo {
+  inline-size: 38px;
+  block-size: 38px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+.name {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 30px;
+  font-weight: 500;
+  color: var(--tilawa-ink);
+}
+.tagline {
+  margin-block: 12px 0;
+  color: var(--tilawa-muted);
+  line-height: 1.6;
+  max-inline-size: 38ch;
+  font-size: 14px;
+}
+.links {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 20px;
+  flex-wrap: wrap;
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+    color: var(--tilawa-ink);
+    text-decoration: none;
+    font-size: 14px;
+    &:hover {
+      text-decoration: underline;
+    }
+    &:focus-visible {
+      outline-color: var(--tilawa-ink);
+    }
+    @include tilawa.academy-focus-visible;
+  }
+}
+.license {
+  grid-column: 1/-1;
+  margin: 0;
+  padding-block-start: 24px;
+  border-block-start: 1px solid var(--tilawa-border);
+  color: var(--tilawa-muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+:global([dir='rtl']) {
+  .name {
+    font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  }
+}
+@media (max-width: 760px) {
+  .inner {
+    grid-template-columns: 1fr;
+  }
+  .links {
+    justify-content: flex-start;
+  }
+}

@@ -1,0 +1,427 @@
+{
+  "seo-title": "Tilawa Academy — Learn Quran and Arabic Online with a Teacher",
+  "seo-description": "Live online Quran and Arabic lessons for all ages, with qualified teachers, structured programs, and personal guidance.",
+  "nav-label": "Academy",
+  "language-switch": {
+    "label": "Language"
+  },
+  "header": {
+    "academy": "Academy",
+    "faq": "FAQ",
+    "how-it-works": "How it works",
+    "login": "Log in",
+    "programs": "Programs",
+    "read-quran": "Read Quran",
+    "teachers": "Teachers",
+    "pricing": "Pricing",
+    "open-menu": "Open menu",
+    "close-menu": "Close menu",
+    "menu-title": "Explore Tilawa",
+    "menu-description": "Your next step in Arabic and Quran learning."
+  },
+  "hero": {
+    "cta-primary": "Explore programs",
+    "cta-secondary": "Meet the teachers",
+    "cta-tertiary": "Read the Quran",
+    "eyebrow": "Arabic & Quran, live online",
+    "subtitle": "Personal lessons for all ages, wherever you are.",
+    "title": "Learn with purpose. Grow with a teacher.",
+    "title-first": "Learn with purpose.",
+    "title-second": "Grow with a teacher.",
+    "image-alt": "Illustrative Arabic teacher giving a live online lesson",
+    "image-caption": "Illustrative learning scene",
+    "lesson-label": "One-to-one lessons",
+    "subjects": {
+      "memorization": "Memorization",
+      "tajweed": "Tajweed",
+      "arabic": "Arabic"
+    },
+    "title-lead": "Learn with",
+    "title-focus": "purpose."
+  },
+  "programs": {
+    "items": {
+      "arabic": {
+        "description": "Build communication skills for work, family and life.",
+        "title": "Arabic for everyday connection"
+      },
+      "fiqh": {
+        "description": "Essential foundations of worship and belief, explained simply and connected to verses of the Quran.",
+        "title": "Foundations"
+      },
+      "memorization": {
+        "description": "Step by step, with personal guidance.",
+        "title": "Quran Memorization"
+      },
+      "revision": {
+        "description": "Focused intensive sessions to consolidate memorization, with revision guidance matched to your goal.",
+        "title": "Revision & Intensive Review"
+      },
+      "tajweed": {
+        "description": "Learn to recite with clarity and confidence.",
+        "title": "Tajweed & Recitation"
+      }
+    },
+    "note": "Every program is taught live, one-to-one, and adapted to your level and schedule. Lesson length and pricing are confirmed with your teacher before you book.",
+    "subtitle": "Structured programs. Personal guidance. Meaningful progress.",
+    "title": "Your learning journey",
+    "more-options": "More learning options",
+    "find-teacher": "Find a teacher for {{program}}",
+    "decorative-letter": "ض"
+  },
+  "teachers": {
+    "browse": "Browse teachers",
+    "empty-description": "Our teacher directory is opening soon. Explore Arabic, Tajweed and Quran memorization programs while we welcome our first approved teachers.",
+    "empty-title": "Your learning journey starts here.",
+    "subtitle": "Personal guidance for Arabic and Quran learning.",
+    "title": "Find your teacher.",
+    "eyebrow": "A teacher for your journey",
+    "filters-label": "Teacher subjects",
+    "filters": {
+      "arabic_for_non_arabic_speakers": "Arabic",
+      "memorization": "Memorization",
+      "aqeedah": "Belief",
+      "tajweed": "Tajweed",
+      "all": "All teachers",
+      "fiqh": "Foundations",
+      "arabic": "Arabic",
+      "quran": "Quran"
+    },
+    "search-label": "Search teachers",
+    "search-placeholder": "Search teachers",
+    "no-results": "No matching teachers",
+    "no-results-description": "Try another subject or search term.",
+    "application": {
+      "description": "Share your knowledge with learners of all ages around the world.",
+      "title": "Teach with Tilawa.",
+      "status": "Teacher applications are opening soon.",
+      "action": "Apply to teach"
+    },
+    "view-profile": "View profile",
+    "duration": "Lesson length: {{minutes}} minutes",
+    "price": "Lesson price: {{price}}",
+    "language-label": "Teaching language",
+    "languages": {
+      "en": "English",
+      "ar": "Arabic"
+    },
+    "sample-profile": "Sample profile",
+    "preview-notice": "Design preview: these profiles and generated portraits are illustrative. No teacher is bookable yet."
+  },
+  "how": {
+    "steps": {
+      "first": {
+        "description": "Find the right path for your goals.",
+        "title": "Choose your program"
+      },
+      "second": {
+        "description": "Choose a teacher who fits your journey.",
+        "title": "Meet your teacher"
+      },
+      "third": {
+        "description": "Begin your lessons, live online.",
+        "title": "Start learning"
+      }
+    },
+    "title": "How lessons work"
+  },
+  "cta": {
+    "primary": "Explore programs",
+    "secondary": "Read the Quran",
+    "subtitle": "Start with a program, meet an approved teacher, and build a habit of recitation and revision.",
+    "title": "Begin your learning journey today"
+  },
+  "faq": {
+    "items": {
+      "format": {
+        "answer": "All lessons are live and online, one-to-one with your teacher. After booking, you receive a meeting link for your lesson.",
+        "question": "How are lessons held?"
+      },
+      "language": {
+        "answer": "Yes. Lessons are available in English and Arabic, with Arabic programs for non-native speakers from their first letters to everyday conversation.",
+        "question": "I do not speak Arabic. Can I still learn?"
+      },
+      "price": {
+        "answer": "Website packages start at $80 per month for 8 lessons of 45 minutes. Explore the pricing page for all packages. Individual teacher pricing is separate.",
+        "question": "How much do lessons cost?"
+      },
+      "who": {
+        "answer": "Tilawa welcomes learners of all ages, including children who can read and book lessons, to learn Arabic and Quran with a teacher suited to their level and goals.",
+        "question": "Who is the academy for?"
+      }
+    },
+    "title": "Frequently asked questions"
+  },
+  "footer": {
+    "license-note": "Quran text, translations, and audio on this site are served through Quran Foundation services. Tilawa Academy is an independent teaching platform.",
+    "login": "Log in",
+    "read-quran": "Read Quran",
+    "tagline": "Live online Quran and Arabic teaching for all ages."
+  },
+  "profile": {
+    "guidance-description": "Choose your teacher, lesson and time. Real availability and terms are checked before confirmation. Teachers review free requests; paid lessons are confirmed after verified payment. Payment is not enabled in this preview.",
+    "no-times": "No example times on this date. Choose a weekday.",
+    "booking-guidance": "How booking works",
+    "goal-placeholder": "What would you like to work on?",
+    "select-time": "Choose an illustrative time",
+    "lesson-types": {
+      "intensive_review": "Intensive review",
+      "follow_up": "Regular lesson",
+      "intro": "Introductory lesson"
+    },
+    "delivery": "Live, one-to-one, online",
+    "navigation": "Teacher profile sections",
+    "approach": "Teaching approach",
+    "audience": "All ages welcome",
+    "eligibility-note": "The introductory lesson is offered once per teacher. Subscription eligibility, duration and final pricing are confirmed before a real booking.",
+    "not-submitted": "Preview only — no request has been submitted.",
+    "no-qualifications": "Public qualifications will appear after the teacher provides them and the profile is approved.",
+    "schedule-demo": "Illustrative weekday times, shown in your selected time zone.",
+    "zones": {
+      "Australia-Sydney": "Sydney",
+      "America-New_York": "New York",
+      "Europe-London": "London",
+      "UTC": "UTC",
+      "America-Los_Angeles": "Los Angeles",
+      "Europe-Berlin": "Berlin"
+    },
+    "review-request": "Preview booking request",
+    "booking-title": "Plan your lesson",
+    "lesson-type": "Choose a lesson",
+    "reviews-note": "Student feedback follows completed lessons. No sample ratings are shown.",
+    "booking-demo": "Explore the booking design. Nothing is sent or charged.",
+    "price-pending": "Price to be published",
+    "minutes": "{{count}} minutes",
+    "choose-lesson": "Choose a lesson",
+    "no-reviews": "No student reviews yet.",
+    "lesson-descriptions": {
+      "intensive_review": "A focused 60-minute session to consolidate your learning and revision.",
+      "follow_up": "A personal lesson with guidance and practice matched to your program.",
+      "intro": "Meet your teacher, discuss your goals and find your starting point."
+    },
+    "sections": {
+      "qualifications": "Qualifications",
+      "lessons": "Lessons",
+      "about": "About",
+      "reviews": "Reviews",
+      "languages": "Languages"
+    },
+    "date": "Schedule date (UTC)",
+    "timezone": "Your time zone",
+    "request-summary": "Your request preview",
+    "back": "All teachers",
+    "learning-goal": "Your learning goal (optional)",
+    "free-intro": "Free introduction",
+    "intro-video": "Teacher introduction",
+    "video-fallback": "Your browser cannot play this video.",
+    "video-pending": "An introduction video can be added to a published teacher profile."
+  },
+  "application": {
+    "approval-note": "Teacher eligibility and public profile approval belong to administration. Private identity documents will be requested securely when registration opens.",
+    "review": "Preview application",
+    "bilingual": "English and Arabic",
+    "summary": "Application preview",
+    "price": "Regular lesson price (USD)",
+    "subtitle": "Build a teacher profile for Arabic and Quran learners of all ages.",
+    "qualifications": "Qualifications and teaching experience",
+    "languages": "Teaching languages",
+    "email": "Email address",
+    "availability": "Availability and time zone",
+    "name": "Full name",
+    "preview-note": "Application design preview. Your information stays on this page; it is not saved or submitted.",
+    "bio": "Introduce yourself",
+    "title": "Teach with Tilawa.",
+    "subject": "Primary subject",
+    "duration": "Regular lesson length",
+    "photo": "Public profile photo (optional)",
+    "video": "Introduction video URL (optional)",
+    "video-hint": "Optional, but recommended: a short introduction helps students get to know you and your teaching style."
+  },
+  "marketplace": {
+    "message": "Send a message",
+    "close": "Close",
+    "your-message": "Your message",
+    "preview-message": "Preview message",
+    "message-not-sent": "Preview only — your message has not been sent.",
+    "message-preview-note": "Try the message design. Messaging will be available when student and teacher accounts are connected.",
+    "video-empty": "No introduction video added yet",
+    "per-lesson": "{{count}}-minute lesson",
+    "new-teacher": "New teacher",
+    "reviews-pending": "No reviews yet",
+    "lessons-taught": "Lessons taught",
+    "review-count": "{{count}} reviews",
+    "speaks": "Speaks",
+    "i-speak": "I speak",
+    "teaching-language": "Teaching language",
+    "student-reviews": "What my students say",
+    "lesson-rating": "Lesson rating",
+    "ratings-empty": "Ratings appear after students complete and review their lessons.",
+    "rating-value": "{{value}} out of 5",
+    "rating-areas": {
+      "reassurance": "Reassurance",
+      "clarity": "Clarity",
+      "progress": "Progress",
+      "preparation": "Preparation"
+    },
+    "resume": "Resume",
+    "certifications": "Certifications & teaching experience",
+    "related": "You might also like",
+    "view-schedule": "View lesson options & schedule",
+    "booking-hint": "Choose your lesson and time. Review all details before confirming.",
+    "gender-label": "Teacher preference",
+    "male": "Male teacher",
+    "female": "Female teacher",
+    "price-label": "Price per lesson (USD)",
+    "any-price": "Any price",
+    "up-to-price": "≤ ${{price}}",
+    "profile-of": "View {{name}}’s profile",
+    "meet-teacher": "Meet your teacher",
+    "any-teacher": "Any teacher"
+  },
+  "pricing": {
+    "seo-title": "Monthly Arabic & Quran Packages",
+    "eyebrow": "A little consistency. A lasting difference.",
+    "title": "Make room for",
+    "title-focus": "your progress.",
+    "subtitle": "Personal, live online lessons. Choose your subject and find a monthly rhythm that works for you.",
+    "subject-label": "Choose your learning subject",
+    "subjects": {
+      "arabic": "Arabic language",
+      "quran": "Holy Quran"
+    },
+    "subject-description": {
+      "arabic": "Learn to read, speak and connect in Arabic — one lesson at a time.",
+      "quran": "Build confidence in recitation, Tajweed and Quran memorization."
+    },
+    "packages-label": "Monthly learning packages",
+    "recommended": "Recommended",
+    "lesson-count": "{{count}} lessons",
+    "per-month": "/ month",
+    "usd": "USD · monthly package",
+    "duration": "{{minutes}} minutes per lesson",
+    "private-lessons": "Live, one-to-one online lessons",
+    "all-teachers": "Same package price with every teacher",
+    "plans": {
+      "essential": {
+        "name": "Foundation",
+        "description": "Make learning part of your routine.",
+        "lesson-count": "8 lessons"
+      },
+      "progress": {
+        "name": "Momentum",
+        "description": "More practice. More room to grow.",
+        "lesson-count": "12 lessons"
+      },
+      "immersive": {
+        "name": "Immersion",
+        "description": "Give your goals more time each month.",
+        "lesson-count": "16 lessons"
+      }
+    },
+    "gift-title": "One free lesson — your choice",
+    "gifts": {
+      "recitation": "Quran recitation correction",
+      "memorization": "Quran memorization"
+    },
+    "gift-extra": "One extra lesson, in addition to your package.",
+    "no-gift": "A focused start with 8 personal lessons each month.",
+    "choose": "Choose this package",
+    "choose-label": "Choose {{lessons}} of {{subject}}",
+    "preview-note": "Explore the packages and registration preview. Payments are not open yet.",
+    "included-eyebrow": "More than a lesson",
+    "included-title": "Personal learning, at every step.",
+    "included": {
+      "personal": {
+        "title": "A pace that fits you",
+        "body": "Lessons shaped around your starting point and learning goals."
+      },
+      "live": {
+        "title": "A real conversation",
+        "body": "Learn directly with a teacher, with room to ask and practise."
+      },
+      "bilingual": {
+        "title": "Guidance you understand",
+        "body": "An English and Arabic experience, from choosing a plan to learning."
+      }
+    },
+    "faq-title": "A few helpful answers",
+    "faq": {
+      "difference": {
+        "question": "Are Arabic and Quran packages priced differently?",
+        "answer": "No. Both subjects have the same monthly packages: 8 lessons for $80, 12 for $100, or 16 for $120. Each regular lesson is 45 minutes."
+      },
+      "gift": {
+        "question": "What is included in the free lesson?",
+        "answer": "The $100 and $120 packages each include one extra free lesson. Choose either Quran recitation correction or Quran memorization. This gift is available with both Arabic and Quran packages."
+      },
+      "teacher": {
+        "question": "Does the package price change with the teacher?",
+        "answer": "No. These are fixed Tilawa website packages. A teacher’s own individual lesson pricing is separate from these packages."
+      },
+      "payment": {
+        "question": "Can I pay or activate a package now?",
+        "answer": "This is a design preview. You can choose a package and explore registration, but no account, payment or active subscription is created yet."
+      }
+    },
+    "teacher-prompt": "Get to know the people behind your progress.",
+    "meet-teachers": "Meet the teachers"
+  },
+  "account": {
+    "eyebrow": "Your next chapter starts here",
+    "story-title": "A small step today.",
+    "story-focus": "A stronger connection tomorrow.",
+    "story-description": "Learn Arabic and Quran with personal guidance, wherever you are in your journey.",
+    "live-caption": "Personal lessons. Live online.",
+    "selected-plan": "Your chosen package",
+    "change-plan": "Change",
+    "gift-summary": "One free lesson: {{gift}}",
+    "explore-plans": "Explore monthly packages",
+    "welcome": "Welcome to Tilawa",
+    "register": {
+      "title": "Start your learning journey.",
+      "subtitle": "Create your student account and take your next step with Tilawa.",
+      "submit": "Create account",
+      "preview-result": "Your registration preview is complete. No account has been created and no payment has been taken."
+    },
+    "sign-in": {
+      "title": "Good to see you again.",
+      "subtitle": "Your learning journey continues here.",
+      "submit": "Log in",
+      "preview-result": "This is a sign-in preview. Authentication will be available when accounts are connected."
+    },
+    "recovery": {
+      "title": "Let’s get you back in.",
+      "subtitle": "Enter your email to preview the password reset flow.",
+      "submit": "Send reset link",
+      "preview-result": "Password reset preview complete. No email has been sent."
+    },
+    "google": "Continue with Google",
+    "google-preview": "Google sign-in is not connected yet. No Google account has been accessed.",
+    "or-email": "or continue with email",
+    "name": "Full name",
+    "name-placeholder": "Your full name",
+    "email": "Email address",
+    "email-placeholder": "you@example.com",
+    "password": "Password",
+    "password-hint": "Use at least 8 characters.",
+    "show-password": "Show password",
+    "hide-password": "Hide password",
+    "preview-note": "Design preview · account creation and sign-in are not active yet.",
+    "have-account": "Already have an account?",
+    "new-account": "New to Tilawa?",
+    "register-link": "Create an account",
+    "forgot-password": "Forgot your password?",
+    "back-login": "Back to log in",
+    "teacher-title": "Here to teach?",
+    "teacher-description": "Tell us about your experience and teaching approach.",
+    "teacher-link": "Apply as a teacher"
+  },
+  "theme": {
+    "label": "Appearance",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "Auto",
+    "switch-light": "Switch to light mode",
+    "switch-dark": "Switch to dark mode"
+  }
+}

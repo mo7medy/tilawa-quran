@@ -1,0 +1,103 @@
+/* Turquoise identity with accessible action colors and soft neutral surfaces.*/
+/* Shared Tilawa palette; the reader maps its semantic colors to these tokens.*/
+
+@mixin academy-light-tokens {
+  --tilawa-primary: #00a29f;
+  --tilawa-bright: #00f1e2;
+  --tilawa-deep: #006b69;
+  --tilawa-button: #007f7d;
+  --tilawa-secondary-text: #006561;
+  --tilawa-secondary-hover: #d6ebe8;
+  --tilawa-container: #e3f1ef;
+  --tilawa-gold: #00bfb4;
+  --tilawa-bg: #f3f6f6;
+  --tilawa-ink: #111111;
+  --tilawa-muted: #3e4848;
+  --tilawa-card: #ffffff;
+  --tilawa-border: #c8d8d5;
+  --tilawa-on-primary: #ffffff;
+  --tilawa-link: #006561;
+  --tilawa-focus: #007596;
+  --tilawa-notice: #e9efee;
+  --tilawa-disabled: #dce5e4;
+  --tilawa-radius: 26px;
+  --tilawa-color-scheme: light;
+  --tilawa-glass: linear-gradient(
+    110deg,
+    rgba(255, 255, 255, 0.74),
+    rgba(255, 255, 255, 0.56) 55%,
+    rgba(227, 245, 242, 0.7)
+  );
+  --tilawa-glass-border: rgba(255, 255, 255, 0.8);
+  --tilawa-glass-chip: rgba(255, 255, 255, 0.3);
+  --tilawa-control-border: rgba(0, 100, 95, 0.16);
+  --tilawa-glass-shadow: 0 8px 30px rgba(20, 65, 59, 0.08), 0 0 0 1px rgba(0, 162, 159, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --tilawa-drawer: linear-gradient(145deg, rgba(255, 255, 255, 0.82), rgba(229, 247, 243, 0.74));
+  --tilawa-overlay: rgba(11, 37, 35, 0.22);
+  --tilawa-featured: linear-gradient(165deg, #e7f5f2, #fff 54%);
+  --tilawa-caption: rgba(255, 255, 255, 0.94);
+  --tilawa-media-scrim: #f3f6f6f5;
+  --tilawa-error: #a92323;
+  --tilawa-program-image-opacity: 1;
+  --tilawa-subtle-image-opacity: 0.18;
+  --tilawa-photo-brightness: 1;
+}
+
+@mixin academy-tokens {
+  @include academy-light-tokens;
+
+  :global(html[data-tilawa-theme='dark']) & {
+    @include academy-dark-tokens;
+  }
+}
+
+@mixin academy-dark-tokens {
+  --tilawa-primary: #00a29f;
+  --tilawa-bright: #77ded2;
+  --tilawa-deep: #006b69;
+  --tilawa-button: #007f7d;
+  --tilawa-secondary-text: #80e3d7;
+  --tilawa-secondary-hover: #253247;
+  --tilawa-container: #1b2a3e;
+  --tilawa-gold: #5fdccb;
+  --tilawa-bg: #0d1119;
+  --tilawa-ink: #edf2fa;
+  --tilawa-muted: #aebbd0;
+  --tilawa-card: #151c28;
+  --tilawa-border: #566b86;
+  --tilawa-on-primary: #ffffff;
+  --tilawa-link: #77ded2;
+  --tilawa-focus: #76e8d8;
+  --tilawa-notice: #1c283a;
+  --tilawa-disabled: #2b394e;
+  --tilawa-color-scheme: dark;
+  --tilawa-glass: linear-gradient(
+    110deg,
+    rgba(21, 28, 40, 0.9),
+    rgba(21, 28, 40, 0.82) 55%,
+    rgba(27, 42, 62, 0.88)
+  );
+  --tilawa-glass-border: rgba(174, 197, 230, 0.24);
+  --tilawa-glass-chip: rgba(255, 255, 255, 0.06);
+  --tilawa-control-border: #566b86;
+  --tilawa-glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(174, 197, 230, 0.08);
+  --tilawa-drawer: linear-gradient(145deg, rgba(18, 26, 39, 0.94), rgba(25, 39, 59, 0.88));
+  --tilawa-overlay: rgba(2, 6, 15, 0.55);
+  --tilawa-featured: linear-gradient(165deg, #21334d, #151c28 65%);
+  --tilawa-caption: rgba(21, 28, 40, 0.95);
+  --tilawa-media-scrim: #141c29f5;
+  --tilawa-error: #ffb4ab;
+  --tilawa-program-image-opacity: 0.16;
+  --tilawa-subtle-image-opacity: 0.06;
+  --tilawa-photo-brightness: 0.88;
+}
+
+/* Visible keyboard focus for academy interactive elements (44px targets*/
+/* pair with this outline).*/
+@mixin academy-focus-visible {
+  &:focus-visible {
+    outline: 3px solid var(--tilawa-focus);
+    outline-offset: 2px;
+  }
+}

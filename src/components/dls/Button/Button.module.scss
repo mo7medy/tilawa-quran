@@ -41,9 +41,22 @@
 
 // type
 .primary {
-  --themed-bg: var(--color-primary-medium);
-  --themed-fg: var(--color-text-inverse);
-  --themed-border: var(--color-primary-medium);
+  --themed-bg: var(--tilawa-button, var(--color-primary-medium));
+  --themed-fg: var(--tilawa-on-primary, var(--color-text-inverse));
+  --themed-border: var(--themed-bg);
+}
+
+.primary.ghost,
+.primary.outlined,
+.primary.compact {
+  --themed-bg: var(--tilawa-link, var(--color-primary-medium));
+}
+
+@media (hover: hover) {
+  .primary:hover,
+  .success:hover {
+    color: var(--tilawa-link, var(--themed-bg));
+  }
 }
 
 .secondary {
@@ -149,8 +162,9 @@
   border: none;
   color: var(--themed-bg);
   &:hover {
-    background-color: var(--themed-bg);
-    @include lighten-background-color;
+    background-color: var(--tilawa-secondary-hover, var(--themed-bg));
+    background-image: none;
+    color: var(--tilawa-ink, var(--themed-fg));
   }
 }
 // corner case for secondary ghost button
@@ -165,6 +179,12 @@
     background-color: var(--themed-bg);
     color: var(--themed-fg);
   }
+}
+
+.primary.outlined:hover {
+  background-color: var(--tilawa-button, var(--themed-bg));
+  border-color: var(--tilawa-button, var(--themed-border));
+  color: var(--tilawa-on-primary, var(--themed-fg));
 }
 // corner case for secondary ghost button
 .ghost.secondary {
@@ -257,8 +277,8 @@
 
   @media (hover: hover) {
     &:hover {
-      background-color: var(--color-success-deep);
-      color: var(--color-text-inverse);
+      background-color: var(--tilawa-button, var(--color-success-deep));
+      color: var(--tilawa-on-primary, var(--color-text-inverse));
       opacity: var(--opacity-85);
     }
   }
@@ -266,7 +286,7 @@
 
 .accent {
   background-color: var(--color-success-medium);
-  color: var(--color-text-inverse);
+  color: var(--tilawa-on-primary, var(--color-text-inverse));
   font-weight: var(--font-weight-bold);
   border-radius: var(--border-radius-rounded);
   border: none;
@@ -274,13 +294,13 @@
   padding: var(--spacing-xxsmall-px);
 
   .prefix svg path {
-    fill: var(--color-text-inverse);
+    fill: var(--tilawa-on-primary, var(--color-text-inverse));
   }
 
   @media (hover: hover) {
     &:hover {
-      background-color: var(--color-success-deep);
-      color: var(--color-text-inverse);
+      background-color: var(--tilawa-button, var(--color-success-deep));
+      color: var(--tilawa-on-primary, var(--color-text-inverse));
       opacity: var(--opacity-85);
     }
   }

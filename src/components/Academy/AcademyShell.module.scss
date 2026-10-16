@@ -1,0 +1,75 @@
+@use './tokens' as tilawa;
+
+.shell {
+  @include tilawa.academy-tokens;
+  --tilawa-header-clearance: 120px;
+  /* System font stack scoped to the academy shell only: academy pages must*/
+  /* not inherit (or trigger downloads of) the Quran font stack, and the Quran*/
+  /* loader in `src/components/Fonts` stays untouched.*/
+  --tilawa-ui-font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Tahoma, Arial, sans-serif;
+  font-family: var(--tilawa-ui-font);
+  background-color: var(--tilawa-bg);
+  color: var(--tilawa-ink);
+  color-scheme: var(--tilawa-color-scheme);
+  display: flow-root;
+  min-block-size: 100vh;
+  box-sizing: border-box;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+
+  :global(main section[id]),
+  :global(main h2[id]) {
+    scroll-margin-block-start: var(--tilawa-header-clearance);
+  }
+
+  @media (max-width: 1200px) {
+    --tilawa-header-clearance: 110px;
+  }
+
+  @media (max-width: 520px) {
+    --tilawa-header-clearance: 100px;
+  }
+
+  :global(h1),
+  :global(h2),
+  :global(h3) {
+    font-family: Georgia, 'Times New Roman', serif;
+  }
+
+  :global([dir='rtl']) & {
+    :global(h1),
+    :global(h2),
+    :global(h3) {
+      font-family: 'Cairo', Tahoma, Arial, sans-serif;
+    }
+  }
+}
+
+.shell.arabic {
+  --tilawa-ui-font: 'Cairo', Tahoma, Arial, sans-serif;
+  font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  line-height: 1.65;
+
+  * {
+    font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  }
+
+  :global(h1),
+  :global(h2),
+  :global(h3) {
+    line-height: 1.45;
+    letter-spacing: normal;
+  }
+
+  :global(p) {
+    letter-spacing: normal;
+  }
+}
+
+.shell :global([lang='ar']) {
+  font-family: 'Cairo', Tahoma, Arial, sans-serif;
+}

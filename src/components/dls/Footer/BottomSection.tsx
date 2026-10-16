@@ -40,12 +40,8 @@ const BottomSection = () => {
         </div>
         <div className={styles.copyright}>
           © {localizedCurrentYear}{' '}
-          <Link href="https://quran.com" variant={LinkVariant.Highlight} shouldPrefetch={false}>
-            {
-              // we don't want to localize Quran.com text
-              // eslint-disable-next-line i18next/no-literal-string
-              'Quran.com'
-            }
+          <Link href={ROUTES.ACADEMY_HOME} variant={LinkVariant.Highlight} shouldPrefetch={false}>
+            {t('tilawa')}
           </Link>
           . {t('footer.rights')}
         </div>

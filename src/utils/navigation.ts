@@ -3,6 +3,7 @@ import { ParsedUrlQuery, stringify } from 'querystring';
 
 import REVELATION_ORDER from './revelationOrder';
 import { searchIdToNavigationKey } from './search';
+import { getSiteOrigin } from './siteOrigin';
 import { getBasePath } from './url';
 import { getVerseAndChapterNumbersFromKey, getVerseNumberRangeFromKey } from './verse';
 
@@ -18,6 +19,11 @@ import { SearchNavigationType } from 'types/Search/SearchNavigationResult';
  */
 export const ROUTES = {
   HOME: '/',
+  /** Tilawa academy homepage. Same string as HOME; use this name in academy code. */
+  ACADEMY_HOME: '/',
+  /** Preserved original Quran homepage (moved from `/`). */
+  QURAN_HOME: '/quran',
+  TEACHERS: '/teachers',
   LOGIN: '/login',
   LOGOUT: '/logout',
   AUTH: '/auth',
@@ -76,6 +82,9 @@ export const EXTERNAL_ROUTES = {
 };
 
 export const QURAN_URL = 'https://quran.com';
+// NOTE (Tilawa): legacy share host. Do NOT use for user-visible URLs — use
+// `getShareableVerseUrl` (this deployment's origin) instead. Kept exported
+// only so old tests/mocks keep compiling until they migrate.
 export const MY_QURAN_URL = '/my-quran';
 export const LEARNING_PLANS_URL = '/learning-plans';
 export const RADIO_URL = '/radio';
@@ -104,6 +113,21 @@ export const getMyQuranNavigationUrl = (tab?: MyQuranTab): string =>
 export const getVerseNavigationUrlByVerseKey = (verseKey: string): string => {
   const [chapterId, verseNumber] = getVerseAndChapterNumbersFromKey(verseKey);
   return `/${chapterId}/${verseNumber}`;
+};
+
+/**
+ * User-visible absolute share URL for a verse, targeting THIS deployment
+ * (`NEXT_PUBLIC_SITE_URL` -> browser origin -> Vercel host). Falls back to
+ * the site-relative path when the origin is unknowable — never to the legacy
+ * quran.com host.
+ *
+ * @param {string} verseKey verse key (e.g. `2:255`)
+ * @returns {string} shareable verse URL
+ */
+export const getShareableVerseUrl = (verseKey: string): string => {
+  const path = getVerseNavigationUrlByVerseKey(verseKey);
+  const origin = getSiteOrigin();
+  return origin === '' ? path : `${origin}${path}`;
 };
 
 /**
@@ -501,6 +525,18 @@ export const getWhatIsRamadanNavigationUrl = () => '/what-is-ramadan';
 export const getTakeNotesNavigationUrl = () => '/take-notes';
 export const getLoginNavigationUrl = (redirectTo?: string) =>
   `/login${redirectTo ? `?${QueryParam.REDIRECT_TO}=${encodeURIComponent(redirectTo)}` : ''}`;
+
+/** Tilawa academy teachers browse. Currently an honest empty scaffold (backend later).
+ *
+ * @returns {string} teachers page url
+ */
+export const getTeachersNavigationUrl = (): string => ROUTES.TEACHERS;
+
+/** Preserved original Quran homepage.
+ *
+ * @returns {string} Quran homepage url
+ */
+export const getQuranHomeNavigationUrl = (): string => ROUTES.QURAN_HOME;
 
 export const getReadingGoalProgressNavigationUrl = () => '/reading-goal/progress';
 

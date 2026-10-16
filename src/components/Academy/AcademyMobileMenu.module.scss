@@ -1,0 +1,268 @@
+@use './tokens' as tilawa;
+
+.trigger,
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 46px;
+  block-size: 46px;
+  flex-shrink: 0;
+  border: 1px solid var(--tilawa-control-border);
+  border-radius: 50%;
+  background: var(--tilawa-glass-chip);
+  color: var(--tilawa-ink);
+  cursor: pointer;
+  &:hover {
+    background: var(--tilawa-container);
+  }
+  @include tilawa.academy-focus-visible;
+}
+.trigger {
+  display: none;
+  margin-inline-start: auto;
+  svg {
+    inline-size: 23px;
+    block-size: 23px;
+  }
+}
+.overlay {
+  @include tilawa.academy-tokens;
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  background: var(--tilawa-overlay);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  animation: overlay-in 180ms ease-out;
+}
+.drawer {
+  @include tilawa.academy-tokens;
+  --drawer-entry-offset: 28px;
+  position: fixed;
+  z-index: 81;
+  inset-block: 12px;
+  inset-inline-end: 12px;
+  inline-size: min(340px, calc(100vw - 44px));
+  max-block-size: calc(100dvh - 24px);
+  padding: 22px;
+  padding-block-end: max(22px, env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  color: var(--tilawa-ink);
+  color-scheme: var(--tilawa-color-scheme);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Tahoma, Arial, sans-serif;
+  background: var(--tilawa-drawer);
+  border: 1px solid var(--tilawa-glass-border);
+  border-radius: 26px;
+  box-shadow: var(--tilawa-glass-shadow);
+  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  backdrop-filter: blur(24px) saturate(140%);
+  animation: drawer-in 220ms ease-out;
+  a {
+    @include tilawa.academy-focus-visible;
+  }
+  *,
+  *::before,
+  *::after {
+    box-sizing: inherit;
+  }
+  svg {
+    flex-shrink: 0;
+  }
+}
+.drawer.arabic {
+  --drawer-entry-offset: -28px;
+  font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  line-height: 1.6;
+  * {
+    font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  }
+}
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-block-size: 46px;
+  color: var(--tilawa-ink);
+  text-decoration: none;
+  font-size: 28px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: 600;
+  img {
+    border-radius: 9px;
+  }
+}
+.arabic .brand {
+  font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  font-size: 25px;
+}
+.title {
+  font-size: 21px;
+  font-family: inherit;
+  font-weight: 650;
+  margin-block: 32px 8px;
+}
+.description {
+  color: var(--tilawa-muted);
+  font-size: 14px;
+  line-height: 1.6;
+  margin-block-end: 22px;
+}
+.links {
+  display: grid;
+  gap: 4px;
+  margin-block-end: 24px;
+  a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-block-size: 50px;
+    padding: 10px 12px;
+    border-radius: 12px;
+    color: var(--tilawa-ink);
+    text-decoration: none;
+    font-weight: 550;
+    font-size: 16px;
+    transition: background-color 160ms ease;
+    svg {
+      color: var(--tilawa-link);
+      inline-size: 16px;
+      block-size: 16px;
+    }
+    &:hover,
+    &[aria-current='page'] {
+      background: var(--tilawa-container);
+      color: var(--tilawa-secondary-text);
+    }
+  }
+}
+.arabic .links svg {
+  transform: rotate(180deg);
+}
+.bottom {
+  margin-block-start: auto;
+  border-block-start: 1px solid var(--tilawa-border);
+  padding-block-start: 18px;
+  display: grid;
+  gap: 10px;
+}
+.language {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 14px;
+  color: var(--tilawa-muted);
+  nav a {
+    color: var(--tilawa-link);
+    font-family: inherit;
+    font-size: 14px;
+  }
+}
+.login,
+.register {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: 48px;
+  border-radius: 999px;
+  padding: 10px 16px;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 650;
+}
+.login {
+  background: var(--tilawa-button);
+  color: var(--tilawa-on-primary);
+  &:hover {
+    background: var(--tilawa-deep);
+  }
+}
+.register {
+  border: 1px solid var(--tilawa-primary);
+  color: var(--tilawa-secondary-text);
+  background: var(--tilawa-glass-chip);
+  &:hover {
+    background: var(--tilawa-container);
+  }
+}
+@media (max-width: 1200px) {
+  .trigger {
+    display: inline-flex;
+  }
+}
+@media (max-width: 360px) {
+  .drawer {
+    padding: 18px;
+  }
+  .title {
+    margin-block-start: 22px;
+  }
+}
+@keyframes drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(var(--drawer-entry-offset));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes drawer-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(var(--drawer-entry-offset));
+  }
+}
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.drawer[data-state='closed'] {
+  animation: drawer-out 140ms ease-in;
+}
+.overlay[data-state='closed'] {
+  animation: overlay-out 140ms ease-in;
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .drawer {
+    background: var(--tilawa-card);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .drawer,
+  .overlay {
+    animation: none;
+  }
+  .links a {
+    transition: none;
+  }
+}

@@ -8,7 +8,7 @@ import { deleteCollectionBookmarkById } from '@/utils/auth/api';
 import { textToBlob } from '@/utils/blob';
 import { getChapterData } from '@/utils/chapter';
 import { toLocalizedNumber } from '@/utils/locale';
-import { QURAN_URL, getVerseNavigationUrlByVerseKey } from '@/utils/navigation';
+import { getShareableVerseUrl } from '@/utils/navigation';
 import { makeVerseKey } from '@/utils/verse';
 import ChaptersData from 'types/ChaptersData';
 
@@ -59,7 +59,7 @@ export const buildBulkCopyBlobPromise = async (params: {
       const verse = await fetchVerseForCopy(vk, selectedTranslations);
       const surahNumber = vk.split(':')[0];
       const chapter = getChapterData(chaptersData, surahNumber);
-      const qdcUrl = `${QURAN_URL}${getVerseNavigationUrlByVerseKey(vk)}`;
+      const qdcUrl = getShareableVerseUrl(vk);
       return buildVerseCopyText({ verse, chapter, lang, qdcUrl });
     },
   );

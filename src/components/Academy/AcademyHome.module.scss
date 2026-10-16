@@ -1,0 +1,597 @@
+@use './tokens' as tilawa;
+.page {
+  @include tilawa.academy-tokens;
+  max-inline-size: 1380px;
+  margin-inline: auto;
+  padding-inline: clamp(20px, 4vw, 56px);
+  padding-block-end: 64px;
+  background: var(--tilawa-bg);
+  color: var(--tilawa-ink);
+}
+.hero {
+  display: grid;
+  grid-template-columns: 1.04fr 1fr;
+  align-items: center;
+  gap: 32px;
+  padding-block: 28px 32px;
+}
+.eyebrow {
+  margin-block: 0 22px;
+  color: var(--tilawa-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  &::before {
+    content: '';
+    inline-size: 32px;
+    block-size: 1px;
+    background: var(--tilawa-gold);
+    flex-shrink: 0;
+  }
+}
+.heroTitle {
+  font-size: clamp(40px, 4.9vw, 72px);
+  line-height: 1.06;
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  color: var(--tilawa-ink);
+  margin-block: 0 24px;
+  em {
+    font-style: italic;
+    font-weight: 400;
+  }
+  span {
+    display: block;
+  }
+}
+.heroSubtitle {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: clamp(18px, 1.65vw, 24px);
+  line-height: 1.5;
+  color: var(--tilawa-muted);
+  max-inline-size: 34ch;
+  margin-block: 0 26px;
+}
+.heroCtas,
+.ctaButtons {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.primaryCta,
+.readLink,
+.programLink {
+  svg path {
+    fill: currentColor;
+  }
+}
+.primaryCta,
+.secondaryCta {
+  min-block-size: 50px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  border-radius: 999px;
+  padding-block: 14px;
+  padding-inline: 26px;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: var(--tilawa-ui-font);
+  background: var(--tilawa-button);
+  color: var(--tilawa-on-primary);
+  border: 1px solid var(--tilawa-primary);
+  transition: background-color 180ms ease;
+  svg {
+    inline-size: 18px;
+    block-size: 18px;
+  }
+  &:hover {
+    background: var(--tilawa-deep);
+  }
+  @include tilawa.academy-focus-visible;
+}
+.secondaryCta {
+  background: var(--tilawa-card);
+  color: var(--tilawa-secondary-text);
+  border-color: var(--tilawa-primary);
+  &:hover {
+    background: var(--tilawa-secondary-hover);
+  }
+}
+.readLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-block-size: 44px;
+  margin-block-start: 10px;
+  font-size: 12px;
+  color: var(--tilawa-link);
+  text-decoration: none;
+  svg {
+    inline-size: 14px;
+    block-size: 14px;
+  }
+  @include tilawa.academy-focus-visible;
+}
+.heroVisual {
+  position: relative;
+  margin: 0;
+  min-inline-size: 0;
+  padding-inline-end: 32px;
+}
+.heroArch {
+  aspect-ratio: 1.13;
+  overflow: hidden;
+  border-start-start-radius: 48%;
+  border-start-end-radius: 48%;
+  background: var(--tilawa-container);
+}
+.heroPhoto {
+  filter: brightness(var(--tilawa-photo-brightness));
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: 36% center;
+  display: block;
+}
+.lessonPreview {
+  position: absolute;
+  inset-block-start: 15%;
+  inset-inline-end: 0;
+  inline-size: 40%;
+  padding: 16px;
+  border-radius: 20px;
+  background: var(--tilawa-card);
+  box-shadow: 0 16px 44px #103e3814;
+}
+.lessonLabel {
+  margin-block: 0 12px;
+  color: var(--tilawa-ink);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 13px;
+}
+.lessonPhotos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  img {
+    inline-size: 100%;
+    block-size: 85px;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+  img:first-child {
+    object-position: 20% center;
+  }
+}
+.lessonWave,
+.programWave {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  justify-content: center;
+  color: var(--tilawa-link);
+  span {
+    inline-size: 2px;
+    border-radius: 4px;
+    background: currentColor;
+  }
+}
+.lessonWave {
+  margin-block-start: 10px;
+}
+.subjectPills {
+  position: absolute;
+  inset-inline-end: -8px;
+  inset-block-end: 15%;
+  display: grid;
+  gap: 10px;
+  span {
+    background: var(--tilawa-container);
+    color: var(--tilawa-ink);
+    padding-block: 10px;
+    padding-inline: 18px;
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 13px;
+    border-radius: 999px;
+    box-shadow: 0 6px 20px #103e3808;
+  }
+  span:nth-child(2) {
+    background: var(--tilawa-notice);
+  }
+}
+.imageCaption {
+  margin-block-start: 8px;
+  text-align: end;
+  font-size: 11px;
+  color: var(--tilawa-muted);
+}
+.sections {
+  display: grid;
+  gap: 32px;
+}
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+  flex-wrap: wrap;
+  margin-block-end: 20px;
+}
+.sectionTitle {
+  font-size: clamp(28px, 3.1vw, 42px);
+  line-height: 1.15;
+  font-weight: 500;
+  margin-block: 0;
+  color: var(--tilawa-ink);
+}
+.sectionSubtitle {
+  margin: 0;
+  color: var(--tilawa-muted);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 16px;
+}
+.programGrid {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr 1fr;
+  gap: 14px;
+}
+.programCard {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border-radius: var(--tilawa-radius);
+  background: var(--tilawa-container);
+  min-block-size: 250px;
+  padding: 26px;
+  color: var(--tilawa-ink);
+}
+.programImage {
+  opacity: var(--tilawa-program-image-opacity);
+  position: absolute;
+  inset: 0;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+.programCopy {
+  position: relative;
+  max-inline-size: 75%;
+  block-size: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.programTitle {
+  font-size: clamp(23px, 2.15vw, 30px);
+  font-weight: 500;
+  line-height: 1.12;
+  margin-block: 0 12px;
+  color: inherit;
+}
+.programDescription {
+  font-family: Georgia, 'Times New Roman', serif;
+  line-height: 1.5;
+  font-size: 15px;
+  color: inherit;
+  margin-block: 0 18px;
+}
+.programLink {
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-block-start: auto;
+  background: var(--tilawa-button);
+  color: var(--tilawa-on-primary);
+  svg {
+    inline-size: 18px;
+    block-size: 18px;
+  }
+  @include tilawa.academy-focus-visible;
+}
+.arabicLetter {
+  position: absolute;
+  inset-inline-end: 14%;
+  inset-block-end: 30px;
+  font-family: 'Times New Roman', serif;
+  font-size: 110px;
+  color: var(--tilawa-ink);
+  line-height: 1;
+  z-index: -1;
+}
+.tajweed {
+  background: var(--tilawa-notice);
+}
+.memorization {
+  background: var(--tilawa-container);
+  color: var(--tilawa-ink);
+  .programImage {
+    opacity: var(--tilawa-subtle-image-opacity);
+  }
+  .programLink {
+    border: 1px solid var(--tilawa-border);
+  }
+  .programLink:focus-visible {
+    outline-color: var(--tilawa-focus);
+  }
+}
+.programWave {
+  position: absolute;
+  inset-inline-end: 20%;
+  inset-block-end: 28px;
+  opacity: 0.6;
+  z-index: -1;
+}
+.extraPrograms {
+  margin-block-start: 18px;
+  color: var(--tilawa-muted);
+  summary {
+    min-block-size: 44px;
+    align-content: center;
+    font-size: 13px;
+    cursor: pointer;
+    @include tilawa.academy-focus-visible;
+  }
+}
+.extraGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  padding-block: 16px;
+  h3 {
+    color: var(--tilawa-ink);
+    margin-block: 0 12px;
+    font-size: 22px;
+  }
+  p {
+    line-height: 1.6;
+    margin: 0;
+  }
+}
+.steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  list-style: none;
+  margin: 0;
+  padding: 26px;
+  background: var(--tilawa-notice);
+  border-radius: var(--tilawa-radius);
+}
+.step {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+.stepNumber {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: 50%;
+  background: var(--tilawa-container);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 22px;
+}
+.stepTitle {
+  font-size: 20px;
+  font-weight: 500;
+  line-height: 1.25;
+  margin-block: 0 6px;
+  color: var(--tilawa-ink);
+}
+.stepDescription {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 14px;
+  color: var(--tilawa-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+.cta {
+  background: var(--tilawa-container);
+  border-radius: var(--tilawa-radius);
+  padding: clamp(24px, 4vw, 48px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+.ctaTitle {
+  font-size: clamp(28px, 3vw, 40px);
+  line-height: 1.15;
+  color: var(--tilawa-ink);
+  margin-block: 0 14px;
+  font-weight: 500;
+}
+.ctaSubtitle {
+  max-inline-size: 48ch;
+  line-height: 1.6;
+  color: var(--tilawa-muted);
+  margin: 0;
+}
+.faq {
+  padding-block-start: 20px;
+}
+.faqList {
+  margin-block-start: 24px;
+}
+.faqItem {
+  border-block-end: 1px solid var(--tilawa-border);
+  padding-block: 16px;
+}
+.faqQuestion {
+  min-block-size: 44px;
+  align-content: center;
+  font-size: 17px;
+  color: var(--tilawa-ink);
+  cursor: pointer;
+  @include tilawa.academy-focus-visible;
+}
+.faqAnswer {
+  margin-block: 10px;
+  color: var(--tilawa-muted);
+  max-inline-size: 80ch;
+  line-height: 1.7;
+}
+:global([dir='rtl']) {
+  .lessonPreview {
+    inset-inline-start: 0;
+    inset-inline-end: auto;
+  }
+
+  .subjectPills {
+    inset-inline-start: 0;
+    inset-inline-end: auto;
+  }
+
+  .heroTitle {
+    font-size: clamp(32px, 3.8vw, 56px);
+    line-height: 1.35;
+    letter-spacing: normal;
+    font-weight: 700;
+  }
+  .heroSubtitle,
+  .programDescription,
+  .sectionSubtitle,
+  .stepDescription {
+    font-family: 'Cairo', Tahoma, Arial, sans-serif;
+  }
+  .programImage {
+    transform: scaleX(-1);
+  }
+  .primaryCta svg,
+  .readLink svg,
+  .programLink svg {
+    transform: scaleX(-1);
+  }
+  .programCopy {
+    max-inline-size: 78%;
+  }
+  .programTitle {
+    font-size: 24px;
+    line-height: 1.4;
+  }
+}
+@media (max-width: 1000px) {
+  .heroTitle {
+    font-size: clamp(38px, 4.8vw, 52px);
+  }
+  .programCard {
+    padding: 20px;
+    min-block-size: 270px;
+  }
+  .programCopy {
+    max-inline-size: 88%;
+  }
+  .programTitle {
+    font-size: 25px;
+  }
+  .steps {
+    gap: 18px;
+    padding: 22px;
+  }
+  .step {
+    flex-direction: column;
+  }
+  .lessonPreview {
+    padding: 12px;
+  }
+  .lessonPhotos img {
+    block-size: 58px;
+  }
+}
+@media (max-width: 760px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    padding-block-start: 36px;
+  }
+  .heroTitle {
+    font-size: clamp(40px, 8vw, 60px);
+  }
+  .heroVisual {
+    max-inline-size: 560px;
+    inline-size: 100%;
+    justify-self: center;
+  }
+  .heroArch {
+    aspect-ratio: 1.4;
+  }
+  .programGrid {
+    grid-template-columns: 1fr;
+  }
+  .programCard {
+    padding: 26px;
+    min-block-size: 250px;
+  }
+  .programCopy {
+    max-inline-size: 60%;
+  }
+  .programTitle {
+    font-size: 28px;
+  }
+  .steps,
+  .extraGrid {
+    grid-template-columns: 1fr;
+  }
+  .step {
+    flex-direction: row;
+  }
+  .lessonPhotos img {
+    block-size: 70px;
+  }
+}
+@media (max-width: 400px) {
+  .heroVisual {
+    padding-inline-end: 16px;
+  }
+  .heroArch {
+    aspect-ratio: 1.15;
+  }
+  .subjectPills {
+    inset-inline-end: 0;
+    inset-block-end: 12%;
+  }
+  .subjectPills span {
+    padding-block: 8px;
+    padding-inline: 12px;
+    font-size: 11px;
+  }
+  .lessonPreview {
+    inline-size: 45%;
+    inset-block-start: 10%;
+    padding: 10px;
+  }
+  .lessonLabel {
+    font-size: 11px;
+  }
+  .lessonPhotos img {
+    block-size: 50px;
+  }
+  .programCopy {
+    max-inline-size: 74%;
+  }
+  .programTitle {
+    font-size: 25px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .primaryCta,
+  .secondaryCta {
+    transition: none;
+  }
+}

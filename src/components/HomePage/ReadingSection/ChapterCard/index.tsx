@@ -1,20 +1,20 @@
 import React, { useContext } from 'react';
 
+import classNames from 'classnames';
 import useTranslation from 'next-translate/useTranslation';
 
 import styles from './ChapterCard.module.scss';
 
 import Card from '@/components/HomePage/Card';
 import DataContext from '@/contexts/DataContext';
-import Button, { ButtonSize } from '@/dls/Button/Button';
+import buttonStyles from '@/dls/Button/Button.module.scss';
 import IconContainer, { IconSize } from '@/dls/IconContainer/IconContainer';
-import Link, { LinkVariant } from '@/dls/Link/Link';
+import linkStyles from '@/dls/Link/Link.module.scss';
 import ArrowIcon from '@/icons/arrow.svg';
 import { getChapterData } from '@/utils/chapter';
 import { logButtonClick } from '@/utils/eventLogger';
 import { toLocalizedNumber } from '@/utils/locale';
 import { getChapterWithStartingVerseUrl, getPageNavigationUrl } from '@/utils/navigation';
-import { isMobile } from '@/utils/responsive';
 
 type Props = {
   surahNumber: number;
@@ -47,7 +47,12 @@ const ChapterCard: React.FC<Props> = ({
     : getChapterWithStartingVerseUrl(`${surahNumber}:${verseNumber}`);
 
   return (
-    <Card className={styles.chapterCard} link={link} testId="chapter-card">
+    <Card
+      className={styles.chapterCard}
+      link={link}
+      testId="chapter-card"
+      onClick={isContinueReading ? onContinueReadingClicked : onBeginClicked}
+    >
       <div className={styles.surahContainer}>
         <div className={styles.surahName} translate="no">
           {surahNumberString.padStart(3, '0')}
@@ -59,11 +64,11 @@ const ChapterCard: React.FC<Props> = ({
             </span>
             <span className={styles.translatedName} translate="no">
               {' '}
-              {isMobile() ? `${chapterData.translatedName}` : `(${chapterData.translatedName})`}
+              {chapterData.translatedName}
             </span>
           </div>
           {isContinueReading ? (
-            <Link href={link} variant={LinkVariant.Primary} onClick={onContinueReadingClicked}>
+            <div className={classNames(linkStyles.base, linkStyles.primary)}>
               <div className={styles.continueReading}>
                 <span>{t('common:verse')}</span>
                 <span>{toLocalizedNumber(verseNumber, lang)}</span>
@@ -74,16 +79,19 @@ const ChapterCard: React.FC<Props> = ({
                   className={styles.continueReadingArrowIcon}
                 />
               </div>
-            </Link>
+            </div>
           ) : (
-            <Button
-              size={ButtonSize.Small}
-              href={link}
-              onClick={onBeginClicked}
-              className={styles.beginButton}
+            <span
+              className={classNames(
+                buttonStyles.base,
+                buttonStyles.primary,
+                buttonStyles.small,
+                buttonStyles.withText,
+                styles.beginButton,
+              )}
             >
-              {t('begin')}
-            </Button>
+              <span className={buttonStyles.content}>{t('begin')}</span>
+            </span>
           )}
         </div>
       </div>

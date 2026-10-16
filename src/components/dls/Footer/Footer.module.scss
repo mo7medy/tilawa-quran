@@ -4,6 +4,13 @@
 
 .footer {
   background-color: var(--color-background-elevated-new);
+  border-block-start: 1px solid var(--tilawa-border);
+  padding-block: 24px;
+  font-family: var(--tilawa-ui-font);
+
+  [dir='rtl'] & :where(a, p, div, span) {
+    font-family: var(--tilawa-ui-font);
+  }
 }
 
 .flowItem {
@@ -53,8 +60,8 @@
 }
 
 .iconContainer {
-  & > svg > path {
-    fill: var(--color-text-default);
+  & > img {
+    display: block;
   }
   margin-block-end: var(--spacing-xxsmall);
 }
@@ -137,6 +144,7 @@
 .actionsSections {
   margin-block-end: var(--spacing-small);
   display: flex;
+  flex-wrap: wrap;
   gap: var(--spacing-small);
   @include breakpoints.tablet {
     flex-direction: row;

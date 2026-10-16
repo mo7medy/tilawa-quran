@@ -1,0 +1,71 @@
+@use './tokens' as tilawa;
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 44px;
+  block-size: 44px;
+  flex-shrink: 0;
+  border: 1px solid var(--tilawa-glass-border);
+  border-radius: 50%;
+  background: var(--tilawa-glass-chip);
+  color: var(--tilawa-ink);
+  cursor: pointer;
+  &:hover {
+    background: var(--tilawa-secondary-hover);
+  }
+  @include tilawa.academy-focus-visible;
+}
+.control {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-inline-size: 0;
+  font-family: var(--tilawa-ui-font);
+  legend {
+    padding: 0;
+    color: var(--tilawa-muted);
+    font-size: 14px;
+    margin-block-end: 10px;
+  }
+  > div {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid var(--tilawa-border);
+    border-radius: 14px;
+    background: var(--tilawa-glass-chip);
+  }
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-block-size: 44px;
+    padding: 8px 4px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--tilawa-ink);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    span {
+      font-family: inherit;
+    }
+    svg {
+      inline-size: 16px;
+      block-size: 16px;
+    }
+    &:hover {
+      background: var(--tilawa-secondary-hover);
+    }
+    &[aria-pressed='true'] {
+      background: var(--tilawa-button);
+      color: var(--tilawa-on-primary);
+    }
+    @include tilawa.academy-focus-visible;
+  }
+}

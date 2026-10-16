@@ -188,6 +188,7 @@ const Drawer: React.FC<Props> = ({
         [styles.right]: side === DrawerSide.Right,
         [styles.noTransition]: type === DrawerType.Search && navbar.disableSearchDrawerTransition,
         [styles.settingsDrawer]: isSettingsDrawer,
+        [styles.navigationDrawer]: type === DrawerType.Navigation,
       })}
       ref={drawerRef}
       id={isSettingsDrawer ? 'settings-drawer-container' : undefined}

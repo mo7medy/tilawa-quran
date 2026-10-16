@@ -1,16 +1,15 @@
 import React from 'react';
 
-import classNames from 'classnames';
 import { useSelector, shallowEqual } from 'react-redux';
 
 import LanguageDrawer from './LanguageDrawer/LanguageDrawer';
-import MobileStickyItemsBar from './MobileStickyItemsBar';
 import styles from './Navbar.module.scss';
 import NavbarBody from './NavbarBody';
 import NavigationDrawer from './NavigationDrawer/NavigationDrawer';
 import SearchDrawer from './SearchDrawer/SearchDrawer';
 import SettingsDrawer from './SettingsDrawer/SettingsDrawer';
 
+import AcademyHeader from '@/components/Academy/AcademyHeader';
 import { useOnboarding } from '@/components/Onboarding/OnboardingProvider';
 import useDebounceNavbarVisibility from '@/hooks/useDebounceNavbarVisibility';
 import {
@@ -31,18 +30,13 @@ const Navbar = () => {
 
   return (
     <>
-      <MobileStickyItemsBar />
       <div className={styles.emptySpacePlaceholder} />
-      <nav
-        className={classNames(styles.container, {
-          [styles.hiddenNav]: !showNavbar,
-          [styles.dimmed]: isNavigationDrawerOpen || isSettingsDrawerOpen || isLanguageDrawerOpen,
-        })}
-        data-testid="navbar"
-        data-isvisible={showNavbar}
-      >
-        <NavbarBody />
-      </nav>
+      <AcademyHeader
+        isFixed
+        isVisible={showNavbar}
+        isDimmed={isNavigationDrawerOpen || isSettingsDrawerOpen || isLanguageDrawerOpen}
+        actions={<NavbarBody />}
+      />
       {/* Drawers rendered outside nav to avoid transform containment issues */}
       <SearchDrawer />
       <SettingsDrawer />

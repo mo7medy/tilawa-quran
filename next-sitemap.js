@@ -13,13 +13,35 @@ const englishChaptersData = require('./data/chapters/en.json');
 const { locales } = require('./i18n.json');
 
 const isProduction = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production';
-const isDevelopment = process.env.NEXT_PUBLIC_VERCEL_ENV === 'development';
 const shouldGenerateAdditionalPaths =
   process.env.NEXT_PUBLIC_GENERATE_SITEMAP_ADDITIONAL_PATHS === 'true';
 
-const BASE_PATH =
-  `${isDevelopment ? 'http' : 'https'}://${process.env.NEXT_PUBLIC_VERCEL_URL}` ||
-  'https://quran.com';
+// Canonical site origin for sitemap URLs. Resolution mirrors
+// `src/utils/siteOrigin.ts`: explicit `NEXT_PUBLIC_SITE_URL` first, then
+// Vercel hosts, then a localhost dev fallback. NOTE: the previous code built
+// `` `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` `` which is always truthy
+// and produced `https://undefined` — never rely on bare interpolation here.
+const resolveSiteBasePath = () => {
+  const explicitSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (explicitSiteUrl) return explicitSiteUrl.replace(/\/$/, '');
+  const vercelHost =
+    process.env.NEXT_PUBLIC_VERCEL_URL ||
+    process.env.VERCEL_PROJECT_PRODUCTION_URL ||
+    process.env.VERCEL_URL;
+  if (vercelHost) {
+    if (/^https?:\/\//.test(vercelHost)) return vercelHost.replace(/\/$/, '');
+    const protocol =
+      vercelHost.startsWith('localhost') || vercelHost.startsWith('127.0.0.1') ? 'http' : 'https';
+    return `${protocol}://${vercelHost}`.replace(/\/$/, '');
+  }
+  console.log(
+    'WARNING: no site origin configured (NEXT_PUBLIC_SITE_URL or Vercel host); ' +
+      'falling back to http://localhost:3000. Set NEXT_PUBLIC_SITE_URL in production.',
+  );
+  return 'http://localhost:3000';
+};
+
+const BASE_PATH = resolveSiteBasePath();
 
 const { API_GATEWAY_URL } = process.env;
 const API_CONTENT_URL = `${API_GATEWAY_URL}/content`;

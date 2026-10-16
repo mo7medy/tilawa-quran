@@ -29,6 +29,7 @@ import PreferenceGroup from '@/types/auth/PreferenceGroup';
 import OnboardingGroup from '@/types/OnboardingGroup';
 import { ReadingPreference } from '@/types/QuranReader';
 import { logButtonClick } from '@/utils/eventLogger';
+import { ROUTES } from '@/utils/navigation';
 
 const OnboardingChecklist = () => {
   const { t } = useTranslation('common');
@@ -66,7 +67,8 @@ const OnboardingChecklist = () => {
   }
 
   if (!isChecklistVisible) {
-    if (router.pathname === '/') {
+    // The preserved Quran homepage moved from `/` (now Tilawa Academy) to `/quran`.
+    if (router.pathname === ROUTES.QURAN_HOME) {
       return (
         <Button
           shape={ButtonShape.Circle}

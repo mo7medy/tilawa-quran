@@ -1,0 +1,920 @@
+@use './tokens' as tilawa;
+.page {
+  max-inline-size: 1240px;
+  padding-block: 24px 64px;
+  padding-inline: clamp(20px, 4vw, 48px);
+  margin-inline: auto;
+  color: var(--tilawa-ink);
+}
+.back {
+  min-block-size: 44px;
+  display: inline-flex;
+  align-items: center;
+  color: var(--tilawa-link);
+  text-decoration: none;
+  font-size: 13px;
+  @include tilawa.academy-focus-visible;
+}
+.previewNotice {
+  background: var(--tilawa-notice);
+  color: var(--tilawa-muted);
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.65;
+  margin-block: 10px 24px;
+}
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 344px;
+  gap: 0 48px;
+  align-items: start;
+}
+.profileHero {
+  grid-column: 1;
+  grid-row: 1;
+  min-inline-size: 0;
+  padding-block: 8px 24px;
+}
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  > div {
+    min-inline-size: 0;
+  }
+  h1 {
+    font-family: var(--tilawa-ui-font);
+    font-size: clamp(26px, 3vw, 38px);
+    font-weight: 700;
+    line-height: 1.25;
+    margin-block: 0 8px;
+    color: var(--tilawa-ink);
+    overflow-wrap: anywhere;
+  }
+  p {
+    margin: 0 0 8px;
+    font-size: 14px;
+    color: var(--tilawa-muted);
+  }
+}
+.photo {
+  inline-size: 94px;
+  block-size: 104px;
+  object-fit: cover;
+  object-position: center 35%;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+.badge {
+  display: inline-flex;
+  background: var(--tilawa-container);
+  color: var(--tilawa-ink);
+  border-radius: 5px;
+  padding: 3px 7px;
+  font-size: 11px;
+}
+.specialty {
+  color: var(--tilawa-link);
+}
+.headline {
+  font-size: 16px;
+  line-height: 1.7;
+  margin-block: 22px 18px;
+}
+.primaryButton,
+.secondaryButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-block-size: 48px;
+  padding: 12px 18px;
+  border: 1px solid var(--tilawa-primary);
+  background: var(--tilawa-button);
+  color: var(--tilawa-on-primary);
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  svg {
+    flex-shrink: 0;
+  }
+  &:hover:not(:disabled) {
+    background: var(--tilawa-deep);
+  }
+  &:disabled {
+    cursor: not-allowed;
+    background: var(--tilawa-disabled);
+    border-color: var(--tilawa-disabled);
+    color: var(--tilawa-muted);
+  }
+  @include tilawa.academy-focus-visible;
+}
+.secondaryButton {
+  background: var(--tilawa-card);
+  color: var(--tilawa-secondary-text);
+  border-color: var(--tilawa-primary);
+  &:hover:not(:disabled) {
+    background: var(--tilawa-secondary-hover);
+  }
+}
+.profileHero > .secondaryButton {
+  inline-size: 100%;
+}
+.statistics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  padding-block: 24px;
+  margin-block: 4px 8px;
+  border-block-end: 1px solid var(--tilawa-border);
+  > div {
+    min-inline-size: 0;
+  }
+  svg {
+    inline-size: 17px;
+    block-size: 17px;
+    margin-inline-end: 5px;
+    vertical-align: middle;
+  }
+  strong {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+  small {
+    display: block;
+    margin-block-start: 6px;
+    color: var(--tilawa-muted);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+}
+.profileFacts {
+  display: flex;
+  gap: 12px;
+  padding-block: 12px;
+  font-size: 14px;
+  svg {
+    color: var(--tilawa-link);
+    flex-shrink: 0;
+    margin-block-start: 3px;
+  }
+  p {
+    margin-block: 5px 0;
+    color: var(--tilawa-muted);
+    line-height: 1.6;
+  }
+}
+.styleCard {
+  display: flex;
+  gap: 12px;
+  background: var(--tilawa-container);
+  border: 1px solid var(--tilawa-border);
+  border-radius: 12px;
+  padding: 18px;
+  margin-block-start: 14px;
+  font-size: 14px;
+  svg {
+    flex-shrink: 0;
+  }
+  p {
+    margin-block: 7px 0;
+    color: var(--tilawa-muted);
+    line-height: 1.7;
+    font-size: 13px;
+  }
+}
+.sidebar {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  position: sticky;
+  inset-block-start: 24px;
+  background: var(--tilawa-card);
+  border: 1px solid var(--tilawa-border);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 12px 32px #103e380a;
+}
+.media {
+  inline-size: 100%;
+  min-inline-size: 0;
+  aspect-ratio: 16/10;
+  overflow: hidden;
+  background: var(--tilawa-container);
+  video {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: contain;
+  }
+}
+.videoPlaceholder {
+  position: relative;
+  block-size: 100%;
+  img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    object-position: center 35%;
+  }
+  > div {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 20px;
+    gap: 6px;
+    text-align: center;
+    color: var(--tilawa-ink);
+    background: linear-gradient(transparent 25%, var(--tilawa-media-scrim) 100%);
+  }
+  strong {
+    font-size: 15px;
+  }
+  small {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+}
+.sidebarActions {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+  p {
+    margin-block: 2px 0;
+    font-size: 12px;
+    color: var(--tilawa-muted);
+    text-align: center;
+    line-height: 1.65;
+  }
+}
+.sidebarPrice {
+  strong {
+    font-size: 24px;
+    line-height: 1.4;
+    font-weight: 650;
+  }
+  small {
+    display: block;
+    margin-block: 5px 8px;
+    font-size: 12px;
+    color: var(--tilawa-muted);
+  }
+}
+.profileDetails {
+  grid-column: 1;
+  grid-row: 2;
+  min-inline-size: 0;
+}
+.sectionNav {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding-block: 8px;
+  border-block-end: 1px solid var(--tilawa-border);
+  a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 44px;
+    font-size: 13px;
+    color: var(--tilawa-link);
+    text-decoration: none;
+    &:hover {
+      text-decoration: underline;
+    }
+    @include tilawa.academy-focus-visible;
+  }
+}
+.panel {
+  padding-block: 30px;
+  border-block-end: 1px solid var(--tilawa-border);
+  scroll-margin-block: 24px 100px;
+  h2 {
+    font-size: 28px;
+    font-weight: 600;
+    color: var(--tilawa-ink);
+    margin-block: 0 20px;
+    line-height: 1.4;
+  }
+  h3 {
+    color: var(--tilawa-ink);
+    font-size: 20px;
+    font-weight: 600;
+    margin-block: 18px 10px;
+  }
+  p {
+    color: var(--tilawa-muted);
+    font-size: 15px;
+    line-height: 1.85;
+    margin-block: 12px;
+    overflow-wrap: anywhere;
+  }
+  summary {
+    min-block-size: 44px;
+    align-content: center;
+    color: var(--tilawa-ink);
+    cursor: pointer;
+    font-size: 14px;
+    @include tilawa.academy-focus-visible;
+  }
+}
+.factRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-block-start: 20px;
+  span {
+    background: var(--tilawa-container);
+    color: var(--tilawa-ink);
+    padding: 8px 12px;
+    font-size: 12px;
+    border-radius: 6px;
+  }
+}
+.languageList,
+.qualifications {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 16px;
+  li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    font-size: 14px;
+  }
+  span {
+    background: var(--tilawa-container);
+    color: var(--tilawa-link);
+    font-size: 11px;
+    padding: 4px 8px;
+    border-radius: 4px;
+  }
+  svg {
+    flex-shrink: 0;
+  }
+}
+.qualifications li {
+  align-items: flex-start;
+  p {
+    margin: 0;
+  }
+}
+.emptyReview {
+  border: 1px solid var(--tilawa-border);
+  border-radius: 12px;
+  padding: 24px;
+  background: var(--tilawa-card);
+  svg {
+    display: block;
+    margin-block-end: 14px;
+    color: var(--tilawa-link);
+  }
+  strong {
+    font-size: 16px;
+  }
+  p {
+    font-size: 13px;
+    margin-block-end: 0;
+  }
+}
+.ratingGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  > div {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 12px;
+    background: var(--tilawa-container);
+    padding: 18px;
+    border-radius: 10px;
+  }
+  strong {
+    font-size: 23px;
+    font-weight: 650;
+  }
+  span {
+    grid-column: 1/-1;
+    font-size: 13px;
+  }
+  svg {
+    color: var(--tilawa-link);
+  }
+}
+.reviewScore {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  strong {
+    font-size: 34px;
+    color: var(--tilawa-ink);
+  }
+}
+.reviewList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  article {
+    border: 1px solid var(--tilawa-border);
+    padding: 20px;
+    border-radius: 12px;
+    background: var(--tilawa-card);
+  }
+}
+.panel .resumeHeading {
+  font-size: 14px;
+  padding-block: 8px 14px;
+  border-block-end: 2px solid var(--tilawa-link);
+  margin-block: 0 20px;
+}
+.emptySection {
+  border-inline-start: 2px solid var(--tilawa-border);
+  padding-inline-start: 16px;
+}
+.lessonDescriptions {
+  display: grid;
+  gap: 12px;
+  margin-block-end: 18px;
+  article {
+    border: 1px solid var(--tilawa-border);
+    padding: 20px;
+    border-radius: 12px;
+    background: var(--tilawa-card);
+  }
+  h3 {
+    margin-block: 0 8px;
+    font-size: 18px;
+  }
+  p {
+    margin: 0;
+    font-size: 14px;
+  }
+}
+.relatedList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.relatedCard {
+  display: grid;
+  gap: 8px;
+  min-inline-size: 0;
+  color: var(--tilawa-ink);
+  text-decoration: none;
+  img {
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+  strong {
+    font-size: 16px;
+  }
+  span,
+  small {
+    font-size: 12px;
+    color: var(--tilawa-muted);
+  }
+  @include tilawa.academy-focus-visible;
+}
+.small {
+  color: var(--tilawa-muted);
+  font-size: 12px !important;
+  line-height: 1.7;
+}
+.mobileBooking {
+  display: none;
+}
+:global([dir='rtl']) {
+  .primaryButton > svg {
+    transform: rotate(180deg);
+  }
+}
+.dialog {
+  border: 1px solid var(--tilawa-border);
+  border-radius: 20px;
+  padding: 0;
+  inline-size: min(620px, calc(100vw - 32px));
+  max-block-size: calc(100dvh - 48px);
+  overflow: auto;
+  background: var(--tilawa-bg);
+  color: var(--tilawa-ink);
+  box-sizing: border-box;
+  &::backdrop {
+    background: #0d2924a6;
+  }
+  .booking {
+    position: static;
+    border: 0;
+    border-radius: 0;
+    padding: 24px;
+  }
+}
+.dialogTop {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 18px;
+  background: var(--tilawa-bg);
+  border-block-end: 1px solid var(--tilawa-border);
+  font-size: 14px;
+  button {
+    inline-size: 44px;
+    block-size: 44px;
+    font-size: 26px;
+    background: transparent;
+    color: var(--tilawa-ink);
+    border: 0;
+    cursor: pointer;
+    border-radius: 8px;
+    @include tilawa.academy-focus-visible;
+  }
+}
+.messageForm {
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+  h2 {
+    font-size: 28px;
+    color: var(--tilawa-ink);
+    margin: 0;
+  }
+  p {
+    margin: 0;
+    line-height: 1.7;
+    font-size: 14px;
+  }
+  textarea {
+    box-sizing: border-box;
+    inline-size: 100%;
+    resize: vertical;
+    min-inline-size: 0;
+    font: inherit;
+    font-size: 16px;
+    border: 1px solid var(--tilawa-border);
+    border-radius: 10px;
+    background: var(--tilawa-card);
+    color: var(--tilawa-ink);
+    padding: 12px;
+    @include tilawa.academy-focus-visible;
+  }
+}
+@media (max-width: 900px) {
+  .page {
+    padding-block-start: 12px;
+    padding-block-end: 112px;
+  }
+  .layout {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .sidebar {
+    display: contents;
+  }
+  .sidebarActions {
+    display: none;
+  }
+  .media {
+    order: 0;
+    aspect-ratio: 16/9;
+    border-radius: 12px;
+    margin-block: 0 22px;
+  }
+  .profileHero {
+    order: 1;
+    inline-size: 100%;
+  }
+  .profileDetails {
+    order: 2;
+    inline-size: 100%;
+  }
+  .mobileBooking {
+    display: flex;
+    position: fixed;
+    z-index: 20;
+    inset-inline: 0;
+    inset-block-end: 0;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 20px;
+    padding-block-end: calc(12px + env(safe-area-inset-bottom));
+    border-block-start: 1px solid var(--tilawa-border);
+    background: var(--tilawa-bg);
+    box-shadow: 0 -4px 24px #103e380d;
+    > div {
+      min-inline-size: 0;
+      flex: 1;
+    }
+    strong {
+      font-size: 17px;
+      font-weight: 650;
+      line-height: 1.5;
+      display: block;
+    }
+    small {
+      display: block;
+      color: var(--tilawa-muted);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+    .primaryButton {
+      flex-shrink: 0;
+      font-size: 14px;
+    }
+  }
+}
+@media (max-width: 480px) {
+  .identity {
+    gap: 14px;
+  }
+  .photo {
+    inline-size: 76px;
+    block-size: 88px;
+    border-radius: 8px;
+  }
+  .identity h1 {
+    font-size: 26px;
+  }
+  .statistics {
+    gap: 10px;
+    strong {
+      font-size: 16px;
+    }
+    small {
+      font-size: 11px;
+    }
+  }
+  .sectionNav {
+    gap: 2px 18px;
+  }
+  .panel h2 {
+    font-size: 25px;
+  }
+  .ratingGrid > div {
+    padding: 16px;
+  }
+  .reviewList {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mobileBooking {
+    gap: 10px;
+    padding-inline: 16px;
+    strong {
+      font-size: 14px;
+    }
+    .primaryButton {
+      padding-inline: 12px;
+      font-size: 14px;
+      gap: 6px;
+    }
+  }
+  .dialog {
+    inline-size: 100%;
+    max-inline-size: none;
+    max-block-size: 94dvh;
+    border-radius: 18px 18px 0 0;
+    margin-block: auto 0;
+    margin-inline: 0;
+  }
+}
+
+.booking {
+  position: sticky;
+  inset-block-start: 20px;
+  padding: 26px;
+  background: var(--tilawa-card);
+  border: 1px solid var(--tilawa-border);
+  border-radius: 26px;
+  min-inline-size: 0;
+  h2 {
+    font-size: 30px;
+    color: var(--tilawa-ink);
+    margin-block: 0 14px;
+    font-weight: 500;
+  }
+  form {
+    display: grid;
+    gap: 22px;
+  }
+  .primaryButton {
+    inline-size: 100%;
+  }
+}
+.lessonOptions {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 10px;
+  min-inline-size: 0;
+  legend {
+    color: var(--tilawa-ink);
+    font-size: 14px;
+    margin-block-end: 12px;
+  }
+}
+.lessonChoice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--tilawa-border);
+  border-radius: 16px;
+  color: var(--tilawa-ink);
+  font-size: 13px;
+  cursor: pointer;
+  &:has(input:checked) {
+    border-color: var(--tilawa-link);
+    background: var(--tilawa-container);
+  }
+  input {
+    accent-color: var(--tilawa-link);
+    inline-size: 18px;
+    block-size: 18px;
+    flex-shrink: 0;
+  }
+  strong {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  small {
+    display: block;
+    color: var(--tilawa-muted);
+    margin-block-start: 5px;
+  }
+  .price {
+    margin-inline-start: auto;
+    text-align: end;
+    font-size: 11px;
+    max-inline-size: 10ch;
+  }
+}
+.availability {
+  display: grid;
+  gap: 10px;
+  label {
+    color: var(--tilawa-ink);
+    font-size: 14px;
+  }
+  input[type='date'],
+  select {
+    min-inline-size: 0;
+    inline-size: 100%;
+    box-sizing: border-box;
+    border: 1px solid var(--tilawa-border);
+    border-radius: 12px;
+    min-block-size: 48px;
+    padding: 12px;
+    font: inherit;
+    font-size: 16px;
+    background: var(--tilawa-bg);
+    color: var(--tilawa-ink);
+    @include tilawa.academy-focus-visible;
+  }
+}
+.slots {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  button {
+    background: var(--tilawa-bg);
+    color: var(--tilawa-ink);
+    border: 1px solid var(--tilawa-border);
+    border-radius: 12px;
+    padding: 10px;
+    font: inherit;
+    font-size: 12px;
+    min-block-size: 44px;
+    cursor: pointer;
+    &[aria-pressed='true'] {
+      background: var(--tilawa-button);
+      color: var(--tilawa-on-primary);
+    }
+    @include tilawa.academy-focus-visible;
+  }
+}
+.goalLabel {
+  color: var(--tilawa-ink);
+  font-size: 14px;
+  textarea {
+    display: block;
+    inline-size: 100%;
+    min-inline-size: 0;
+    box-sizing: border-box;
+    font: inherit;
+    font-size: 16px;
+    padding: 12px;
+    border: 1px solid var(--tilawa-border);
+    border-radius: 12px;
+    background: var(--tilawa-bg);
+    color: var(--tilawa-ink);
+    margin-block-start: 10px;
+    resize: vertical;
+    @include tilawa.academy-focus-visible;
+  }
+}
+.requestSummary {
+  border-radius: 16px;
+  background: var(--tilawa-container);
+  padding: 18px;
+  overflow-wrap: anywhere;
+  h3 {
+    margin-block: 0 14px;
+    color: var(--tilawa-ink);
+    font-size: 22px;
+  }
+  p {
+    font-size: 13px;
+    color: var(--tilawa-muted);
+    line-height: 1.6;
+  }
+  strong {
+    color: var(--tilawa-ink);
+    font-size: 13px;
+    line-height: 1.6;
+  }
+}
+.applicationPage {
+  max-inline-size: 900px;
+  padding-block: 30px 64px;
+  padding-inline: 24px;
+  margin-inline: auto;
+  h1 {
+    font-size: clamp(32px, 4vw, 52px);
+    color: var(--tilawa-ink);
+  }
+  p {
+    color: var(--tilawa-muted);
+    line-height: 1.7;
+  }
+}
+.applicationForm {
+  display: grid;
+  gap: 24px;
+  background: var(--tilawa-card);
+  border: 1px solid var(--tilawa-border);
+  padding: clamp(20px, 4vw, 36px);
+  border-radius: 26px;
+  label {
+    display: grid;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--tilawa-ink);
+  }
+  input,
+  select,
+  textarea {
+    inline-size: 100%;
+    min-inline-size: 0;
+    box-sizing: border-box;
+    border: 1px solid var(--tilawa-border);
+    border-radius: 12px;
+    padding: 12px;
+    min-block-size: 48px;
+    font: inherit;
+    font-size: 16px;
+    color: var(--tilawa-ink);
+    background: var(--tilawa-bg);
+    @include tilawa.academy-focus-visible;
+  }
+  textarea {
+    resize: vertical;
+  }
+}
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.applicationForm,
+.formGrid,
+.applicationForm label {
+  min-inline-size: 0;
+}
+
+@media (max-width: 600px) {
+  .formGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .applicationPage {
+    padding-inline: 20px;
+  }
+}

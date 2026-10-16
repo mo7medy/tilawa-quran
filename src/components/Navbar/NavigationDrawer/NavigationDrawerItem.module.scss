@@ -20,10 +20,14 @@
 }
 
 .titleContainer {
+  font-family: var(--tilawa-ui-font);
   margin-inline-start: var(--spacing-medium);
   font-size: var(--font-size-normal-px);
   font-weight: var(--font-weight-semibold);
   line-height: 0;
+  [dir='rtl'] & {
+    font-family: var(--tilawa-ui-font);
+  }
 }
 
 .containerEvent {

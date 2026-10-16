@@ -94,7 +94,7 @@ $list-max-width: 80rem;
 }
 
 .bodyContainer {
-  background: var(--color-background-elevated);
+  background: var(--tilawa-bg);
   padding-block-end: var(--spacing-max);
   @include breakpoints.smallerThanTablet {
     border-start-start-radius: var(--border-radius-rounded);
