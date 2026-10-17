@@ -34,8 +34,13 @@ const nextConfig = {
   typescript: { tsconfigPath: 'tsconfig.build.json' },
   output: isCloudflare ? 'standalone' : undefined,
   ...(isCloudflare && {
+    // Share Next's router context with page code instead of loading a separate runtime copy.
+    transpilePackages: ['next-translate'],
     outputFileTracingIncludes: {
-      '*': ['node_modules/@sentry/nextjs/build/**/*', 'node_modules/@sentry/vercel-edge/build/**/*'],
+      '*': [
+        'node_modules/@sentry/nextjs/build/**/*',
+        'node_modules/@sentry/vercel-edge/build/**/*',
+      ],
     },
   }),
   reactStrictMode: true,
