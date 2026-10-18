@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/naming-convention -- Fixtures use the database wire format. */
+/* eslint-disable react-func/max-lines-per-function -- Keep related behavioral assertions together within each test suite. */
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { registerPrivateStore, switchPrivateOwner, guestQuranSnapshot } from './privateCache';
 import { estimatedWeek, quranProgress, calculateStreak } from './quranProgress';
 import {
   normalizeRange,
@@ -11,7 +14,6 @@ import {
   verseOrdinal,
   verseKey,
 } from './quranRanges';
-import { registerPrivateStore, switchPrivateOwner, guestQuranSnapshot } from './privateCache';
 import { safeAccountRedirect } from './redirect';
 
 describe('Quran account ranges and goals', () => {

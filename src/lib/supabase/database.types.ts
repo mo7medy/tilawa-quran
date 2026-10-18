@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/naming-convention -- Generated Supabase types preserve database table and column names. */
+/* eslint-disable max-lines -- Keep the generated database contract intact for client type inference. */
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
 export type Database = {
