@@ -30,7 +30,7 @@
   @include tilawa.academy-tokens;
   position: fixed;
   inset: 0;
-  z-index: 90;
+  z-index: calc(var(--z-index-overlay, 500) + 10);
   background: var(--tilawa-overlay);
 }
 .drawer {
@@ -38,7 +38,7 @@
   position: fixed;
   inset-block: 12px;
   inset-inline-end: 12px;
-  z-index: 91;
+  z-index: calc(var(--z-index-overlay, 500) + 11);
   inline-size: min(380px, calc(100vw - 24px));
   box-sizing: border-box;
   display: flex;

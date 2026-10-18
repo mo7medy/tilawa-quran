@@ -5,6 +5,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import AcademyAccountForm from './AcademyAccountForm';
 
+vi.mock('next/router', () => ({ useRouter: () => ({ query: {}, push: vi.fn() }) }));
+
 vi.mock('next-translate/useTranslation', () => ({ default: () => ({ t: (key: string) => key }) }));
 afterEach(cleanup);
 

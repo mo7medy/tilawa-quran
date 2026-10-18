@@ -8,6 +8,8 @@ import { useRouter } from 'next/router';
 
 import AcademyShell from '@/components/Academy/AcademyShell';
 import AcademyThemeProvider from '@/components/Academy/AcademyThemeProvider';
+import AccountPreviewProvider from '@/components/Account/AccountPreviewProvider';
+import GuestQuranImport from '@/components/Account/GuestQuranImport';
 import QuranAppShell from '@/components/QuranAppShell';
 import ThirdPartyScripts from '@/components/ThirdPartyScripts/ThirdPartyScripts';
 import { AuthProvider } from '@/contexts/AuthContext';
@@ -66,45 +68,48 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, [router.events]);
 
   return (
-    <AcademyThemeProvider>
-      <AuthProvider>
-        <Head>
-          <link rel="icon" href="/tilawa/logo.svg" type="image/svg+xml" />
-          <link rel="apple-touch-icon" href="/tilawa/app_icon.png" />
-          <link rel="manifest" href="/manifest.json" />
-          <link rel="preconnect" href={API_HOST} />
-          <script
-            // eslint-disable-next-line react/no-danger
-            dangerouslySetInnerHTML={{
-              __html: `window.__BUILD_INFO__ = {
+    <AccountPreviewProvider>
+      <AcademyThemeProvider>
+        <AuthProvider>
+          <Head>
+            <link rel="icon" href="/tilawa/logo.svg" type="image/svg+xml" />
+            <link rel="apple-touch-icon" href="/tilawa/app_icon.png" />
+            <link rel="manifest" href="/manifest.json" />
+            <link rel="preconnect" href={API_HOST} />
+            <script
+              // eslint-disable-next-line react/no-danger
+              dangerouslySetInnerHTML={{
+                __html: `window.__BUILD_INFO__ = {
               date: "${process.env.NEXT_PUBLIC_BUILD_DATE || new Date().toISOString()}",
               hash: "${process.env.NEXT_PUBLIC_COMMIT_HASH || 'development'}",
               version: "${process.env.NEXT_PUBLIC_APP_VERSION || ''}",
               env: "${process.env.NEXT_PUBLIC_APP_ENV}"
             }`,
-            }}
-          />
-        </Head>
-        <DirectionProvider dir={languageDirection}>
-          <TooltipProvider>
-            <ToastContainerProvider>
-              {isAcademyPage ? (
-                <AcademyShell>
-                  <Component {...pageProps} />
-                </AcademyShell>
-              ) : (
-                <QuranAppShell
-                  Component={Component}
-                  pageProps={pageProps}
-                  locale={resolvedLocale}
-                />
-              )}
-            </ToastContainerProvider>
-          </TooltipProvider>
-        </DirectionProvider>
-        <ThirdPartyScripts />
-      </AuthProvider>
-    </AcademyThemeProvider>
+              }}
+            />
+          </Head>
+          <DirectionProvider dir={languageDirection}>
+            <TooltipProvider>
+              <ToastContainerProvider>
+                <GuestQuranImport />
+                {isAcademyPage ? (
+                  <AcademyShell>
+                    <Component {...pageProps} />
+                  </AcademyShell>
+                ) : (
+                  <QuranAppShell
+                    Component={Component}
+                    pageProps={pageProps}
+                    locale={resolvedLocale}
+                  />
+                )}
+              </ToastContainerProvider>
+            </TooltipProvider>
+          </DirectionProvider>
+          <ThirdPartyScripts />
+        </AuthProvider>
+      </AcademyThemeProvider>
+    </AccountPreviewProvider>
   );
 }
 

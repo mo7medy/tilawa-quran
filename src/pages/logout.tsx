@@ -1,6 +1,8 @@
 import { GetServerSideProps, GetServerSidePropsContext, GetServerSidePropsResult } from 'next';
 
 import { fetcher } from '@/api';
+import { isSupabaseConfigured } from '@/lib/supabase/config';
+import { serverSupabase } from '@/lib/supabase/server';
 import QueryParam from '@/types/QueryParam';
 import { makeLogoutUrl } from '@/utils/auth/apiPaths';
 import { SSO_ENABLED } from '@/utils/auth/constants';
@@ -92,6 +94,11 @@ const performLogout = async (
  */
 /* eslint-disable react-func/max-lines-per-function */
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  if (isSupabaseConfigured()) {
+    context.res.setHeader('Cache-Control', 'private, no-store');
+    await serverSupabase(context.req, context.res).auth.signOut();
+    return { redirect: { destination: '/sign-in', permanent: false } };
+  }
   const {
     [QueryParam.SILENT]: silent,
     [QueryParam.REDIRECTBACK]: redirectBack,

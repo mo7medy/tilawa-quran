@@ -1,3 +1,4 @@
+import { isSupabaseConfigured } from '@/lib/supabase/config';
 import UserProfile from 'types/auth/UserProfile';
 import FormField, { FormFieldType } from 'types/FormField';
 
@@ -7,6 +8,7 @@ import FormField, { FormFieldType } from 'types/FormField';
  * @returns {boolean} - Indicating if the profile is complete
  */
 export const isCompleteProfile = (userData: UserProfile): boolean => {
+  if (isSupabaseConfigured()) return !!userData?.email && !!userData?.firstName;
   return !!userData?.email && !!userData?.firstName && !!userData?.lastName && !!userData?.username;
 };
 

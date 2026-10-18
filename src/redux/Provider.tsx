@@ -11,6 +11,7 @@ import getStore from './store';
 import resetSettings from '@/redux/actions/reset-settings';
 import syncLocaleDependentSettings from '@/redux/actions/sync-locale-dependent-settings';
 import syncUserPreferences from '@/redux/actions/sync-user-preferences';
+import { registerPrivateStore } from '@/tilawa/backend/privateCache';
 import { getUserPreferences } from '@/utils/auth/api';
 import { isLoggedIn } from '@/utils/auth/login';
 import { setLocaleCookie } from '@/utils/cookies';
@@ -42,6 +43,13 @@ const ReduxProvider = ({ children, locale }) => {
     storeRef.current = getStore(locale);
   }
   const store = storeRef.current;
+  useEffect(() => {
+    registerPrivateStore({
+      getState: () => ({ ...store.getState() }),
+      dispatch: (action) => store.dispatch(action),
+    });
+    return () => registerPrivateStore(null);
+  }, [store]);
 
   // Browser back/forward can change the URL locale without going through our explicit
   // language-switch handlers. For guests, keep locale-dependent "tabs" aligned with the URL

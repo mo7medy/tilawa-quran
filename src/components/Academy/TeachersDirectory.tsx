@@ -1,6 +1,7 @@
 import { useState } from 'react';
 
 import useTranslation from 'next-translate/useTranslation';
+import useSWR from 'swr';
 
 import { getTeacherName, getTeachersDirectoryState } from '../../tilawa/teachers';
 
@@ -9,19 +10,34 @@ import TeacherFilters, { TeacherSubjectFilter } from './TeacherFilters';
 import TeacherProfileCard from './TeacherProfileCard';
 import styles from './TeachersDirectory.module.scss';
 
+import { tilawaFetch } from '@/tilawa/backend/http';
+import { mapTeacher, rows } from '@/tilawa/backend/mappers';
+import type { AcademyTeacherProfile } from '@/tilawa/teachers';
 import { ROUTES } from '@/utils/navigation';
 
 interface TeachersDirectoryProps {
   isStandalonePage?: boolean;
+  initialTeachers?: AcademyTeacherProfile[];
 }
 
-const TeachersDirectory = ({ isStandalonePage = false }: TeachersDirectoryProps): JSX.Element => {
+const TeachersDirectory = ({
+  isStandalonePage = false,
+  initialTeachers,
+}: TeachersDirectoryProps): JSX.Element => {
   const { t, lang } = useTranslation('academy');
   const [query, setQuery] = useState('');
   const [subject, setSubject] = useState<TeacherSubjectFilter>('all');
   const [gender, setGender] = useState('all');
   const [maxPrice, setMaxPrice] = useState('all');
-  const directory = getTeachersDirectoryState();
+  const live = process.env.NODE_ENV !== 'test';
+  const { data, error, isValidating } = useSWR(
+    live ? 'tilawa-public-teachers' : null,
+    async () => rows(await tilawaFetch('teachers')).map(mapTeacher),
+    { fallbackData: initialTeachers },
+  );
+  const directory = live
+    ? { status: data?.length ? 'ready' : 'empty', teachers: data ?? [] }
+    : getTeachersDirectoryState();
   const teachers = directory.teachers.filter(
     (teacher) =>
       (subject === 'all' ||
@@ -72,6 +88,8 @@ const TeachersDirectory = ({ isStandalonePage = false }: TeachersDirectoryProps)
           onSubjectChange={setSubject}
         />
       )}
+      {live && !data && isValidating && <p role="status">{t('teachers.loading')}</p>}
+      {error && <p role="alert">{t('teachers.load-error')}</p>}
       {directory.status === 'preview' && (
         <p className={styles.previewNotice}>{t('teachers.preview-notice')}</p>
       )}

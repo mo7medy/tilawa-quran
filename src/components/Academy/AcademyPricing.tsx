@@ -1,19 +1,39 @@
 /* eslint-disable react-func/max-lines-per-function */
+
 import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
+import useSWR from 'swr';
 
 import { ACADEMY_PLANS, getAcademySubject } from '../../tilawa/academyPlans';
-import type { AcademySubject } from '../../tilawa/academyPlans';
+import type { AcademySubject, AcademyPlan } from '../../tilawa/academyPlans';
 
 import AcademyIcon from './AcademyIcon';
 import AcademyLink from './AcademyLink';
 import AcademyPlanCard from './AcademyPlanCard';
 import styles from './AcademyPricing.module.scss';
 
+import { tilawaFetch } from '@/tilawa/backend/http';
+import { rows } from '@/tilawa/backend/mappers';
+
 const INCLUDED_ICONS = { personal: 'star', live: 'chat', bilingual: 'globe' } as const;
 
 const AcademyPricing = (): JSX.Element => {
   const { t } = useTranslation('academy');
+  const { t: accountText } = useTranslation('account');
+  const live = process.env.NODE_ENV !== 'test';
+  const { data: plans, error } = useSWR<AcademyPlan[]>(
+    live ? 'tilawa-public-plans' : null,
+    async () =>
+      rows(await tilawaFetch('plans'))
+        .filter((plan) => plan.active !== false)
+        .map((plan) => ({
+          id: plan.id as AcademyPlan['id'],
+          lessons: Number(plan.lessons),
+          monthlyPriceCents: Number(plan.price_cents),
+          giftLessons: Number(plan.gift_lessons),
+        })),
+  );
+  const catalogue = live ? plans ?? [] : ACADEMY_PLANS;
   const router = useRouter();
   const subject = getAcademySubject(router.query.subject);
   const handleSubjectChange = (nextSubject: AcademySubject): Promise<boolean> =>
@@ -47,10 +67,13 @@ const AcademyPricing = (): JSX.Element => {
         </p>
       </section>
       <section className={styles.grid} aria-label={t('pricing.packages-label')}>
-        {ACADEMY_PLANS.map((plan) => (
+        {catalogue.map((plan) => (
           <AcademyPlanCard key={plan.id} plan={plan} subject={subject} />
         ))}
       </section>
+      {live && !plans && (
+        <p role={error ? 'alert' : 'status'}>{accountText(error ? 'backend-error' : 'loading')}</p>
+      )}
       <p className={styles.previewNote}>{t('pricing.preview-note')}</p>
       <section className={styles.included} aria-labelledby="included-title">
         <div>

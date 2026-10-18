@@ -1,10 +1,11 @@
-import type { GetStaticPaths, GetStaticProps } from 'next';
+import type { GetServerSideProps } from 'next';
 
-import { getTeacherBySlug, getTeacherName, getTeachersDirectoryState } from '../../tilawa/teachers';
+import { getTeacherName } from '../../tilawa/teachers';
 import type { AcademyTeacherProfile } from '../../tilawa/teachers';
 
-import TeacherProfile from '@/components/Academy/TeacherProfile';
+import TeacherAccountPreview from '@/components/Account/TeacherAccountPreview';
 import NextSeoWrapper from '@/components/NextSeoWrapper';
+import { loadPublicTeachers } from '@/tilawa/backend/teachers';
 import { getCanonicalUrl } from '@/utils/navigation';
 
 interface TeacherProfilePageProps {
@@ -25,19 +26,18 @@ const TeacherProfilePage = ({
       url={getCanonicalUrl(locale, `/teachers/${teacher.slug}`)}
       noindex={teacher.isIllustrative === true}
     />
-    <TeacherProfile key={teacher.id} teacher={teacher} referenceDate={referenceDate} />
+    <TeacherAccountPreview key={teacher.id} teacher={teacher} referenceDate={referenceDate} />
   </>
 );
 
-export const getStaticPaths: GetStaticPaths = () => ({
-  paths: getTeachersDirectoryState().teachers.flatMap((teacher) =>
-    ['en', 'ar'].map((locale) => ({ params: { slug: teacher.slug }, locale })),
-  ),
-  fallback: false,
-});
-
-export const getStaticProps: GetStaticProps<TeacherProfilePageProps> = ({ params, locale }) => {
-  const teacher = typeof params?.slug === 'string' ? getTeacherBySlug(params.slug) : undefined;
+export const getServerSideProps: GetServerSideProps<TeacherProfilePageProps> = async ({
+  params,
+  locale,
+  res,
+}) => {
+  res.setHeader('Cache-Control', 'no-store');
+  const directory = await loadPublicTeachers();
+  const teacher = directory.find((item) => item.slug === params?.slug);
   if (!teacher) return { notFound: true };
   return {
     props: {
@@ -45,7 +45,6 @@ export const getStaticProps: GetStaticProps<TeacherProfilePageProps> = ({ params
       locale: locale ?? 'en',
       referenceDate: new Date().toISOString().slice(0, 10),
     },
-    revalidate: 86400,
   };
 };
 

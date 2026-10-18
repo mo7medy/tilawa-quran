@@ -43,6 +43,7 @@ export interface AcademyTeacherProfile {
   approach?: { en: string; ar: string };
   qualifications?: { en: string; ar: string }[];
   isIllustrative?: boolean;
+  academyEnabled?: boolean;
   introductionVideoUrl?: string;
   introductionCaptionsUrl?: string;
   introductionVideoLanguage?: string;
@@ -73,4 +74,4 @@ export const getTeacherBySlug = (slug: string): AcademyTeacherProfile | undefine
   getTeachersDirectoryState().teachers.find((teacher) => teacher.slug === slug);
 
 export const getTeacherName = (teacher: AcademyTeacherProfile, locale: string): string =>
-  teacher.displayNameLocalized?.[locale === 'ar' ? 'ar' : 'en'] ?? teacher.displayName;
+  teacher.displayNameLocalized?.[locale === 'ar' ? 'ar' : 'en'] || teacher.displayName;

@@ -1,0 +1,4 @@
+-- Run through a trusted SQL session, replacing ONLY the UUID below with an existing
+-- website auth user. Never expose this operation as a public endpoint.
+-- insert into private.admin_memberships(user_id) values ('EXISTING_AUTH_USER_UUID');
+-- No admin is created by migrations or by matching user-editable email/metadata.

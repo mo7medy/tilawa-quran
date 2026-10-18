@@ -11,6 +11,7 @@ import AcademyLink from './AcademyLink';
 import AcademyMobileMenu from './AcademyMobileMenu';
 import AcademyThemeControl from './AcademyThemeControl';
 
+import { useOptionalAccountPreview } from '@/components/Account/AccountContext';
 import { ROUTES } from '@/utils/navigation';
 
 interface AcademyHeaderProps {
@@ -26,6 +27,7 @@ const AcademyHeader = ({
   isVisible = true,
   isDimmed = false,
 }: AcademyHeaderProps): JSX.Element => {
+  const account = useOptionalAccountPreview();
   const { t: tCommon } = useTranslation('common');
   const t = (key: string): string => tCommon(`site-nav.${key}`);
 
@@ -74,9 +76,14 @@ const AcademyHeader = ({
             <>
               <AcademyLanguageSwitch />
               <AcademyThemeControl isCompact />
-              <AcademyLink href="/sign-in" className={styles.login}>
-                {t('header.login')}
+              <AcademyLink href="/profile" className={styles.readQuran}>
+                {t('header.my-account')}
               </AcademyLink>
+              {!account?.userId && (
+                <AcademyLink href="/sign-in" className={styles.login}>
+                  {t('header.login')}
+                </AcademyLink>
+              )}
             </>
           )}
         </div>

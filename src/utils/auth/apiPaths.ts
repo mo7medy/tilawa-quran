@@ -5,6 +5,7 @@ import BookmarkByCollectionIdQueryParams from './types/BookmarkByCollectionIdQue
 import GetNoteByAttachedEntityParams from './types/GetNoteByAttachedEntityParams';
 import GetAllNotesQueryParams from './types/Note/GetAllNotesQueryParams';
 
+import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { ActivityDayType, FilterActivityDaysParams } from '@/types/auth/ActivityDay';
 import { EstimateGoalRequest, GoalCategory } from '@/types/auth/Goal';
 import { StreakWithMetadataParams } from '@/types/auth/Streak';
@@ -35,6 +36,14 @@ export const BOOKMARK_CACHE_PATHS = {
 } as const;
 
 export const makeUrl = (url: string, parameters?: Record<string, unknown>): string => {
+  if (
+    isSupabaseConfigured() &&
+    /^(users\/(profile|syncLocalData)$|feature-flags$|mushaf\/map$|bookmarks(?:\/|$)|collections(?:\/|$)|notes(?:\/|$)|preferences(?:\/|$)|reading-sessions$|activity-days(?:\/|$)|goal(?:\/|$)|streak$|pinned-items(?:\/|$))/.test(
+      url,
+    )
+  ) {
+    return `/api/tilawa/v1/quran/${url}${parameters ? `?${stringify(parameters)}` : ''}`;
+  }
   if (!parameters) {
     return getProxiedServiceUrl(QuranFoundationService.AUTH, `/${url}`);
   }

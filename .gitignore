@@ -85,3 +85,10 @@ keys
 
 # Specs
 docs/specs
+
+# Supabase local connection metadata and test credentials
+supabase/.temp/
+supabase/.branches/
+.env.local
+*.stdout.log
+*.stderr.log

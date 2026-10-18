@@ -42,6 +42,8 @@
     "postpack": "pinst --enable"
   },
   "dependencies": {
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.117.3",
     "@babel/eslint-parser": "^7.25.1",
     "@milkdown/core": "^7.5.0",
     "@milkdown/ctx": "^7.5.0",

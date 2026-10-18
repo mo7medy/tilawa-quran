@@ -17,7 +17,8 @@ module.exports = {
   ...config,
   loadLocaleFrom: async (locale, namespace) => {
     // Academy copy exists in English and Arabic. Reader locales stay intact.
-    const contentLocale = namespace === 'academy' && locale !== 'ar' ? 'en' : locale;
+    const contentLocale =
+      ['academy', 'account'].includes(namespace) && locale !== 'ar' ? 'en' : locale;
     const translated = await import(`./locales/${contentLocale}/${namespace}.json`).then(
       (module) => module.default,
     );

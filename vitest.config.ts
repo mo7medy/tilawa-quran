@@ -44,6 +44,7 @@ export default defineConfig({
       types: path.resolve(__dirname, './types'),
       src: path.resolve(__dirname, './src'),
       '@/api': path.resolve(__dirname, './src/api.ts'),
+      '@/tilawa': path.resolve(__dirname, './src/tilawa'),
       '@/lib': path.resolve(__dirname, './src/lib'),
       '@/hooks': path.resolve(__dirname, './src/hooks'),
       '@/components': path.resolve(__dirname, './src/components'),

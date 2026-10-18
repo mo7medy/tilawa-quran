@@ -5,6 +5,8 @@ import { useDispatch } from 'react-redux';
 
 import { useAuthContext } from '@/contexts/AuthContext';
 import { logErrorToSentry } from '@/lib/sentry';
+import { getBrowserSupabase } from '@/lib/supabase/browser';
+import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { clearBookmarks } from '@/redux/slices/QuranReader/bookmarks';
 import { clearReadingTracker } from '@/redux/slices/QuranReader/readingTracker';
 import QueryParam from '@/types/QueryParam';
@@ -42,6 +44,13 @@ const useLogout = (): LogoutFunction => {
       if (eventName) logButtonClick(eventName);
 
       try {
+        if (isSupabaseConfigured()) {
+          await getBrowserSupabase().auth.signOut();
+          authContextLogout();
+          removeLastSyncAt();
+          await router.replace('/sign-in');
+          return;
+        }
         authContextLogout();
         removeLastSyncAt();
         dispatch(clearBookmarks());

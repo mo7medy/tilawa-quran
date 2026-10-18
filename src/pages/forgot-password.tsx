@@ -26,3 +26,10 @@ const ForgotPasswordPage: NextPage = () => {
 };
 
 export default ForgotPasswordPage;
+
+export const getServerSideProps: import('next').GetServerSideProps = async ({ locale }) => ({
+  redirect: {
+    destination: `${locale && locale !== 'en' ? `/${locale}` : ''}/sign-in?recovery=1`,
+    permanent: false,
+  },
+});

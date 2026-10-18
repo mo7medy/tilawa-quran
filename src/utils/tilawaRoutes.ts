@@ -15,6 +15,7 @@ export const ACADEMY_ROUTE_PATHNAMES: readonly string[] = [
   '/pricing',
   '/register',
   '/sign-in',
+  '/profile',
 ];
 
 /** Locales with first-class academy content (`locales/<locale>/academy.json`). */
@@ -31,7 +32,17 @@ export type AcademyLocale = (typeof ACADEMY_LOCALES)[number];
  * @returns {boolean} true for academy routes, false for Quran/auth routes
  */
 export const isAcademyRoutePathname = (pathname: string): boolean => {
-  return ACADEMY_ROUTE_PATHNAMES.includes(pathname) || pathname.startsWith('/teachers/');
+  return (
+    ACADEMY_ROUTE_PATHNAMES.includes(pathname) ||
+    pathname.startsWith('/teachers/') ||
+    pathname.startsWith('/profile/') ||
+    pathname === '/dashboard/teacher' ||
+    pathname.startsWith('/dashboard/teacher/') ||
+    pathname.startsWith('/lessons/') ||
+    pathname === '/admin' ||
+    pathname.startsWith('/admin/') ||
+    pathname.startsWith('/auth/')
+  );
 };
 
 /**

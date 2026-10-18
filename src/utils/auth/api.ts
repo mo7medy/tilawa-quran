@@ -922,6 +922,9 @@ export const withCredentialsFetcher = async <T>(
   input: RequestInfo,
   init?: RequestInit,
 ): Promise<T> => {
+  if (typeof input === 'string' && input.startsWith('/api/tilawa/')) {
+    return fetcher<T>(input, { ...init, credentials: 'same-origin', cache: 'no-store' });
+  }
   try {
     const request: NextApiRequest = {
       url: typeof input === 'string' ? input : input.url,

@@ -4,12 +4,23 @@ import { describe, expect, it } from 'vitest';
 // eslint-disable-next-line import/default
 import config from '../../i18n.js';
 import arAcademy from '../../locales/ar/academy.json';
+import arAccount from '../../locales/ar/account.json';
 import arCommon from '../../locales/ar/common.json';
 import enAcademy from '../../locales/en/academy.json';
+import enAccount from '../../locales/en/account.json';
 import enCommon from '../../locales/en/common.json';
 import nlCommon from '../../locales/nl/common.json';
 
 describe('Site locale loading', () => {
+  it('loads account content in Arabic and English with English fallback for other reader locales', async () => {
+    await Promise.all(
+      config.locales.map(async (locale: string) => {
+        expect(await config.loadLocaleFrom(locale, 'account')).toEqual(
+          locale === 'ar' ? arAccount : enAccount,
+        );
+      }),
+    );
+  });
   it('loads English academy copy for every reader locale without academy translations', async () => {
     await Promise.all(
       config.locales.map(async (locale: string) => {

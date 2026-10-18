@@ -1,3 +1,4 @@
+/* eslint-disable react/no-multi-comp -- A small mode wrapper selects the colocated live or isolated design-preview component. */
 import { useId, useState } from 'react';
 
 import useTranslation from 'next-translate/useTranslation';
@@ -12,6 +13,7 @@ import { getTeacherName } from '../../tilawa/teachers';
 import type { AcademyTeacherProfile } from '../../tilawa/teachers';
 
 import LessonOptions from './LessonOptions';
+import LiveTeacherBooking from './LiveTeacherBooking';
 import TeacherAvailability from './TeacherAvailability';
 import styles from './TeacherProfile.module.scss';
 
@@ -20,7 +22,7 @@ interface TeacherBookingPreviewProps {
   referenceDate: string;
 }
 
-const TeacherBookingPreview = ({
+const DemoTeacherBooking = ({
   teacher,
   referenceDate,
 }: TeacherBookingPreviewProps): JSX.Element => {
@@ -111,5 +113,14 @@ const TeacherBookingPreview = ({
     </aside>
   );
 };
+const TeacherBookingPreview = ({
+  teacher,
+  referenceDate,
+}: TeacherBookingPreviewProps): JSX.Element =>
+  process.env.NODE_ENV === 'test' || teacher.isIllustrative ? (
+    <DemoTeacherBooking teacher={teacher} referenceDate={referenceDate} />
+  ) : (
+    <LiveTeacherBooking teacher={teacher} />
+  );
 
 export default TeacherBookingPreview;

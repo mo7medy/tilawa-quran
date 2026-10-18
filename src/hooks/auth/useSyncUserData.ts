@@ -1,4 +1,5 @@
 /* eslint-disable max-lines */
+
 import { useEffect, useCallback, useRef } from 'react';
 
 import { shallowEqual, useSelector } from 'react-redux';
@@ -8,6 +9,7 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { READING_BOOKMARK_KEY } from '@/hooks/auth/useGlobalReadingBookmark';
 import useIsLoggedIn from '@/hooks/auth/useIsLoggedIn';
 import { logErrorToSentry } from '@/lib/sentry';
+import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { selectGuestReadingBookmark } from '@/redux/slices/guestBookmark';
 import { selectIsPersistGateHydrationComplete } from '@/redux/slices/persistGateHydration';
 import { selectBookmarkedPages, selectBookmarks } from '@/redux/slices/QuranReader/bookmarks';
@@ -191,6 +193,7 @@ const useSyncUserData = () => {
   );
 
   useEffect(() => {
+    if (isSupabaseConfigured()) return undefined;
     // Clear lastSyncAt cookie when user is logged out (handles server-side logout via /logout page)
     if (!isLoggedIn) {
       if (getLastSyncAt()) removeLastSyncAt();

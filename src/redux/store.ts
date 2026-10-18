@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Keep this cohesive form or typed data contract together; reader services are split by feature. */
 import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import {
   persistReducer,
@@ -51,6 +52,9 @@ import welcomeMessage from './slices/welcomeMessage';
 import SliceName from './types/SliceName';
 import getPersistedTheme from './utils/getPersistedTheme';
 
+import { isSupabaseConfigured } from '@/lib/supabase/config';
+import { hideUnverifiedPrivateCache } from '@/tilawa/backend/privateCache';
+
 const persistConfig = {
   key: 'root',
   version: 48,
@@ -84,7 +88,7 @@ const persistConfig = {
   ], // Reducers defined here will be have their values saved in local storage and persist across sessions. See: https://github.com/rt2zz/redux-persist#blacklist--whitelist
 };
 
-export const rootReducer = combineReducers({
+const combinedReducer = combineReducers({
   audioPlayerState: persistReducer(audioPlayerPersistConfig, audioPlayerState),
   contextMenu,
   navbar,
@@ -119,9 +123,28 @@ export const rootReducer = combineReducers({
   pinnedVerses,
 });
 
+export const rootReducer: typeof combinedReducer = (state, action) => {
+  let next = state;
+  if (action.type === 'tilawa/private-reset' && state) {
+    const replacement = (action as { type: string; payload: Record<string, unknown> }).payload;
+    const defaults = combinedReducer(undefined, { type: '@@INIT' });
+    next = {
+      ...state,
+      ...Object.fromEntries(
+        ['bookmarks', 'readingTracker', 'pinnedVerses', 'guestBookmark'].map((key) => [
+          key,
+          replacement[key] ?? defaults[key],
+        ]),
+      ),
+    };
+  }
+  return combinedReducer(next, action);
+};
+
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 const getStore = (locale: string) => {
+  if (isSupabaseConfigured()) hideUnverifiedPrivateCache();
   const baseInitialState = getStoreInitialState(locale);
 
   // Preserve persisted theme synchronously to prevent flash during language switching.

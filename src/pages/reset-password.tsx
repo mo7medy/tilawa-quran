@@ -26,3 +26,10 @@ const ResetPasswordPage: NextPage = () => {
 };
 
 export default ResetPasswordPage;
+
+export const getServerSideProps: import('next').GetServerSideProps = async ({ locale }) => ({
+  redirect: {
+    destination: `${locale && locale !== 'en' ? `/${locale}` : ''}/sign-in?reset=1`,
+    permanent: false,
+  },
+});

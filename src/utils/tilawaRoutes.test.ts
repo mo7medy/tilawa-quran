@@ -40,6 +40,21 @@ describe('isAcademyRoutePathname', () => {
   });
 });
 
+describe('account shell routes', () => {
+  it('uses the light account shell for all account pages without changing chapter lesson routes', () => {
+    [
+      '/profile',
+      '/profile/[...section]',
+      '/dashboard/teacher/[[...section]]',
+      '/lessons/[lessonId]',
+    ].forEach((path) => {
+      expect(isAcademyRoutePathname(path)).toBe(true);
+    });
+    expect(isAcademyRoutePathname('/[chapterId]/lessons')).toBe(false);
+    expect(isAcademyRoutePathname('/profile-other')).toBe(false);
+  });
+});
+
 describe('withLocalePrefix', () => {
   it('should leave English and missing locales unprefixed', () => {
     expect(withLocalePrefix('/teachers', 'en')).toBe('/teachers');

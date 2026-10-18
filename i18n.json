@@ -82,7 +82,7 @@
     "/reciters/[reciterId]": ["home", "radio", "reciter"],
     "/reciters/[reciterId]/[chapterId]": ["reciter"],
     "/reciters": ["reciter", "home"],
-    "/profile": ["home", "profile", "collection", "quran-reader"],
+    "/profile": ["academy", "account"],
     "/login": ["login"],
     "/forgot-password": ["login"],
     "/reset-password": ["login"],
@@ -105,10 +105,14 @@
     "/my-quran": ["my-quran", "notes", "collection", "quran-reader"],
     "/embed": ["embed"],
     "/embed/v1": ["embed"],
-    "/teachers/[slug]": ["academy"],
+    "/teachers/[slug]": ["academy", "account"],
     "/teachers/apply": ["academy"],
-    "/pricing": ["academy"],
-    "/register": ["academy"],
-    "/sign-in": ["academy"]
+    "/pricing": ["academy", "account"],
+    "/register": ["academy", "account"],
+    "/sign-in": ["academy", "account"],
+    "/profile/[...section]": ["academy", "account"],
+    "/dashboard/teacher/[[...section]]": ["academy", "account"],
+    "/lessons/[lessonId]": ["academy", "account"],
+    "/admin/[[...section]]": ["academy", "account"]
   }
 }

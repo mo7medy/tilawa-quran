@@ -1,8 +1,10 @@
-import { createContext, useCallback, useContext, useMemo, useReducer } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useReducer } from 'react';
 
 import { authReducer, initialState } from './authActions';
 import type { AuthAction } from './authActions';
 
+import { useOptionalAccountPreview } from '@/components/Account/AccountPreviewProvider';
+import { legacyWebsiteProfile } from '@/tilawa/backend/legacyProfile';
 import { AuthState } from '@/types/auth/AuthState';
 import UserProfile from '@/types/auth/UserProfile';
 import { isLoggedIn } from '@/utils/auth/login';
@@ -58,6 +60,7 @@ export function useAuthContext(): AuthContextType {
  * @returns {JSX.Element} AuthProvider component
  */
 export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
+  const account = useOptionalAccountPreview();
   // Initialize auth state based on the presence of the login cookie on the client.
   // This avoids a brief unauthenticated state that can cause premature redirects.
   const [state, dispatch] = useReducer(authReducer, initialState, (init): AuthState => {
@@ -66,6 +69,16 @@ export const AuthProvider = ({ children }: AuthProviderProps): JSX.Element => {
     const loggedIn = isLoggedIn();
     return { ...init, isAuthenticated: loggedIn };
   });
+  useEffect(() => {
+    if (!account?.backend) return;
+    if (account.snapshot && account.userId) {
+      dispatch({ type: 'SET_USER_DATA', payload: legacyWebsiteProfile(account.snapshot) });
+    } else {
+      dispatch({ type: 'LOGOUT' });
+      dispatch({ type: 'SET_AUTHENTICATED', payload: !!account.userId });
+      dispatch({ type: 'SET_LOADING', payload: !!account.loading });
+    }
+  }, [account?.backend, account?.userId, account?.snapshot, account?.loading]);
 
   /**
    * Helper function to set authenticated user

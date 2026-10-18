@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
 
 import type { AcademyTeacherProfile } from '../../tilawa/teachers';
+import { useOptionalAccountPreview } from '../Account/AccountPreviewProvider';
 
 import AcademyIcon from './AcademyIcon';
 import AcademyLink from './AcademyLink';
@@ -24,6 +25,12 @@ interface TeacherProfileProps {
 const TeacherProfile = ({ teacher, referenceDate }: TeacherProfileProps): JSX.Element => {
   const { t } = useTranslation('academy');
   const router = useRouter();
+  const account = useOptionalAccountPreview();
+  const message = (): void => {
+    if (account?.backend && !teacher.isIllustrative) {
+      router.push(`/profile/messages?peer=${teacher.id}`);
+    } else setDialog('message');
+  };
   const [dialog, setDialog] = useState<'booking' | 'message' | null>(null);
   const action = router.query?.action;
   useEffect(() => {
@@ -38,7 +45,7 @@ const TeacherProfile = ({ teacher, referenceDate }: TeacherProfileProps): JSX.El
         <p className={styles.previewNotice}>{t('teachers.preview-notice')}</p>
       )}
       <div className={styles.layout}>
-        <TeacherProfileHeader teacher={teacher} onMessage={() => setDialog('message')} />
+        <TeacherProfileHeader teacher={teacher} onMessage={message} />
         <aside className={styles.sidebar}>
           <TeacherIntroMedia teacher={teacher} />
           <div className={styles.sidebarActions}>
@@ -53,11 +60,7 @@ const TeacherProfile = ({ teacher, referenceDate }: TeacherProfileProps): JSX.El
               {t('profile.choose-lesson')}
               <AcademyIcon name="arrow" />
             </button>
-            <button
-              type="button"
-              className={styles.secondaryButton}
-              onClick={() => setDialog('message')}
-            >
+            <button type="button" className={styles.secondaryButton} onClick={message}>
               <AcademyIcon name="chat" />
               {t('marketplace.message')}
             </button>

@@ -15,6 +15,20 @@
 
 module.exports = [
   {
+    urlPattern: ({ url }) => {
+      const path = url.pathname;
+      return (
+        url.hostname.endsWith('.supabase.co') ||
+        path.startsWith('/api/tilawa/') ||
+        /(?:^|\/)(?:profile|dashboard|admin|lessons|my-quran|notes|collections|reading-goal|sign-in|register|auth)(?:\/|\.|$)/.test(
+          path,
+        )
+      );
+    },
+    handler: 'NetworkOnly',
+    method: 'GET',
+  },
+  {
     urlPattern: /^https:\/\/fonts\.(?:gstatic)\.com\/.*/i,
     handler: 'CacheFirst',
     options: {

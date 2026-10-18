@@ -4,6 +4,7 @@ import useSWR from 'swr';
 
 import useIsLoggedIn from './useIsLoggedIn';
 
+import { useOptionalAccountPreview } from '@/components/Account/AccountPreviewProvider';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { logErrorToSentry, addSentryBreadcrumb } from '@/lib/sentry';
 import { AuthState } from '@/types/auth/AuthState';
@@ -35,9 +36,10 @@ export interface UseAuthDataReturn extends AuthState {
  */
 const useAuthData = (): UseAuthDataReturn => {
   const { state, dispatch } = useAuthContext();
+  const account = useOptionalAccountPreview();
   const { isLoggedIn: isLoggedInUser } = useIsLoggedIn();
 
-  const swrKey = isLoggedInUser ? makeUserProfileUrl() : null;
+  const swrKey = isLoggedInUser && !account?.backend ? makeUserProfileUrl() : null;
   const shouldRetryOnError = (error: any) => {
     // Do not retry on 401 Unauthorized errors
     if (error?.status === 401 || error?.response?.status === 401) return false;
@@ -62,8 +64,9 @@ const useAuthData = (): UseAuthDataReturn => {
 
   // Keep isAuthenticated in sync with the login cookie
   useEffect(() => {
+    if (account?.backend) return;
     dispatch({ type: 'SET_AUTHENTICATED', payload: isLoggedInUser });
-  }, [isLoggedInUser, dispatch]);
+  }, [isLoggedInUser, dispatch, account?.backend]);
 
   // Sync SWR data with auth context
   const handleUserDataError = useCallback(() => {
@@ -112,6 +115,7 @@ const useAuthData = (): UseAuthDataReturn => {
   ]);
 
   useEffect(() => {
+    if (account?.backend) return;
     if ((isUserDataLoading || isTokenRefreshInProgress()) && !userData) {
       addSentryBreadcrumb('auth.loading', 'profile fetch loading', {
         isUserDataLoading,
@@ -123,7 +127,29 @@ const useAuthData = (): UseAuthDataReturn => {
     }
     if (handleUserDataError()) return;
     handleUserDataSuccessOrEmpty();
-  }, [userData, isUserDataLoading, handleUserDataError, handleUserDataSuccessOrEmpty, dispatch]);
+  }, [
+    userData,
+    isUserDataLoading,
+    handleUserDataError,
+    handleUserDataSuccessOrEmpty,
+    dispatch,
+    account?.backend,
+  ]);
+
+  if (account?.backend) {
+    return {
+      ...state,
+      userData: state.user,
+      userDataError: null,
+      refreshUserData: async () => {
+        await account.refresh?.();
+        return state.user;
+      },
+      isUserDataLoading: !!account.loading,
+      isRefreshingToken: false,
+      hasValidatedProfileFromNetwork: !!account.snapshot,
+    };
+  }
 
   return {
     ...state,

@@ -106,7 +106,9 @@
       "ar": "Arabic"
     },
     "sample-profile": "Sample profile",
-    "preview-notice": "Design preview: these profiles and generated portraits are illustrative. No teacher is bookable yet."
+    "preview-notice": "Design preview: these profiles and generated portraits are illustrative. No teacher is bookable yet.",
+    "loading": "Loading teachers…",
+    "load-error": "Could not load teachers. Please try again later."
   },
   "how": {
     "steps": {

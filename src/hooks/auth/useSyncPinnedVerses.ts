@@ -4,6 +4,7 @@ import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 
 import { performPinnedSync } from '@/hooks/auth/pinnedVersesSync';
 import useIsLoggedIn from '@/hooks/auth/useIsLoggedIn';
+import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { selectIsPersistGateHydrationComplete } from '@/redux/slices/persistGateHydration';
 import { selectPinnedVerses } from '@/redux/slices/QuranReader/pinnedVerses';
 import { selectQuranReaderStyles } from '@/redux/slices/QuranReader/styles';
@@ -40,6 +41,7 @@ const useSyncPinnedVerses = () => {
   mushafIdRef.current = mushafId;
 
   useEffect(() => {
+    if (isSupabaseConfigured()) return undefined;
     if (!isLoggedIn) {
       hasSyncedRef.current = false;
       return () => {};
