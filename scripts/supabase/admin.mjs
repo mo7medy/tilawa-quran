@@ -22,5 +22,5 @@ const result = cli(
 if (!JSON.parse(result).rows?.[0]?.created)
   throw new Error('No verified user with this UUID. No admin was created.');
 process.stdout.write(
-  'Trusted administrator membership is ready. Sign out and back in, then open /admin/teachers.\n',
+  'Trusted administrator membership is ready. Sign out and back in, then open /1x2003/admin/teachers.\n',
 );

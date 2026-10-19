@@ -4,7 +4,8 @@ import type { GetServerSideProps } from 'next';
 
 import { serverSupabase } from './server';
 
-import { withLocalePrefix } from '@/utils/tilawaRoutes';
+import { isAdminRoutePathname } from '@/tilawa/adminSections';
+import { stripLocalePrefix, withLocalePrefix } from '@/utils/tilawaRoutes';
 
 // Page protection is additional to API authorization and database RLS.
 export const protectAccountPage: GetServerSideProps = async ({ req, res, resolvedUrl, locale }) => {
@@ -22,7 +23,8 @@ export const protectAccountPage: GetServerSideProps = async ({ req, res, resolve
       },
     };
   }
-  if (/\/admin(?:\/|$)/.test(resolvedUrl)) {
+  const pathname = stripLocalePrefix(resolvedUrl.split(/[?#]/)[0], locale ? [locale] : []);
+  if (isAdminRoutePathname(pathname)) {
     const result = await client.rpc('tilawa_admin_snapshot');
     if (result.error) return { notFound: true };
   }

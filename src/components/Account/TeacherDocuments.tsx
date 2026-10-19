@@ -12,7 +12,9 @@ const TeacherDocuments = (): JSX.Element => {
   const [error, setError] = useState(false);
   return (
     <div className={styles.field}>
-      <label htmlFor="teacher-document">{t('supporting-documents')}</label>
+      <label htmlFor="teacher-document">
+        {t('teacher-wizard.optional-field', { field: t('supporting-documents') })}
+      </label>
       <input
         id="teacher-document"
         type="file"

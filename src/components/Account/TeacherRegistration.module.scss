@@ -1,0 +1,63 @@
+.form {
+  margin-block-start: 24px;
+  [hidden] {
+    display: none;
+  }
+}
+.steps {
+  list-style: none;
+  padding: 0;
+  margin-block: 0 18px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  .step {
+    inline-size: 100%;
+    block-size: 100%;
+    min-block-size: 60px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-align: start;
+    padding: 12px;
+    background: var(--tilawa-card);
+    color: var(--tilawa-ink);
+    border-color: var(--tilawa-border);
+    overflow-wrap: anywhere;
+    &[aria-current='step'] {
+      background: var(--tilawa-container);
+      color: var(--tilawa-secondary-text);
+      border-color: var(--tilawa-button);
+      font-weight: 700;
+    }
+  }
+}
+.number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 28px;
+  block-size: 28px;
+  flex-shrink: 0;
+  border: 1px solid currentcolor;
+  border-radius: 50%;
+  font-size: 14px;
+}
+.form .secondary {
+  background: var(--tilawa-card);
+  color: var(--tilawa-link);
+  border-color: var(--tilawa-border);
+  &:hover {
+    background: var(--tilawa-container);
+  }
+}
+@media (max-width: 480px) {
+  .steps {
+    gap: 8px;
+    .step {
+      flex-direction: column;
+      align-items: flex-start;
+      font-size: 14px;
+    }
+  }
+}

@@ -6,9 +6,11 @@ import { useAccountUi } from './useAccountUi';
 const PhotoField = ({
   value,
   onChange,
+  isOptional = false,
 }: {
   value: string;
   onChange: (photo: string) => void;
+  isOptional?: boolean;
 }): JSX.Element => {
   const { t, role, state } = useAccountUi();
   const id = useId();
@@ -28,7 +30,7 @@ const PhotoField = ({
         </span>
       )}
       <label htmlFor={id}>
-        {t('photo')}
+        {isOptional ? t('teacher-wizard.optional-field', { field: t('photo') }) : t('photo')}
         <input
           id={id}
           type="file"

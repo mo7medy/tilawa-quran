@@ -15,10 +15,24 @@ application. Do not copy application users, credentials or migrations into this 
 | Shared lessons      | `/lessons/[lessonId]`                                                                        | participant-only lesson details, events, completion and cancellation requests                  |
 | Messages            | `/profile/messages`                                                                          | private conversations, pending requests, accept/reject, block, read state, paginated history   |
 | Finance             | teacher earnings and withdrawals                                                             | payment evidence, immutable credit events, verified balances and locked withdrawal requests    |
-| Administration      | `/admin/teachers`, `/admin/teachers/[id]`, `/admin/settings`                                 | private administrator membership, teacher approval and registration switch; no lesson approval |
+| Administration      | `/1x2003/admin/teachers`, `/1x2003/admin/teachers/[id]`, `/1x2003/admin/settings`            | private administrator membership, teacher approval and registration switch; no lesson approval |
 | Quran personal data | existing bookmarks, collections, notes, pins, preferences, sessions and reading goals        | private `quran_*` tables through a compatibility adapter                                       |
 
 Arabic/English, RTL, light/dark appearance and the existing mobile navigation are preserved.
+
+### Teacher registration stages
+
+The teacher editor uses two stages: information and teaching languages, then plans/pricing and the
+public introduction. Going back preserves entered values. Required fields are checked before
+advancing; saving checks both stages. A contact phone with at least eight digits and a
+qualifications description are required, consistent with the application form. Profile photo,
+introduction video and supporting document uploads remain optional; the video is recommended.
+
+Teacher pricing uses USD only. Per-lesson, monthly and combined pricing are supported; fields for
+inactive pricing modes are hidden and do not block validation. Teacher offers remain separate from
+the platform's monthly packages. Saving the form does not approve a teacher: the existing separate
+application submission and administrator approval flow remains in effect.
+
 Production never uses account preview data. Local preview is available only with
 `NODE_ENV=development` and `NEXT_PUBLIC_TILAWA_DEMO=1`; preview parameters never grant live
 permissions.
@@ -172,3 +186,10 @@ cover RLS, function privileges and indexes.
   No fonts or Quran assets were installed for these checks.
 - Email delivery, Google OAuth, payment collection/payouts, meeting provisioning and an actual
   Cloudflare production build/deployment were not tested or enabled.
+
+## Administration reports
+
+Operational statistics and the read-only USD finance section are implemented under `/1x2003/admin`.
+The reporting RPCs and indexes are applied to the independent website project. See
+[TILAWA_ADMIN_REPORTS.md](TILAWA_ADMIN_REPORTS.md) for definitions, permission boundaries, UTC date
+filtering, CSV limits and verification. Payment collection remains disabled.

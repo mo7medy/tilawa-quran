@@ -1,21 +1,15 @@
 import { useState } from 'react';
 
-import buildTeacherDraft from '../../tilawa/account/teacherDraft';
-
 import styles from './Account.module.scss';
 import AccountSettings from './AccountSettings';
 import { AccountLink, Panel, Status } from './AccountUi';
-import PhotoField from './PhotoField';
 import TeacherDocuments from './TeacherDocuments';
-import TeacherFields from './TeacherFields';
+import TeacherRegistrationForm from './TeacherRegistrationForm';
 import { useAccountUi } from './useAccountUi';
 
 const TeacherEditor = (): JSX.Element => {
   const { t, state, dispatch, lang, backend, busy, snapshot } = useAccountUi();
-  const [photo, setPhoto] = useState(state.teacher.publicProfile.photoUrl ?? '');
   const [message, setMessage] = useState('');
-  const [version, setVersion] = useState(0);
-  const locale = lang === 'ar' ? 'ar' : 'en';
   return (
     <>
       <Panel title={t('teacher-profile')}>
@@ -50,48 +44,8 @@ const TeacherEditor = (): JSX.Element => {
             {t('copy-profile-link')}
           </button>
         </div>
-        <form
-          key={`${version}-${locale}`}
-          onChange={() => setMessage('')}
-          onSubmit={async (event) => {
-            event.preventDefault();
-            const value = buildTeacherDraft(
-              new FormData(event.currentTarget),
-              state.teacher,
-              photo,
-              lang,
-            );
-            if (!value) {
-              setMessage('invalid-teacher');
-              return;
-            }
-            if ((await dispatch({ type: 'teacher', value })) === false) return;
-            setMessage('saved');
-          }}
-        >
-          <PhotoField value={photo} onChange={setPhoto} />
-          <TeacherFields />
-          <div className={styles.actions}>
-            <button type="submit" disabled={busy}>
-              {t('save-preview')}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setPhoto(state.teacher.publicProfile.photoUrl ?? '');
-                setVersion(version + 1);
-                setMessage('');
-              }}
-            >
-              {t('cancel-edit')}
-            </button>
-          </div>
-          {message && (
-            <Status error={message.startsWith('invalid') || message === 'copy-failed'}>
-              {t(message)}
-            </Status>
-          )}
-        </form>
+        {message && <Status error={message === 'copy-failed'}>{t(message)}</Status>}
+        <TeacherRegistrationForm />
       </Panel>
       {backend && (
         <Panel title={t('application-status')}>
@@ -107,7 +61,7 @@ const TeacherEditor = (): JSX.Element => {
           {state.teacher.approval !== 'approved' && (
             <button
               type="button"
-              disabled={busy || state.teacher.approval === 'pending'}
+              disabled={busy || state.teacher.approval === 'pending' || !snapshot?.teacher}
               onClick={() => {
                 dispatch({ type: 'submit-teacher' });
               }}

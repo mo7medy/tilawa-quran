@@ -113,6 +113,6 @@
     "/profile/[...section]": ["academy", "account"],
     "/dashboard/teacher/[[...section]]": ["academy", "account"],
     "/lessons/[lessonId]": ["academy", "account"],
-    "/admin/[[...section]]": ["academy", "account"]
+    "/1x2003/admin/[[...section]]": ["academy", "account"]
   }
 }

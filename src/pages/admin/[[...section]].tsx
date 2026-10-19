@@ -1,4 +1,7 @@
-import AdminAccount from '@/components/Account/AdminAccount';
+import type { GetServerSideProps } from 'next';
 
-export default AdminAccount;
-export { protectAccountPage as getServerSideProps } from '@/lib/supabase/protectPage';
+// Retire the old entry without redirecting visitors to the replacement path.
+export const getServerSideProps: GetServerSideProps = async () => ({ notFound: true });
+
+const RetiredAdminPage = (): null => null;
+export default RetiredAdminPage;

@@ -17,12 +17,12 @@ const buildTeacherDraft = (
   return {
     ...previous,
     country: String(data.get('country')),
-    email: String(data.get('email')),
+    email: String(data.get('email') ?? previous.email),
     phone: String(data.get('phone')),
     experience: Number(data.get('experience')),
     pricing: data.get('pricing') as TeacherAccount['pricing'],
     monthlyPriceCents: Math.round(Number(data.get('monthlyPrice')) * 100),
-    monthlyLessons: Number(data.get('monthlyLessons')),
+    monthlyLessons: Number(data.get('monthlyLessons') ?? previous.monthlyLessons),
     publicProfile: {
       ...profile,
       displayName: name,

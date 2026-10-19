@@ -41,6 +41,13 @@ describe('isAcademyRoutePathname', () => {
 });
 
 describe('account shell routes', () => {
+  it('keeps the relocated admin on its own light route family and retires the old family', () => {
+    expect(isAcademyRoutePathname('/1x2003/admin')).toBe(true);
+    expect(isAcademyRoutePathname('/1x2003/admin/[[...section]]')).toBe(true);
+    expect(isAcademyRoutePathname('/admin')).toBe(false);
+    expect(isAcademyRoutePathname('/admin/teachers')).toBe(false);
+    expect(isAcademyRoutePathname('/1x2003/administrator')).toBe(false);
+  });
   it('uses the light account shell for all account pages without changing chapter lesson routes', () => {
     [
       '/profile',

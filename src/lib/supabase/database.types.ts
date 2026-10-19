@@ -1807,6 +1807,21 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      tilawa_admin_finance: {
+        Args: {
+          p_export?: boolean;
+          p_from: string;
+          p_kind?: string;
+          p_page?: number;
+          p_status?: string;
+          p_until: string;
+        };
+        Returns: Json;
+      };
+      tilawa_admin_overview: {
+        Args: { p_from: string; p_until: string };
+        Returns: Json;
+      };
       tilawa_admin_snapshot: { Args: never; Returns: Json };
       tilawa_available_slots: {
         Args: {

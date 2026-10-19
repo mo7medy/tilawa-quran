@@ -5,11 +5,14 @@ import { useEffect, useState } from 'react';
 import useSWR from 'swr';
 
 import styles from './Account.module.scss';
-import AccountLayout from './AccountLayout';
 import { AccountLink, Field, Panel } from './AccountUi';
 import { useAccountUi } from './useAccountUi';
 
+import consoleStyles from '@/components/Admin/AdminConsole.module.scss';
+import AdminLayout from '@/components/Admin/AdminLayout';
+import AdminSectionContent from '@/components/Admin/AdminSectionContent';
 import { getBrowserSupabase } from '@/lib/supabase/browser';
+import { ADMIN_BASE_PATH, getAdminSection } from '@/tilawa/adminSections';
 import { tilawaFetch } from '@/tilawa/backend/http';
 import { object, rows, string } from '@/tilawa/backend/mappers';
 import type { Row } from '@/tilawa/backend/mappers';
@@ -17,14 +20,23 @@ import type { Row } from '@/tilawa/backend/mappers';
 const AdminAccount = (): JSX.Element => {
   const { t, snapshot, router, userId, command, busy, loading } = useAccountUi();
   const [filter, setFilter] = useState('pending');
+  const [search, setSearch] = useState('');
   const [reason, setReason] = useState('');
   const [academy, setAcademy] = useState(false);
   const { data, error, mutate } = useSWR<Row>(
-    snapshot?.isAdmin ? ['tilawa-admin', userId] : null,
+    snapshot?.isAdmin && userId ? ['tilawa-admin', userId] : null,
     () => tilawaFetch('admin'),
   );
   const segments = Array.isArray(router.query.section) ? router.query.section : [];
-  const settings = segments[0] === 'settings';
+  const section = getAdminSection(segments[0]);
+  const settings = section === 'settings';
+  const visibleTeachers = rows(data?.teachers).filter(
+    (item) =>
+      (filter === 'all' || item.approval === filter) &&
+      `${string(item.display_name)} ${string(item.email)}`
+        .toLocaleLowerCase()
+        .includes(search.trim().toLocaleLowerCase()),
+  );
   const id = segments[1];
   const teacher = rows(data?.teachers).find((item) => item.user_id === id);
   useEffect(() => {
@@ -47,7 +59,7 @@ const AdminAccount = (): JSX.Element => {
     }
   };
   return (
-    <AccountLayout title={t(settings ? 'admin.settings' : 'admin.title')}>
+    <AdminLayout section={section}>
       {loading ? (
         <Panel>
           <p>{t('loading')}</p>
@@ -63,34 +75,50 @@ const AdminAccount = (): JSX.Element => {
       ) : error ? (
         <Panel>
           <p role="alert">{t('backend-error')}</p>
+          <button
+            type="button"
+            onClick={() => {
+              mutate();
+            }}
+          >
+            {t('admin-console.retry')}
+          </button>
         </Panel>
       ) : !data ? (
         <Panel>
           <p>{t('loading')}</p>
         </Panel>
       ) : settings ? (
-        <Panel title={t('admin.settings')}>
-          <label className={styles.check} htmlFor="teacher-registration">
-            <input
-              id="teacher-registration"
-              type="checkbox"
-              checked={!!object(data.settings).teacher_registration_enabled}
-              disabled={busy}
-              onChange={async (event) => {
-                try {
-                  await command?.('admin-settings', {
-                    teacherRegistrationEnabled: event.target.checked,
-                  });
-                  await mutate();
-                } catch {
-                  /* Shared feedback. */
-                }
-              }}
-            />
-            {t('admin.registration-open')}
-          </label>
-          <p>{t('admin.deferred-integrations')}</p>
-        </Panel>
+        <>
+          <Panel title={t('admin.settings')}>
+            <label className={styles.check} htmlFor="teacher-registration">
+              <input
+                id="teacher-registration"
+                type="checkbox"
+                checked={!!object(data.settings).teacher_registration_enabled}
+                disabled={busy}
+                onChange={async (event) => {
+                  try {
+                    await command?.('admin-settings', {
+                      teacherRegistrationEnabled: event.target.checked,
+                    });
+                    await mutate();
+                  } catch {
+                    /* Shared feedback. */
+                  }
+                }}
+              />
+              {t('admin.registration-open')}
+            </label>
+            <p>{t('admin.deferred-integrations')}</p>
+          </Panel>
+          <Panel title={t('admin-console.security-title')}>
+            <p>{t('admin-console.security-hint')}</p>
+            <p className={consoleStyles.stageNote}>{t('admin-console.security-pending')}</p>
+          </Panel>
+        </>
+      ) : section !== 'teachers' ? (
+        <AdminSectionContent section={section} data={data} />
       ) : id ? (
         teacher ? (
           <>
@@ -175,9 +203,9 @@ const AdminAccount = (): JSX.Element => {
                   {t('admin.reject')}
                 </button>
               </div>
-              <AccountLink to="/admin/teachers">{t('back')}</AccountLink>
+              <AccountLink to={`${ADMIN_BASE_PATH}/teachers`}>{t('back')}</AccountLink>
             </Panel>
-            <Panel title={t('history')}>
+            <Panel title={t('admin-console.approval-history')}>
               {rows(teacher.events).map((event) => (
                 <p key={string(event.id)}>
                   {t(`approval.${event.status}`)} · {string(event.reason)} ·{' '}
@@ -194,50 +222,44 @@ const AdminAccount = (): JSX.Element => {
       ) : (
         <>
           <Panel title={t('admin.title')}>
-            <label className={styles.field} htmlFor="approval-filter">
-              {t('application-status')}
-              <select
-                id="approval-filter"
-                value={filter}
-                onChange={(event) => setFilter(event.target.value)}
-              >
-                {['all', 'pending', 'approved', 'rejected', 'incomplete'].map((status) => (
-                  <option key={status} value={status}>
-                    {t(status === 'all' ? 'all' : `approval.${status}`)}
-                  </option>
-                ))}
-              </select>
-            </label>
-            {rows(data.teachers)
-              .filter((item) => filter === 'all' || item.approval === filter)
-              .map((item) => (
-                <article className={styles.listCard} key={string(item.user_id)}>
-                  <div>
-                    <h3>{string(item.display_name)}</h3>
-                    <p>{t(`approval.${item.approval}`)}</p>
-                  </div>
-                  <AccountLink to={`/admin/teachers/${item.user_id}`}>
-                    {t('open-section')}
-                  </AccountLink>
-                </article>
-              ))}
-            {!rows(data.teachers).some((item) => filter === 'all' || item.approval === filter) && (
-              <p>{t('admin.no-requests')}</p>
-            )}
-          </Panel>
-          <Panel title={t('admin.audit')}>
-            {rows(data.audit)
-              .slice(0, 20)
-              .map((event) => (
-                <p key={string(event.id)}>
-                  {t(event.action === 'admin-settings' ? 'admin.settings' : 'admin.title')} ·{' '}
-                  {string(event.created_at)}
-                </p>
-              ))}
+            <div className={consoleStyles.filters}>
+              <Field
+                label={t('admin-console.search-teachers')}
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+              />
+              <label className={styles.field} htmlFor="approval-filter">
+                {t('application-status')}
+                <select
+                  id="approval-filter"
+                  value={filter}
+                  onChange={(event) => setFilter(event.target.value)}
+                >
+                  {['all', 'pending', 'approved', 'rejected', 'incomplete'].map((status) => (
+                    <option key={status} value={status}>
+                      {t(status === 'all' ? 'all' : `approval.${status}`)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            {visibleTeachers.map((item) => (
+              <article className={styles.listCard} key={string(item.user_id)}>
+                <div>
+                  <h3>{string(item.display_name)}</h3>
+                  <p>{t(`approval.${item.approval}`)}</p>
+                </div>
+                <AccountLink to={`${ADMIN_BASE_PATH}/teachers/${item.user_id}`}>
+                  {t('open-section')}
+                </AccountLink>
+              </article>
+            ))}
+            {!visibleTeachers.length && <p>{t('admin.no-requests')}</p>}
           </Panel>
         </>
       )}
-    </AccountLayout>
+    </AdminLayout>
   );
 };
 export default AdminAccount;

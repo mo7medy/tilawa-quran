@@ -14,6 +14,7 @@ import QuranAppShell from '@/components/QuranAppShell';
 import ThirdPartyScripts from '@/components/ThirdPartyScripts/ThirdPartyScripts';
 import { AuthProvider } from '@/contexts/AuthContext';
 import ToastContainerProvider from '@/dls/Toast/ToastProvider';
+import { isAdminRoutePathname } from '@/tilawa/adminSections';
 import { API_HOST } from '@/utils/api';
 import { logAndRedirectUnsupportedLogicalCSS } from '@/utils/css';
 import * as gtag from '@/utils/gtag';
@@ -36,6 +37,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   // none of the Quran navbar/footer/audio/font stack. Everything else keeps
   // the reader provider tree via `QuranAppShell`, with shared site appearance.
   const isAcademyPage = isAcademyRoutePathname(router.pathname);
+  const isAdminPage = isAdminRoutePathname(router.pathname);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -91,22 +93,24 @@ function MyApp({ Component, pageProps }: AppProps) {
           <DirectionProvider dir={languageDirection}>
             <TooltipProvider>
               <ToastContainerProvider>
-                <GuestQuranImport />
-                {isAcademyPage ? (
-                  <AcademyShell>
-                    <Component {...pageProps} />
-                  </AcademyShell>
-                ) : (
-                  <QuranAppShell
-                    Component={Component}
-                    pageProps={pageProps}
-                    locale={resolvedLocale}
-                  />
-                )}
+                {!isAdminPage && <GuestQuranImport />}
+                {isAdminPage && <Component {...pageProps} />}
+                {!isAdminPage &&
+                  (isAcademyPage ? (
+                    <AcademyShell>
+                      <Component {...pageProps} />
+                    </AcademyShell>
+                  ) : (
+                    <QuranAppShell
+                      Component={Component}
+                      pageProps={pageProps}
+                      locale={resolvedLocale}
+                    />
+                  ))}
               </ToastContainerProvider>
             </TooltipProvider>
           </DirectionProvider>
-          <ThirdPartyScripts />
+          {!isAdminPage && <ThirdPartyScripts />}
         </AuthProvider>
       </AcademyThemeProvider>
     </AccountPreviewProvider>

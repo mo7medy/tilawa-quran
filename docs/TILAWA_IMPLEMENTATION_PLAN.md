@@ -258,7 +258,7 @@ teachers/eligibility only.
   `src/utils/auth/{api,apiPaths,login}.ts`, `ROUTES` auth/protected lists in
   `src/utils/navigation.ts`).
 - Target: Supabase session coexists behind an adapter; `useAuthData` remains the component contract;
-  protected academy routes (`/academy/**`, `/teachers/**/book`, `/dashboard/**`, `/admin/**`)
+  protected academy routes (`/academy/**`, `/teachers/**/book`, `/dashboard/**`, `/1x2003/admin/**`)
   enforce server-checked role guards (RLS + API-route checks), not client flags.
 
 ---

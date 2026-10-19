@@ -9,6 +9,8 @@ import NextSeoWrapper from '../NextSeoWrapper';
 import styles from './Account.module.scss';
 import { useAccountUi } from './useAccountUi';
 
+import { ADMIN_BASE_PATH, isAdminRoutePathname } from '@/tilawa/adminSections';
+
 const STUDENT_LINKS = [
   ['/profile', 'profile'],
   ['/profile/learning', 'learning'],
@@ -34,8 +36,8 @@ const TEACHER_LINKS = [
   ['/profile/notifications', 'notifications'],
 ];
 const ADMIN_LINKS = [
-  ['/admin/teachers', 'admin.title'],
-  ['/admin/settings', 'admin.settings'],
+  [`${ADMIN_BASE_PATH}/teachers`, 'admin.title'],
+  [`${ADMIN_BASE_PATH}/settings`, 'admin.settings'],
   ['/profile', 'profile'],
 ];
 
@@ -63,7 +65,7 @@ const AccountLayout = ({
   } = useAccountUi();
   const current = stripLocalePrefix(router.asPath.split('?')[0], router.locales ?? ['en', 'ar']);
   const { view } = router.query;
-  const links = router.pathname.startsWith('/admin')
+  const links = isAdminRoutePathname(router.pathname)
     ? ADMIN_LINKS
     : role === 'teacher'
     ? TEACHER_LINKS
@@ -77,7 +79,7 @@ const AccountLayout = ({
           <strong>{t('live-account')}</strong>
           <div className={styles.actions}>
             {snapshot?.isAdmin === true && (
-              <AcademyLink href="/admin/teachers">{t('admin.title')}</AcademyLink>
+              <AcademyLink href={`${ADMIN_BASE_PATH}/teachers`}>{t('admin.title')}</AcademyLink>
             )}
             {userId && (
               <button

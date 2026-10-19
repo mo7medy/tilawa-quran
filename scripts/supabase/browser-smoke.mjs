@@ -180,7 +180,7 @@ export const browserSmoke = async ({ student, teacher, owner, assert }) => {
       }
     }
     const administrator = await login(owner);
-    const adminPage = await administrator.page.goto(`${base}/admin/teachers`, {
+    const adminPage = await administrator.page.goto(`${base}/1x2003/admin/teachers`, {
       waitUntil: 'domcontentloaded',
       timeout: 120000,
     });

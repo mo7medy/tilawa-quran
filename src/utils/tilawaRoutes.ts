@@ -1,3 +1,5 @@
+import { isAdminRoutePathname } from '../tilawa/adminSections';
+
 /**
  * Tilawa academy route classification.
  *
@@ -39,8 +41,7 @@ export const isAcademyRoutePathname = (pathname: string): boolean => {
     pathname === '/dashboard/teacher' ||
     pathname.startsWith('/dashboard/teacher/') ||
     pathname.startsWith('/lessons/') ||
-    pathname === '/admin' ||
-    pathname.startsWith('/admin/') ||
+    isAdminRoutePathname(pathname) ||
     pathname.startsWith('/auth/')
   );
 };

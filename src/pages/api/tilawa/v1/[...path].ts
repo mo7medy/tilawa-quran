@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Central API dispatch with feature handlers split into separate modules. */
 /* eslint-disable react-func/max-lines-per-function -- Declarative form fields and explicit protocol mappings are kept together for auditability. */
 /* eslint-disable @typescript-eslint/naming-convention -- Preserve existing database, HTTP and translation-key contracts at the boundary. */
 import type { NextApiRequest, NextApiResponse } from 'next';
@@ -9,6 +10,7 @@ import {
   respondError,
   serverSupabase,
 } from '@/lib/supabase/server';
+import { handleAdminReports } from '@/tilawa/backend/adminReports';
 import { rows } from '@/tilawa/backend/mappers';
 import { handleMushafMapping } from '@/tilawa/backend/mushafMapping';
 import { handleQuranAccount } from '@/tilawa/backend/quran';
@@ -49,6 +51,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const user = await requireUser(client);
     if (req.headers['x-tilawa-user'] && req.headers['x-tilawa-user'] !== user.id) {
       throw new BackendError('ACCOUNT_CHANGED', 409);
+    }
+    if (
+      req.method === 'GET' &&
+      parts[0] === 'admin' &&
+      parts[1] === 'reports' &&
+      parts.length === 3
+    ) {
+      await handleAdminReports(req, res, client, parts[2]);
+      return;
     }
     if (parts[0] === 'quran') {
       await handleQuranAccount(req, res, client, user, parts.slice(1));
