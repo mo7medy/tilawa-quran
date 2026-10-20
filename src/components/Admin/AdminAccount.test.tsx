@@ -18,6 +18,12 @@ import { ADMIN_SECTIONS, getAdminSection, isAdminRoutePathname } from '@/tilawa/
 import { tilawaFetch } from '@/tilawa/backend/http';
 
 vi.mock('@/tilawa/backend/http', () => ({ tilawaFetch: vi.fn() }));
+vi.mock('@/lib/supabase/browser', () => ({
+  getSessionUserId: () => 'admin-1',
+  getBrowserSupabase: () => ({
+    auth: { mfa: { listFactors: async () => ({ data: { totp: [] } }) } },
+  }),
+}));
 
 const response = {
   teachers: [
@@ -66,7 +72,7 @@ const mount = (
           dispatch: vi.fn(),
           backend: true,
           userId,
-          snapshot: { isAdmin: allowed },
+          snapshot: { isAdmin: allowed, adminVerified: allowed, settings: response.settings },
           command: async <T,>(action: string, payload: unknown) => command(action, payload) as T,
         }}
       >
@@ -81,6 +87,42 @@ beforeEach(() => {
   vi.mocked(tilawaFetch).mockImplementation(async <T,>(path: string) => {
     if (path.startsWith('admin/reports/overview')) return structuredClone(overviewTestReport) as T;
     if (path.startsWith('admin/reports/finance')) return structuredClone(financeTestReport) as T;
+    if (path.startsWith('admin/teacher/')) {
+      return structuredClone(
+        response.teachers.find((teacher) => path.endsWith(teacher.user_id)) ?? null,
+      ) as T;
+    }
+    if (path.startsWith('admin/lists/teachers')) {
+      const params = new URL(path, 'https://test.invalid').searchParams;
+      const items = response.teachers
+        .filter(
+          (teacher) =>
+            (params.get('status') === 'all' || teacher.approval === params.get('status')) &&
+            `${teacher.display_name} ${teacher.email}`
+              .toLowerCase()
+              .includes((params.get('search') ?? '').toLowerCase()),
+        )
+        .map((teacher) => ({
+          id: teacher.user_id,
+          name: teacher.display_name,
+          status: teacher.approval,
+          country: teacher.country,
+        }));
+      return { items, total: items.length } as T;
+    }
+    if (path.startsWith('admin/lists/audit')) {
+      return {
+        items: response.audit.map((event) => ({
+          ...event,
+          name: 'Administrator',
+          status: event.action,
+          target: 'event-123456',
+        })),
+        total: 1,
+      } as T;
+    }
+    if (path.startsWith('admin/lists/')) return { items: [], total: 0 } as T;
+    if (path === 'admin/health') return { readsReady: true, maintenance: null } as T;
     return structuredClone(response) as T;
   });
 });
@@ -119,10 +161,10 @@ describe('Website administration', () => {
     mount(['teachers']);
     await screen.findByText('Pending teacher');
     fireEvent.change(screen.getByRole('combobox'), { target: { value: 'all' } });
-    expect(screen.getByText('Approved teacher')).toBeDefined();
+    await screen.findByText('Approved teacher');
     fireEvent.change(screen.getByRole('searchbox'), { target: { value: 'APPROVED@example.test' } });
-    expect(screen.queryByText('Pending teacher')).toBeNull();
-    expect(screen.getByText('Approved teacher')).toBeDefined();
+    await waitFor(() => expect(screen.queryByText('Pending teacher')).toBeNull());
+    await screen.findByText('Approved teacher');
   });
   it('closes the mobile navigation with Escape from a navigation link', async () => {
     mount();
@@ -154,7 +196,7 @@ describe('Website administration', () => {
     await waitFor(() =>
       expect(command).toHaveBeenCalledWith('admin-settings', { teacherRegistrationEnabled: false }),
     );
-    expect(screen.getByText(/Cloudflare Access/)).toBeDefined();
+    expect(screen.getByText(/Administrator data and actions require/)).toBeDefined();
   });
   it('shows actual audit entries on their own page', async () => {
     mount(['audit']);
@@ -172,10 +214,10 @@ describe('Website administration', () => {
     expect(command).not.toHaveBeenCalled();
   });
   it.each(['students', 'lessons'])(
-    'marks %s as awaiting secure data connection',
+    'loads %s through the secured live directory',
     async (section) => {
       mount([section]);
-      await screen.findByText('Awaiting secure data connection');
+      await screen.findByText('No matching records.');
       expect(screen.getByRole('table')).toBeDefined();
       expect(command).not.toHaveBeenCalled();
     },
@@ -230,6 +272,42 @@ describe('Website administration', () => {
   it('shows report failures instead of substituting zero financial totals', async () => {
     vi.mocked(tilawaFetch).mockImplementation(async <T,>(path: string) => {
       if (path.startsWith('admin/reports/finance')) throw new Error('Unavailable');
+      if (path.startsWith('admin/teacher/')) {
+        return structuredClone(
+          response.teachers.find((teacher) => path.endsWith(teacher.user_id)) ?? null,
+        ) as T;
+      }
+      if (path.startsWith('admin/lists/teachers')) {
+        const params = new URL(path, 'https://test.invalid').searchParams;
+        const items = response.teachers
+          .filter(
+            (teacher) =>
+              (params.get('status') === 'all' || teacher.approval === params.get('status')) &&
+              `${teacher.display_name} ${teacher.email}`
+                .toLowerCase()
+                .includes((params.get('search') ?? '').toLowerCase()),
+          )
+          .map((teacher) => ({
+            id: teacher.user_id,
+            name: teacher.display_name,
+            status: teacher.approval,
+            country: teacher.country,
+          }));
+        return { items, total: items.length } as T;
+      }
+      if (path.startsWith('admin/lists/audit')) {
+        return {
+          items: response.audit.map((event) => ({
+            ...event,
+            name: 'Administrator',
+            status: event.action,
+            target: 'event-123456',
+          })),
+          total: 1,
+        } as T;
+      }
+      if (path.startsWith('admin/lists/')) return { items: [], total: 0 } as T;
+      if (path === 'admin/health') return { readsReady: true, maintenance: null } as T;
       return structuredClone(response) as T;
     });
     mount(['finance']);

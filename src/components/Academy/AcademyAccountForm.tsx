@@ -12,7 +12,7 @@ import AcademyIcon from './AcademyIcon';
 
 import { getBrowserSupabase } from '@/lib/supabase/browser';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
-import { safeAccountRedirect } from '@/tilawa/backend/redirect';
+import { authCallbackPath, authDestination } from '@/tilawa/backend/authDestination';
 
 interface AcademyAccountFormProps {
   mode: 'register' | 'sign-in' | 'recovery';
@@ -46,12 +46,13 @@ const AcademyAccountForm = ({ mode }: AcademyAccountFormProps): JSX.Element => {
         const client = getBrowserSupabase();
         const email = String(values.get('email') ?? '');
         const password = String(values.get('password') ?? '');
-        const callback = `${window.location.origin}/auth/confirm`;
+        const next = router.query.redirectTo ?? router.query.redirect;
+        const callback = `${window.location.origin}${authCallbackPath(next, router.locale)}`;
         const result = resetting
           ? await client.auth.updateUser({ password })
           : isRecovery
           ? await client.auth.resetPasswordForEmail(email, {
-              redirectTo: `${window.location.origin}/auth/callback?next=/sign-in?reset=1`,
+              redirectTo: `${window.location.origin}${authCallbackPath(next, router.locale, true)}`,
             })
           : isRegister
           ? await client.auth.signUp({
@@ -65,7 +66,7 @@ const AcademyAccountForm = ({ mode }: AcademyAccountFormProps): JSX.Element => {
         setIsPasswordVisible(false);
         if (isRegister || isRecovery) setLiveNotice('check-email');
         else {
-          await router.push(safeAccountRedirect(router.query.redirectTo ?? router.query.redirect));
+          await router.push(authDestination(next, router.locale));
         }
       } catch (error) {
         setFailure(
@@ -98,7 +99,15 @@ const AcademyAccountForm = ({ mode }: AcademyAccountFormProps): JSX.Element => {
               }
               const { error } = await getBrowserSupabase().auth.signInWithOAuth({
                 provider: 'google',
-                options: { redirectTo: `${window.location.origin}/auth/callback` },
+                options: {
+                  redirectTo: `${window.location.origin}/auth/callback?${new URLSearchParams({
+                    next: authDestination(
+                      router.query.redirectTo ?? router.query.redirect,
+                      router.locale,
+                    ),
+                    lang: router.locale === 'ar' ? 'ar' : 'en',
+                  })}`,
+                },
               });
               if (error) setFailure('auth-failed');
             }}
@@ -153,9 +162,9 @@ const AcademyAccountForm = ({ mode }: AcademyAccountFormProps): JSX.Element => {
                 id={`${id}-password`}
                 name="password"
                 type={isPasswordVisible ? 'text' : 'password'}
-                autoComplete={isRegister ? 'new-password' : 'current-password'}
+                autoComplete={isRegister || resetting ? 'new-password' : 'current-password'}
                 required
-                minLength={isRegister ? 8 : 1}
+                minLength={isRegister || resetting ? 8 : 1}
                 maxLength={128}
                 aria-describedby={isRegister ? `${id}-password-hint` : undefined}
                 dir="ltr"

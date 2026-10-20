@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary -- Map three wire lesson statuses to the existing UI tabs. */
 /* eslint-disable react/no-multi-comp -- Small related account view primitives share one module. */
 import { useState } from 'react';
 
@@ -31,8 +32,15 @@ export const LessonCard = ({ lesson }: { lesson: Lesson }): JSX.Element => {
   );
 };
 const LessonList = (): JSX.Element => {
-  const { t, state, router } = useAccountUi();
-  const [filter, setFilter] = useState<Lesson['status']>('upcoming');
+  const { t, state, router, backend } = useAccountUi();
+  const [localFilter, setFilter] = useState<Lesson['status']>('upcoming');
+  const filter = backend
+    ? router.query.lessonStatus === 'completed'
+      ? 'completed'
+      : router.query.lessonStatus === 'cancelled'
+      ? 'cancelled'
+      : 'upcoming'
+    : localFilter;
   const lessons =
     router.query.view === 'empty'
       ? []
@@ -47,7 +55,22 @@ const LessonList = (): JSX.Element => {
             key={status}
             type="button"
             aria-pressed={filter === status}
-            onClick={() => setFilter(status)}
+            onClick={() => {
+              if (backend) {
+                router.push(
+                  {
+                    pathname: router.pathname,
+                    query: {
+                      ...router.query,
+                      lessonStatus: status === 'upcoming' ? 'scheduled' : status,
+                      accountPage: 1,
+                    },
+                  },
+                  undefined,
+                  { shallow: true },
+                );
+              } else setFilter(status);
+            }}
           >
             {t(`status.${status}`)}
           </button>

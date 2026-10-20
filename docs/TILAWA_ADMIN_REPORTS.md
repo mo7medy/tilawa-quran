@@ -55,7 +55,8 @@ Migration: `supabase/migrations/20261019204335_tilawa_admin_reports.sql`.
   guarded finance RPC. A missing reporting migration produces an explicit error, not zero totals.
 - Bounded reporting indexes cover profile/payment/order creation, lesson schedules and active
   subscription end times. No business records, payment flags or admin memberships are changed.
-- Existing mandatory MFA/Cloudflare Access hardening remains a separate phase.
+- Administrator MFA/session/factor checks are now enforced; see
+  [backend completion](TILAWA_BACKEND_COMPLETION.md). Cloudflare Access remains external setup.
 
 The migration was applied to the independent project `gsoelrejabrmzqypdchv`. Security advisors found
 no issues before or after it. Live checks confirmed anonymous and sessionless calls are rejected. At

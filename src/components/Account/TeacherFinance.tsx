@@ -7,7 +7,7 @@ import styles from './Account.module.scss';
 import { AccountLink, Field, Panel, Status } from './AccountUi';
 import { useAccountUi } from './useAccountUi';
 
-import { rows, string } from '@/tilawa/backend/mappers';
+import { object, rows, string } from '@/tilawa/backend/mappers';
 
 const TeacherFinance = ({ withdrawal = false }: { withdrawal?: boolean }): JSX.Element => {
   const { t, price, state, dispatch, router, backend, snapshot, busy } = useAccountUi();
@@ -31,7 +31,11 @@ const TeacherFinance = ({ withdrawal = false }: { withdrawal?: boolean }): JSX.E
           </div>
           <div>
             <dt>{t('pending-withdrawals')}</dt>
-            <dd>{price(empty ? 0 : pending)}</dd>
+            <dd>
+              {price(
+                empty ? 0 : backend ? Number(object(snapshot?.balances).withdrawals ?? 0) : pending,
+              )}
+            </dd>
           </div>
         </dl>
         {!withdrawal && (
@@ -118,22 +122,24 @@ const TeacherFinance = ({ withdrawal = false }: { withdrawal?: boolean }): JSX.E
           )}
         </Panel>
       )}
-      <Panel title={t('withdrawal-history')}>
-        {empty || !state.withdrawals.length ? (
-          <p className={styles.empty}>{t('no-withdrawals')}</p>
-        ) : (
-          state.withdrawals.map((item) => (
-            <details key={item.id} className={styles.listCard}>
-              <summary>
-                {item.id} · {price(item.amountCents)}
-              </summary>
-              <p>{t(`withdrawal-status.${item.status}`)}</p>
-              <p>{t('bank-transfer')}</p>
-              <small>{t('withdrawal-note')}</small>
-            </details>
-          ))
-        )}
-      </Panel>
+      {(!backend || withdrawal) && (
+        <Panel title={t('withdrawal-history')}>
+          {empty || !state.withdrawals.length ? (
+            <p className={styles.empty}>{t('no-withdrawals')}</p>
+          ) : (
+            state.withdrawals.map((item) => (
+              <details key={item.id} className={styles.listCard}>
+                <summary>
+                  {item.id} · {price(item.amountCents)}
+                </summary>
+                <p>{t(`withdrawal-status.${item.status}`)}</p>
+                <p>{t('bank-transfer')}</p>
+                <small>{t('withdrawal-note')}</small>
+              </details>
+            ))
+          )}
+        </Panel>
+      )}
     </>
   );
 };

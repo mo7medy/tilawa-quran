@@ -24,7 +24,7 @@ const context = (resolvedUrl: string, locale = 'en'): GetServerSidePropsContext 
 beforeEach(() => {
   vi.clearAllMocks();
   auth.getUser.mockResolvedValue({ data: { user: { id: 'signed-in-user' } }, error: null });
-  auth.rpc.mockResolvedValue({ data: {}, error: null });
+  auth.rpc.mockResolvedValue({ data: { member: true, verified: true }, error: null });
 });
 
 describe('Relocated administration page protection', () => {
@@ -48,12 +48,12 @@ describe('Relocated administration page protection', () => {
     auth.rpc.mockResolvedValue({ error: { message: 'ADMIN_REQUIRED' } });
     const target = `${locale === 'ar' ? '/ar' : ''}${ADMIN_BASE_PATH}/teachers`;
     expect(await newAdminPage(context(target, locale))).toEqual({ notFound: true });
-    expect(auth.rpc).toHaveBeenCalledWith('tilawa_admin_snapshot');
+    expect(auth.rpc).toHaveBeenCalledWith('tilawa_admin_access');
   });
   it('allows a verified administrator after checking membership', async () => {
     expect(await newAdminPage(context(`${ADMIN_BASE_PATH}/settings`))).toEqual({ props: {} });
     expect(auth.getUser).toHaveBeenCalledOnce();
-    expect(auth.rpc).toHaveBeenCalledWith('tilawa_admin_snapshot');
+    expect(auth.rpc).toHaveBeenCalledWith('tilawa_admin_access');
   });
   it('does not treat a return URL query on a student page as an admin page', async () => {
     expect(await protectAccountPage(context(`/profile?next=${ADMIN_BASE_PATH}`))).toEqual({

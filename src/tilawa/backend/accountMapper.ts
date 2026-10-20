@@ -112,7 +112,8 @@ export const mapAccountSnapshot = (value: Row): AccountPreviewState => {
       paid: b.payment_status !== 'unpaid',
       status: b.status as 'pending' | 'accepted' | 'rejected',
       note: string(b.note),
-      lessonId: string(rows(value.lessons).find((l) => l.booking_id === b.id)?.id),
+      lessonId:
+        string(b.lesson_id) || string(rows(value.lessons).find((l) => l.booking_id === b.id)?.id),
     })),
     subscriptions: rows(value.subscriptions)
       .filter((s) => s.student_id === selfId)
@@ -145,17 +146,23 @@ export const mapAccountSnapshot = (value: Row): AccountPreviewState => {
       createdAt: string(m.created_at),
     })),
     withdrawals,
-    availableCents: Math.max(
-      0,
-      rows(value.earnings)
-        .filter((e) => e.status === 'available')
-        .reduce((sum, e) => sum + Number(e.amount_cents), 0) -
-        withdrawals
-          .filter((w) => w.status !== 'rejected')
-          .reduce((sum, w) => sum + w.amountCents, 0),
-    ),
-    pendingCents: rows(value.earnings)
-      .filter((e) => e.status === 'pending')
-      .reduce((sum, e) => sum + Number(e.amount_cents), 0),
+    availableCents:
+      typeof object(value.balances).available === 'number'
+        ? Number(object(value.balances).available)
+        : Math.max(
+            0,
+            rows(value.earnings)
+              .filter((e) => e.status === 'available')
+              .reduce((sum, e) => sum + Number(e.amount_cents), 0) -
+              withdrawals
+                .filter((w) => w.status !== 'rejected')
+                .reduce((sum, w) => sum + w.amountCents, 0),
+          ),
+    pendingCents:
+      typeof object(value.balances).pending === 'number'
+        ? Number(object(value.balances).pending)
+        : rows(value.earnings)
+            .filter((e) => e.status === 'pending')
+            .reduce((sum, e) => sum + Number(e.amount_cents), 0),
   };
 };

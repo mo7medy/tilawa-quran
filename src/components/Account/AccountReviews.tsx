@@ -3,7 +3,7 @@ import { Panel } from './AccountUi';
 import { useAccountUi } from './useAccountUi';
 
 const AccountReviews = (): JSX.Element => {
-  const { t, state, router } = useAccountUi();
+  const { t, state, router, studentFor } = useAccountUi();
   const reviews =
     router.query.view === 'empty' ? [] : state.lessons.filter((lesson) => lesson.review);
   return (
@@ -12,7 +12,7 @@ const AccountReviews = (): JSX.Element => {
         reviews.map((lesson) => (
           <article className={styles.listCard} key={lesson.id}>
             <div>
-              <h3>{state.student.name}</h3>
+              <h3>{studentFor(lesson.studentId).name}</h3>
               <p aria-label={t('rating-value', { rating: lesson.review.rating })}>
                 {'★'.repeat(lesson.review.rating)}
               </p>

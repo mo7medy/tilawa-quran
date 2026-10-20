@@ -7,12 +7,13 @@ import { useSWRConfig } from 'swr';
 
 import { getBrowserSupabase, setSessionUserId } from '@/lib/supabase/browser';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
+import { clearPrivateSwr } from '@/tilawa/backend/clearPrivateSwr';
 import { switchPrivateOwner } from '@/tilawa/backend/privateCache';
 
 export const useLiveSession = (reportError: (message: string) => void) => {
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
-  const { mutate } = useSWRConfig();
+  const { mutate, cache } = useSWRConfig();
   useEffect(() => {
     if (!isSupabaseConfigured()) {
       setAuthLoading(false);
@@ -26,18 +27,9 @@ export const useLiveSession = (reportError: (message: string) => void) => {
       if (!active) return;
       const changed = switchPrivateOwner(next?.id ?? null);
       if (changed) {
-        mutate(
-          (key) =>
-            (Array.isArray(key) &&
-              ['tilawa-account', 'tilawa-admin', 'tilawa-slots'].includes(String(key[0]))) ||
-            (typeof key === 'string' &&
-              (key.includes('/api/tilawa/') ||
-                key === 'pinned-verses' ||
-                key.startsWith('reading-bookmark-') ||
-                /bookmark|countNotes|reading-sessions/.test(key))),
-          undefined,
-          { revalidate: false },
-        );
+        clearPrivateSwr(cache, (key) => {
+          mutate(key, undefined, { revalidate: false });
+        });
         reportError('');
       }
       setSessionUserId(next?.id ?? null);
@@ -56,14 +48,9 @@ export const useLiveSession = (reportError: (message: string) => void) => {
       authRevision += 1;
       update(session?.user ?? null);
       if (event === 'SIGNED_OUT') {
-        mutate(
-          (key) =>
-            (Array.isArray(key) && key[0] === 'tilawa-account') ||
-            (typeof key === 'string' &&
-              (key.includes('/api/tilawa/') || key.startsWith('reading-bookmark-'))),
-          undefined,
-          { revalidate: false },
-        );
+        clearPrivateSwr(cache, (key) => {
+          mutate(key, undefined, { revalidate: false });
+        });
         window.dispatchEvent(new Event('tilawa-account-cleared'));
       }
     });
@@ -71,6 +58,6 @@ export const useLiveSession = (reportError: (message: string) => void) => {
       active = false;
       subscription.subscription.unsubscribe();
     };
-  }, [mutate, reportError]);
+  }, [mutate, cache, reportError]);
   return { user, authLoading };
 };

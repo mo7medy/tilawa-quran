@@ -3,21 +3,10 @@ import { AccountLink, Panel } from './AccountUi';
 import { LessonCard } from './LessonList';
 import { useAccountUi } from './useAccountUi';
 
-import { rows, string } from '@/tilawa/backend/mappers';
-
 const TeacherStudents = ({ studentId }: { studentId?: string }): JSX.Element => {
-  const { t, state, router, backend, snapshot } = useAccountUi();
-  const linkedIds = new Set([
-    ...state.requests.map((item) => item.studentId),
-    ...state.lessons.map((item) => item.studentId),
-    ...rows(snapshot?.subscriptions)
-      .filter((item) => item.kind === 'teacher')
-      .map((item) => string(item.student_id)),
-  ]);
+  const { t, state, router, backend } = useAccountUi();
   const students = backend
-    ? (state.students ?? []).filter(
-        (item) => linkedIds.has(item.id) && (!studentId || item.id === studentId),
-      )
+    ? (state.students ?? []).filter((item) => !studentId || item.id === studentId)
     : [state.student];
   const selectedStudent = students[0];
   if (

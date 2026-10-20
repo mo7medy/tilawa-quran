@@ -2,10 +2,11 @@
 /* eslint-disable import/prefer-default-export -- Named backend entrypoints make route and domain imports explicit. */
 import type { AccountSubscription } from '../account/types';
 
-import { string } from './rows';
+import { object, string } from './rows';
 import type { Row } from './rows';
 
 export const mapSubscription = (s: Row, credits: Row[]): AccountSubscription => {
+  const summary = object(s.credits_summary);
   const entries = credits.filter((c) => c.subscription_id === s.id);
   const regular = entries.filter((c) => c.bucket === 'regular');
   const reserved = regular.filter(
@@ -22,29 +23,42 @@ export const mapSubscription = (s: Row, credits: Row[]): AccountSubscription => 
     planId: (s.plan_id ?? 'essential') as AccountSubscription['planId'],
     teacherId: string(s.teacher_id),
     subject: s.subject === 'arabic' ? 'arabic' : 'quran',
-    used: regular.filter((c) => c.operation === 'consume').length,
+    used:
+      typeof summary.used === 'number'
+        ? Number(summary.used)
+        : regular.filter((c) => c.operation === 'consume').length,
     gift: s.gift_type === 'memorization' ? 'memorization' : 'recitation',
-    giftUsed: entries.some((c) => c.bucket === 'gift' && c.operation === 'consume'),
+    giftUsed:
+      typeof summary.giftUsed === 'boolean'
+        ? Boolean(summary.giftUsed)
+        : entries.some((c) => c.bucket === 'gift' && c.operation === 'consume'),
     giftChosen: !!s.gift_type,
-    giftReserved: entries.some(
-      (c) =>
-        c.bucket === 'gift' &&
-        c.operation === 'reserve' &&
-        !entries.some(
-          (e) =>
-            e.booking_id === c.booking_id && ['consume', 'release'].includes(string(e.operation)),
-        ),
-    ),
+    giftReserved:
+      typeof summary.giftReserved === 'boolean'
+        ? Boolean(summary.giftReserved)
+        : entries.some(
+            (c) =>
+              c.bucket === 'gift' &&
+              c.operation === 'reserve' &&
+              !entries.some(
+                (e) =>
+                  e.booking_id === c.booking_id &&
+                  ['consume', 'release'].includes(string(e.operation)),
+              ),
+          ),
     startsAt: string(s.starts_at),
     renewsAt: string(s.ends_at),
     expiresAt: string(s.access_ends_at),
     status: string(s.status),
     includedLessons: Number(s.included_lessons),
-    reservedLessons: reserved,
-    remainingLessons: Math.max(
-      0,
-      regular.reduce((sum, c) => sum + Number(c.delta), 0),
-    ),
+    reservedLessons: typeof summary.reserved === 'number' ? Number(summary.reserved) : reserved,
+    remainingLessons:
+      typeof summary.remaining === 'number'
+        ? Number(summary.remaining)
+        : Math.max(
+            0,
+            regular.reduce((sum, c) => sum + Number(c.delta), 0),
+          ),
     priceCents: Number(s.price_cents),
     durationMinutes: Number(s.duration_minutes),
   };

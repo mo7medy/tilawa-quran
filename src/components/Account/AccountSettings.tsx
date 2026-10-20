@@ -10,7 +10,7 @@ import { useAccountUi } from './useAccountUi';
 import { getBrowserSupabase } from '@/lib/supabase/browser';
 
 const AccountSettings = (): JSX.Element => {
-  const { t, state, dispatch, role, backend } = useAccountUi();
+  const { t, state, dispatch, role, backend, command } = useAccountUi();
   const [security, setSecurity] = useState<'email' | 'password' | null>(null);
   const [notice, setNotice] = useState(false);
   const [error, setError] = useState(false);
@@ -30,13 +30,17 @@ const AccountSettings = (): JSX.Element => {
           <select
             id="account-accountsettings-778"
             value={role === 'teacher' ? state.availabilityZone : state.student.zone}
-            onChange={(event) =>
-              dispatch(
-                role === 'teacher'
-                  ? { type: 'availability', value: state.availability, zone: event.target.value }
-                  : { type: 'student', value: { ...state.student, zone: event.target.value } },
-              )
-            }
+            onChange={(event) => {
+              if (backend) {
+                command?.('time-zone', { zone: event.target.value }).catch(() => undefined);
+              } else {
+                dispatch(
+                  role === 'teacher'
+                    ? { type: 'availability', value: state.availability, zone: event.target.value }
+                    : { type: 'student', value: { ...state.student, zone: event.target.value } },
+                );
+              }
+            }}
           >
             {ACCOUNT_ZONES.map((zone) => (
               <option key={zone}>{zone}</option>

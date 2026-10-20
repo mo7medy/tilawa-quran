@@ -4,17 +4,14 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './Account.module.scss';
 import { Panel } from './AccountUi';
 import { useAccountUi } from './useAccountUi';
+import useConversationMessages from './useConversationMessages';
 
-import { tilawaFetch } from '@/tilawa/backend/http';
 import { object, rows, string } from '@/tilawa/backend/mappers';
 import type { Row } from '@/tilawa/backend/mappers';
 
 const LiveMessages = (): JSX.Element => {
   const { t, snapshot, userId, router, command, busy, teacherFor, studentFor } = useAccountUi();
   const [text, setText] = useState('');
-  const [older, setOlder] = useState<Record<string, Row[]>>({});
-  const [loadingOlder, setLoadingOlder] = useState(false);
-  const [olderError, setOlderError] = useState(false);
   const opened = useRef('');
   const bottom = useRef<HTMLDivElement>(null);
   const conversations = rows(snapshot?.conversations);
@@ -23,18 +20,8 @@ const LiveMessages = (): JSX.Element => {
       ? router.query.conversation
       : string(conversations[0]?.id);
   const conversation = conversations.find((c) => c.id === id);
-  const messages = Array.from(
-    new Map(
-      [
-        ...(older[id] ?? []),
-        ...rows(snapshot?.messages).filter((m) => m.conversation_id === id),
-      ].map((m) => [m.id, m]),
-    ).values(),
-  ).sort(
-    (a, b) =>
-      string(a.created_at).localeCompare(string(b.created_at)) ||
-      string(a.id).localeCompare(string(b.id)),
-  );
+  const { messages, hasMore, loadingOlder, olderError, loadEarlier, error, loading } =
+    useConversationMessages(userId, id);
   const latest = string(messages[messages.length - 1]?.id);
   const peerName = (c: Row): string =>
     c.teacher_id === userId
@@ -120,30 +107,15 @@ const LiveMessages = (): JSX.Element => {
               >
                 {t(object(conversation.own_state).blocked ? 'unblock' : 'block')}
               </button>
-              {!!messages.length && (
+              {(loading || error) && (
+                <p role={error ? 'alert' : 'status'}>{t(error ? 'backend-error' : 'loading')}</p>
+              )}
+              {hasMore && (
                 <button
                   type="button"
                   className={styles.secondary}
                   disabled={loadingOlder}
-                  onClick={async () => {
-                    setLoadingOlder(true);
-                    setOlderError(false);
-                    try {
-                      const values = await tilawaFetch<Row[]>(
-                        `messages?conversation=${id}&before=${encodeURIComponent(
-                          string(messages[0].created_at),
-                        )}&cursor=${messages[0].id}`,
-                      );
-                      setOlder((current) => ({
-                        ...current,
-                        [id]: [...values, ...(current[id] ?? [])],
-                      }));
-                    } catch {
-                      setOlderError(true);
-                    } finally {
-                      setLoadingOlder(false);
-                    }
-                  }}
+                  onClick={loadEarlier}
                 >
                   {t('load-earlier')}
                 </button>

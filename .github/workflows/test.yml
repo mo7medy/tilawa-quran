@@ -7,10 +7,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # Utilize a cache when installing deps for a potentially quicker build
+      # Match the application's Node.js engine and Cloudflare build runtime.
       - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 24
           cache: 'yarn'
       - name: Install dependencies
         run: yarn install --frozen-lockfile

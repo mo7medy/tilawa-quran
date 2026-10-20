@@ -4,9 +4,9 @@ import type { EmailOtpType } from '@supabase/supabase-js';
 import type { GetServerSideProps } from 'next';
 
 import { serverSupabase } from '@/lib/supabase/server';
-import { safeAccountRedirect } from '@/tilawa/backend/redirect';
+import { authDestination } from '@/tilawa/backend/authDestination';
 
-export const getServerSideProps: GetServerSideProps = async ({ req, res, query }) => {
+export const getServerSideProps: GetServerSideProps = async ({ req, res, query, locale }) => {
   res.setHeader('Cache-Control', 'private, no-store');
   const client = serverSupabase(req, res);
   const allowed = ['email', 'signup', 'recovery', 'email_change'];
@@ -23,11 +23,11 @@ export const getServerSideProps: GetServerSideProps = async ({ req, res, query }
     : { error: true };
   return {
     redirect: {
-      destination: error
-        ? '/sign-in?authError=1'
-        : type === 'recovery'
-        ? '/sign-in?reset=1'
-        : safeAccountRedirect(query.next),
+      destination: authDestination(
+        error ? '/sign-in?authError=1' : query.next,
+        query.lang === 'ar' ? 'ar' : locale,
+        !error && type === 'recovery',
+      ),
       permanent: false,
     },
   };

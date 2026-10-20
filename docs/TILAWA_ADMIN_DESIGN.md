@@ -24,17 +24,17 @@ credentials, payment tools, rooms, coins, gifts and campaigns were not copied.
 There are eight sections: overview, teachers, students, lessons, packages/subscriptions, finance,
 audit and settings. Technical support is deferred.
 
-| Route                             | Current interface and data                                                           |
-| --------------------------------- | ------------------------------------------------------------------------------------ |
-| `/1x2003/admin`                   | Live operational reporting, teacher applications, review links and shortcuts.        |
-| `/1x2003/admin/teachers`          | Existing teacher data, approval filter and name/email search.                        |
-| `/1x2003/admin/teachers/[userId]` | Existing profile/documents review and approve/reject commands.                       |
-| `/1x2003/admin/students`          | Directory layout and explicit pending secure administrative data connection.         |
-| `/1x2003/admin/lessons`           | Schedule layout and pending data connection; no lesson acceptance by administrators. |
-| `/1x2003/admin/subscriptions`     | Approved USD website catalogue and subscription layout awaiting data connection.     |
-| `/1x2003/admin/finance`           | Live read-only financial reporting and filtered CSV exports.                         |
-| `/1x2003/admin/audit`             | Existing snapshot's latest 100 audit records.                                        |
-| `/1x2003/admin/settings`          | Existing teacher-registration switch and the remaining security setup status.        |
+| Route                             | Current interface and data                                                    |
+| --------------------------------- | ----------------------------------------------------------------------------- |
+| `/1x2003/admin`                   | Live operational reporting, teacher applications, review links and shortcuts. |
+| `/1x2003/admin/teachers`          | Existing teacher data, approval filter and name/email search.                 |
+| `/1x2003/admin/teachers/[userId]` | Existing profile/documents review and approve/reject commands.                |
+| `/1x2003/admin/students`          | Live minimal student directory with server filtering and pagination.          |
+| `/1x2003/admin/lessons`           | Live read-only lesson directory; no administrative lesson acceptance.         |
+| `/1x2003/admin/subscriptions`     | USD catalogue and live subscriptions with authoritative credit summaries.     |
+| `/1x2003/admin/finance`           | Live read-only financial reporting and filtered CSV exports.                  |
+| `/1x2003/admin/audit`             | Filtered paginated audit history with actor/target references.                |
+| `/1x2003/admin/settings`          | Existing teacher-registration switch and the remaining security setup status. |
 
 There are no fabricated live student, lesson or subscription records. Local visual verification uses
 synthetic `[Preview]` teacher records in an ignored harness, never in the deployed application.
@@ -49,18 +49,18 @@ optional type of gift lesson in each of the latter two plans. Teacher prices rem
 - Existing server session checks and administrator membership checks remain in place. Hiding links
   is not the access control mechanism. Non-administrators do not request the admin snapshot in the
   UI.
-- Mandatory administrator MFA and Cloudflare Access have **not** been configured or enforced by this
-  design. They remain a separate security phase before treating the console as production hardened.
+- Administrator TOTP setup/challenge and live session/factor checks are implemented and enforced in
+  database authorization. Actual enrollment requires the owner. Cloudflare Access remains external
+  setup.
 - No manual paid activation, collection, refund execution, payout execution, user impersonation or
   conversation inspection is exposed.
 - No additional package, image or font dependency is introduced.
 
 ## Next implementation phase
 
-Connect the three prepared lists through dedicated administrator read models with pagination,
-minimal returned fields and authorization enforced at the server/database boundary. Student learning
-notes and private conversations are outside the directory's scope. Add detail views only after their
-permitted fields and actions are agreed. Support remains deferred.
+The lists are connected through dedicated, bounded administrator read models. Student learning notes
+and private conversations remain outside their scope. Support remains deferred. See
+[backend completion](TILAWA_BACKEND_COMPLETION.md) for contracts and verification.
 
 The UI lives under `src/components/Admin`, with route classification in
 `src/tilawa/adminSections.ts`. This separation helps a future move to an admin subdomain, but that

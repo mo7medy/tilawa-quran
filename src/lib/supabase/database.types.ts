@@ -1807,6 +1807,17 @@ export type Database = {
       [_ in never]: never;
     };
     Functions: {
+      tilawa_account_bootstrap: { Args: never; Returns: Json };
+      tilawa_account_view: {
+        Args: {
+          p_id?: string;
+          p_page?: number;
+          p_status?: string;
+          p_view: string;
+        };
+        Returns: Json;
+      };
+      tilawa_admin_access: { Args: never; Returns: Json };
       tilawa_admin_finance: {
         Args: {
           p_export?: boolean;
@@ -1818,11 +1829,25 @@ export type Database = {
         };
         Returns: Json;
       };
+      tilawa_admin_health: { Args: never; Returns: Json };
+      tilawa_admin_list: {
+        Args: {
+          p_from?: string;
+          p_page?: number;
+          p_search?: string;
+          p_section: string;
+          p_status?: string;
+          p_subject?: string;
+          p_until?: string;
+        };
+        Returns: Json;
+      };
       tilawa_admin_overview: {
         Args: { p_from: string; p_until: string };
         Returns: Json;
       };
       tilawa_admin_snapshot: { Args: never; Returns: Json };
+      tilawa_admin_teacher: { Args: { p_id: string }; Returns: Json };
       tilawa_available_slots: {
         Args: {
           days: number;
@@ -1843,6 +1868,10 @@ export type Database = {
         Returns: Json;
       };
       tilawa_snapshot: { Args: never; Returns: Json };
+      tilawa_upload_referenced: {
+        Args: { p_bucket: string; p_path: string };
+        Returns: boolean;
+      };
     };
     Enums: {
       [_ in never]: never;

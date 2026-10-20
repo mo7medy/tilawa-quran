@@ -193,3 +193,10 @@ Operational statistics and the read-only USD finance section are implemented und
 The reporting RPCs and indexes are applied to the independent website project. See
 [TILAWA_ADMIN_REPORTS.md](TILAWA_ADMIN_REPORTS.md) for definitions, permission boundaries, UTC date
 filtering, CSV limits and verification. Payment collection remains disabled.
+
+## Account and administration completion (2026-10-20)
+
+Live paginated directories, small account bootstrap, per-conversation history, TOTP enforcement,
+whole-ledger balances and failure handling are implemented. Three additional website migrations are
+applied. See [delivery and remaining setup](TILAWA_BACKEND_COMPLETION.md). These source/database
+changes are separate from a Git push or Cloudflare release.

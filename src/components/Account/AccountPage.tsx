@@ -4,6 +4,7 @@ import TeacherProfile from '../Academy/TeacherProfile';
 import AccountLayout from './AccountLayout';
 import AccountMessages from './AccountMessages';
 import AccountNotifications from './AccountNotifications';
+import AccountPager from './AccountPager';
 import AccountReviews from './AccountReviews';
 import { AccountLink, Panel } from './AccountUi';
 import AvailabilityEditor from './AvailabilityEditor';
@@ -25,7 +26,8 @@ interface AccountPageProps {
 }
 
 const AccountPage = ({ area }: AccountPageProps): JSX.Element => {
-  const { t, router, state, role, backend, loading, userId, error } = useAccountUi();
+  const { t, router, state, role, backend, loading, userId, error, snapshot, refresh } =
+    useAccountUi();
   if (backend && (loading || !userId)) {
     return (
       <AccountLayout title={t(loading ? 'loading' : 'sign-in-required')}>
@@ -44,6 +46,18 @@ const AccountPage = ({ area }: AccountPageProps): JSX.Element => {
               {t('login')}
             </AccountLink>
           )}
+        </Panel>
+      </AccountLayout>
+    );
+  }
+  if (backend && error && !snapshot) {
+    return (
+      <AccountLayout title={t('profile')}>
+        <Panel>
+          <p role="alert">{t('backend-error')}</p>
+          <button type="button" onClick={() => refresh?.()}>
+            {t('admin-console.retry')}
+          </button>
         </Panel>
       </AccountLayout>
     );
@@ -100,11 +114,12 @@ const AccountPage = ({ area }: AccountPageProps): JSX.Element => {
       lessons: (
         <>
           <LessonList />
-          {backend && <BookingRequests />}
+          {backend && <AccountLink to="/profile/requests">{t('requests')}</AccountLink>}
         </>
       ),
       teachers: <StudentTeachers />,
       packages: <StudentPackages />,
+      requests: <BookingRequests requestId={id} />,
       messages: <AccountMessages />,
       notifications: <AccountNotifications />,
     };
@@ -128,7 +143,8 @@ const AccountPage = ({ area }: AccountPageProps): JSX.Element => {
   }
   return (
     <AccountLayout title={t(title)}>
-      <div key={backend ? userId : state.revision}>{content}</div>
+      <div key={backend ? `${userId}:${router.asPath}` : state.revision}>{content}</div>
+      <AccountPager />
     </AccountLayout>
   );
 };

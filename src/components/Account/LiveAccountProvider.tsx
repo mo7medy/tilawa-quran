@@ -1,17 +1,17 @@
 /* eslint-disable react-func/max-lines-per-function -- Declarative form fields and explicit protocol mappings are kept together for auditability. */
 /* eslint-disable no-nested-ternary -- Small enum/label selections keep existing UI and wire-state mappings adjacent. */
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-
-import useSWR from 'swr';
 
 import { AccountContext } from './AccountContext';
 import type { LiveAction } from './AccountContext';
+import useAccountReads from './useAccountReads';
 import { useLiveSession } from './useLiveSession';
 
 import { getBrowserSupabase } from '@/lib/supabase/browser';
 import type { PreviewAction } from '@/tilawa/account/types';
-import { sendCommand, tilawaFetch, TilawaRequestError } from '@/tilawa/backend/http';
+import { compensateUpload } from '@/tilawa/backend/compensateUpload';
+import { sendCommand, TilawaRequestError } from '@/tilawa/backend/http';
 import { emptyAccount, mapAccountSnapshot, object } from '@/tilawa/backend/mappers';
 import type { Row } from '@/tilawa/backend/mappers';
 import { uploadDataPhoto } from '@/tilawa/backend/uploadProfilePhoto';
@@ -20,36 +20,8 @@ const LiveAccountProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [busy, setBusy] = useState(false);
   const [operationError, setOperationError] = useState('');
   const { user, authLoading } = useLiveSession(setOperationError);
-  const {
-    data,
-    error,
-    mutate: refresh,
-  } = useSWR<Row>(user ? ['tilawa-account', user.id] : null, () => tilawaFetch<Row>('account'), {
-    shouldRetryOnError: (failure) => failure?.status !== 401,
-  });
+  const { data, error, refresh } = useAccountReads(user?.id);
   const state = useMemo(() => (data ? mapAccountSnapshot(data) : emptyAccount()), [data]);
-  useEffect(() => {
-    if (!user) return undefined;
-    const client = getBrowserSupabase();
-    const channel = client.channel(`account-${user.id}`);
-    [
-      'direct_conversations',
-      'direct_messages',
-      'notifications',
-      'booking_requests',
-      'lessons',
-    ].forEach((table) => {
-      channel.on('postgres_changes', { event: '*', schema: 'public', table }, () => {
-        refresh();
-      });
-    });
-    channel.subscribe((status) => {
-      if (status === 'SUBSCRIBED') refresh();
-    });
-    return () => {
-      client.removeChannel(channel);
-    };
-  }, [user, refresh]);
   const command = useCallback(
     async <T,>(action: string, payload: unknown): Promise<T> => {
       setBusy(true);
@@ -69,6 +41,7 @@ const LiveAccountProvider = ({ children }: { children: ReactNode }): JSX.Element
   );
   const dispatch = useCallback(
     async (action: PreviewAction | LiveAction): Promise<boolean> => {
+      let newUpload = '';
       try {
         if (['reset', 'scenario'].includes(action.type)) throw new Error('PREVIEW_DISABLED');
         let payload: Row = { ...action };
@@ -91,6 +64,7 @@ const LiveAccountProvider = ({ children }: { children: ReactNode }): JSX.Element
           const path = photo.startsWith('data:')
             ? await uploadDataPhoto(photo, user?.id ?? '')
             : oldPath ?? '';
+          if (photo.startsWith('data:')) newUpload = path;
           payload = {
             ...action,
             value:
@@ -101,7 +75,12 @@ const LiveAccountProvider = ({ children }: { children: ReactNode }): JSX.Element
         }
         await command(action.type, payload);
         return true;
-      } catch {
+      } catch (failure) {
+        if (newUpload && user?.id) {
+          await compensateUpload('tilawa-avatars', newUpload, user.id, failure).catch(
+            () => undefined,
+          );
+        }
         return false;
       }
     },

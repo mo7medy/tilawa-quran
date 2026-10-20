@@ -1,10 +1,9 @@
 import { Panel } from '../Account/AccountUi';
 import { useAccountUi } from '../Account/useAccountUi';
 
-import AdminAudit from './AdminAudit';
+import AdminDirectory from './AdminDirectory';
 import AdminFinance from './AdminFinance';
 import AdminOverview from './AdminOverview';
-import AdminPlannedSection from './AdminPlannedSection';
 import AdminSubscriptions from './AdminSubscriptions';
 
 import type { AdminSection } from '@/tilawa/adminSections';
@@ -20,10 +19,10 @@ const AdminSectionContent = ({
   const { t } = useAccountUi();
   if (section === 'overview') return <AdminOverview data={data} />;
   if (section === 'finance') return <AdminFinance />;
-  if (section === 'audit') return <AdminAudit data={data} />;
+  if (section === 'audit') return <AdminDirectory key="audit" section="audit" />;
   if (section === 'subscriptions') return <AdminSubscriptions />;
   if (section === 'students' || section === 'lessons') {
-    return <AdminPlannedSection section={section} />;
+    return <AdminDirectory key={section} section={section} />;
   }
   return (
     <Panel>

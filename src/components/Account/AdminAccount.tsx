@@ -2,20 +2,20 @@
 /* eslint-disable max-lines -- Keep this cohesive form or typed data contract together; reader services are split by feature. */
 import { useEffect, useState } from 'react';
 
-import useSWR from 'swr';
+import AdminHealth from '../Admin/AdminHealth';
+import AdminMfa from '../Admin/AdminMfa';
+import useAdminConsoleData from '../Admin/useAdminConsoleData';
 
 import styles from './Account.module.scss';
 import { AccountLink, Field, Panel } from './AccountUi';
+import SignedDocument from './SignedDocument';
 import { useAccountUi } from './useAccountUi';
 
 import consoleStyles from '@/components/Admin/AdminConsole.module.scss';
 import AdminLayout from '@/components/Admin/AdminLayout';
 import AdminSectionContent from '@/components/Admin/AdminSectionContent';
-import { getBrowserSupabase } from '@/lib/supabase/browser';
 import { ADMIN_BASE_PATH, getAdminSection } from '@/tilawa/adminSections';
-import { tilawaFetch } from '@/tilawa/backend/http';
 import { object, rows, string } from '@/tilawa/backend/mappers';
-import type { Row } from '@/tilawa/backend/mappers';
 
 const AdminAccount = (): JSX.Element => {
   const { t, snapshot, router, userId, command, busy, loading } = useAccountUi();
@@ -23,21 +23,13 @@ const AdminAccount = (): JSX.Element => {
   const [search, setSearch] = useState('');
   const [reason, setReason] = useState('');
   const [academy, setAcademy] = useState(false);
-  const { data, error, mutate } = useSWR<Row>(
-    snapshot?.isAdmin && userId ? ['tilawa-admin', userId] : null,
-    () => tilawaFetch('admin'),
-  );
   const segments = Array.isArray(router.query.section) ? router.query.section : [];
   const section = getAdminSection(segments[0]);
-  const settings = section === 'settings';
-  const visibleTeachers = rows(data?.teachers).filter(
-    (item) =>
-      (filter === 'all' || item.approval === filter) &&
-      `${string(item.display_name)} ${string(item.email)}`
-        .toLocaleLowerCase()
-        .includes(search.trim().toLocaleLowerCase()),
-  );
   const id = segments[1];
+  const [page, setPage] = useState(1);
+  const { data, error, mutate } = useAdminConsoleData(section, id, filter, search, page);
+  const settings = section === 'settings';
+  const visibleTeachers = rows(data?.teachers);
   const teacher = rows(data?.teachers).find((item) => item.user_id === id);
   useEffect(() => {
     setAcademy(!!teacher?.academy_enabled);
@@ -72,6 +64,8 @@ const AdminAccount = (): JSX.Element => {
         <Panel>
           <p>{t('admin.denied')}</p>
         </Panel>
+      ) : !snapshot?.adminVerified ? (
+        <AdminMfa key={userId} />
       ) : error ? (
         <Panel>
           <p role="alert">{t('backend-error')}</p>
@@ -112,9 +106,11 @@ const AdminAccount = (): JSX.Element => {
             </label>
             <p>{t('admin.deferred-integrations')}</p>
           </Panel>
+          <AdminHealth />
+          <AdminMfa key={userId} manage />
           <Panel title={t('admin-console.security-title')}>
             <p>{t('admin-console.security-hint')}</p>
-            <p className={consoleStyles.stageNote}>{t('admin-console.security-pending')}</p>
+            <p className={consoleStyles.stageNote}>{t('backend-ui.mfa.enforced')}</p>
           </Panel>
         </>
       ) : section !== 'teachers' ? (
@@ -154,18 +150,11 @@ const AdminAccount = (): JSX.Element => {
               </p>
               <h3>{t('supporting-documents')}</h3>
               {rows(teacher.documents).map((document) => (
-                <button
-                  type="button"
+                <SignedDocument
                   key={string(document.id)}
-                  onClick={async () => {
-                    const { data: file } = await getBrowserSupabase()
-                      .storage.from('tilawa-teacher-documents')
-                      .createSignedUrl(string(document.path), 60);
-                    if (file) window.open(file.signedUrl, '_blank', 'noopener,noreferrer');
-                  }}
-                >
-                  {string(document.label)}
-                </button>
+                  path={string(document.path)}
+                  label={string(document.label)}
+                />
               ))}
               <label className={styles.check} htmlFor="academy-enabled">
                 <input
@@ -227,14 +216,20 @@ const AdminAccount = (): JSX.Element => {
                 label={t('admin-console.search-teachers')}
                 type="search"
                 value={search}
-                onChange={(event) => setSearch(event.target.value)}
+                onChange={(event) => {
+                  setSearch(event.target.value);
+                  setPage(1);
+                }}
               />
               <label className={styles.field} htmlFor="approval-filter">
                 {t('application-status')}
                 <select
                   id="approval-filter"
                   value={filter}
-                  onChange={(event) => setFilter(event.target.value)}
+                  onChange={(event) => {
+                    setFilter(event.target.value);
+                    setPage(1);
+                  }}
                 >
                   {['all', 'pending', 'approved', 'rejected', 'incomplete'].map((status) => (
                     <option key={status} value={status}>
@@ -256,6 +251,24 @@ const AdminAccount = (): JSX.Element => {
               </article>
             ))}
             {!visibleTeachers.length && <p>{t('admin.no-requests')}</p>}
+            <nav className={styles.actions} aria-label={t('backend-ui.pagination')}>
+              <button type="button" disabled={page <= 1} onClick={() => setPage(page - 1)}>
+                {t('backend-ui.previous')}
+              </button>
+              <span>
+                {t('backend-ui.page', {
+                  page,
+                  pages: Math.max(1, Math.ceil(Number(data.total) / 25)),
+                })}
+              </span>
+              <button
+                type="button"
+                disabled={page * 25 >= Number(data.total)}
+                onClick={() => setPage(page + 1)}
+              >
+                {t('backend-ui.next')}
+              </button>
+            </nav>
           </Panel>
         </>
       )}

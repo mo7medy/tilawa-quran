@@ -9,6 +9,7 @@ const AccountNotifications = (): JSX.Element => {
   const notifications = rows(snapshot?.notifications);
   return (
     <Panel title={t('notifications')}>
+      <p>{t('backend-ui.unread', { count: snapshot?.unreadNotifications ?? 0 })}</p>
       {!notifications.length && <p>{t('no-notifications')}</p>}
       {notifications.map((item) => (
         <article className={styles.listCard} key={string(item.id)}>

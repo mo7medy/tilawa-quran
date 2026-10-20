@@ -25,8 +25,8 @@ export const protectAccountPage: GetServerSideProps = async ({ req, res, resolve
   }
   const pathname = stripLocalePrefix(resolvedUrl.split(/[?#]/)[0], locale ? [locale] : []);
   if (isAdminRoutePathname(pathname)) {
-    const result = await client.rpc('tilawa_admin_snapshot');
-    if (result.error) return { notFound: true };
+    const result = await client.rpc('tilawa_admin_access');
+    if (result.error || !result.data?.member) return { notFound: true };
   }
   if (/\/dashboard\/teacher(?:\/|$)/.test(resolvedUrl)) {
     const { data: teacher } = await client

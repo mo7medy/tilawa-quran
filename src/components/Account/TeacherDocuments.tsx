@@ -1,9 +1,12 @@
+/* eslint-disable react-func/max-lines-per-function -- Validate, upload and compensate one document in a single change handler. */
 import { useState } from 'react';
 
 import styles from './Account.module.scss';
+import SignedDocument from './SignedDocument';
 import { useAccountUi } from './useAccountUi';
 
 import { getBrowserSupabase } from '@/lib/supabase/browser';
+import { compensateUpload } from '@/tilawa/backend/compensateUpload';
 import { rows, string } from '@/tilawa/backend/mappers';
 
 const TeacherDocuments = (): JSX.Element => {
@@ -32,6 +35,7 @@ const TeacherDocuments = (): JSX.Element => {
           }
           setBusy(true);
           setError(false);
+          let uploadedPath = '';
           try {
             const path = `${userId}/${crypto.randomUUID()}.${
               file.type === 'application/pdf' ? 'pdf' : file.type.split('/')[1]
@@ -40,8 +44,17 @@ const TeacherDocuments = (): JSX.Element => {
               .storage.from('tilawa-teacher-documents')
               .upload(path, file, { contentType: file.type });
             if (uploadError) throw uploadError;
+            uploadedPath = path;
             await command?.('document', { path, label: file.name });
-          } catch {
+          } catch (failure) {
+            if (uploadedPath && userId) {
+              await compensateUpload(
+                'tilawa-teacher-documents',
+                uploadedPath,
+                userId,
+                failure,
+              ).catch(() => undefined);
+            }
             setError(true);
           } finally {
             setBusy(false);
@@ -51,18 +64,7 @@ const TeacherDocuments = (): JSX.Element => {
       <small>{t('documents-hint')}</small>
       {error && <p role="alert">{t('document-upload-error')}</p>}
       {rows(snapshot?.documents).map((doc) => (
-        <button
-          type="button"
-          key={string(doc.id)}
-          onClick={async () => {
-            const { data } = await getBrowserSupabase()
-              .storage.from('tilawa-teacher-documents')
-              .createSignedUrl(string(doc.path), 60);
-            if (data) window.open(data.signedUrl, '_blank', 'noopener,noreferrer');
-          }}
-        >
-          {string(doc.label)}
-        </button>
+        <SignedDocument key={string(doc.id)} path={string(doc.path)} label={string(doc.label)} />
       ))}
     </div>
   );

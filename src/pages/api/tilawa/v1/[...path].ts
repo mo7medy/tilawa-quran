@@ -10,6 +10,7 @@ import {
   respondError,
   serverSupabase,
 } from '@/lib/supabase/server';
+import { handleAccountReads, handleAdminReads } from '@/tilawa/backend/accountReads';
 import { handleAdminReports } from '@/tilawa/backend/adminReports';
 import { rows } from '@/tilawa/backend/mappers';
 import { handleMushafMapping } from '@/tilawa/backend/mushafMapping';
@@ -65,9 +66,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await handleQuranAccount(req, res, client, user, parts.slice(1));
       return;
     }
+    if (req.method === 'GET' && path === 'account/view') {
+      await handleAccountReads(req, res, client);
+      return;
+    }
+    if (req.method === 'GET' && parts[0] === 'admin' && parts.length > 1) {
+      await handleAdminReads(req, res, client, parts);
+      return;
+    }
     if (req.method === 'GET' && ['account', 'admin'].includes(path)) {
       const { data, error } = await client.rpc(
-        path === 'account' ? 'tilawa_snapshot' : 'tilawa_admin_snapshot',
+        path === 'account' ? 'tilawa_account_bootstrap' : 'tilawa_admin_snapshot',
       );
       if (error) throw error;
       res.status(200).json({
@@ -90,6 +99,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         throw new BackendError('INVALID_TIME_ZONE', 422);
       }
       const start = new Date(`${date}T12:00:00Z`);
+      if (!Number.isFinite(start.getTime()) || start.toISOString().slice(0, 10) !== date) {
+        throw new BackendError('INVALID_INPUT', 422);
+      }
       start.setUTCDate(start.getUTCDate() - 2);
       const { data, error } = await client.rpc('tilawa_available_slots', {
         teacher_id: req.query.teacher,
@@ -118,7 +130,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .eq('conversation_id', id)
         .order('created_at', { ascending: false })
         .order('id', { ascending: false })
-        .limit(50);
+        .limit(51);
       if (req.query.before) {
         const time = new Date(String(req.query.before));
         const cursor = String(req.query.cursor ?? '');
@@ -131,7 +143,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
       const { data, error } = await request;
       if (error) throw error;
-      res.json({ data });
+      const items = data.slice(0, 50);
+      const last = items[items.length - 1];
+      res.json({
+        data: {
+          items,
+          hasMore: data.length > 50,
+          nextCursor:
+            data.length > 50 && last ? { before: last.created_at, cursor: last.id } : null,
+        },
+      });
       return;
     }
     if (req.method === 'POST' && path === 'command') {

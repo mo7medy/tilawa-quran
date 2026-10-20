@@ -2,7 +2,7 @@ import { Panel } from '../Account/AccountUi';
 import { useAccountUi } from '../Account/useAccountUi';
 
 import styles from './AdminConsole.module.scss';
-import AdminPlannedSection from './AdminPlannedSection';
+import AdminDirectory from './AdminDirectory';
 
 import { ACADEMY_LESSON_MINUTES, ACADEMY_PLANS, formatAcademyPrice } from '@/tilawa/academyPlans';
 
@@ -25,7 +25,7 @@ const AdminSubscriptions = (): JSX.Element => {
           ))}
         </div>
       </Panel>
-      <AdminPlannedSection section="subscriptions" />
+      <AdminDirectory section="subscriptions" />
       <Panel title={t('admin-console.teacher-offers')}>
         <p>{t('admin-console.teacher-offers-hint')}</p>
         <p className={styles.stageNote}>{t('admin-console.payments-deferred')}</p>
