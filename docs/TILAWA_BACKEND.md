@@ -109,6 +109,10 @@ Migrations live in `supabase/migrations/`. Already-applied migrations are immuta
 subsequent migrations. The project guard refuses a different linked project. The five-minute
 database job is named `tilawa-maintenance`.
 
+The separate `tilawa-message-retention` job also runs every five minutes. It deletes message history
+after 60 days without a new message, keeping the conversation and its request/block states. See
+[message retention](TILAWA_MESSAGE_RETENTION.md) for receipt privacy, Realtime and verification.
+
 ## Files, privacy and reader compatibility
 
 - `tilawa-avatars`: private bucket, JPEG/PNG/WebP, 5 MB. The UI uploads when the profile is saved,

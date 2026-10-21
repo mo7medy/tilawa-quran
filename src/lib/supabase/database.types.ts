@@ -252,6 +252,7 @@ export type Database = {
         Row: {
           created_at: string;
           id: string;
+          last_message_at: string | null;
           request_status: string;
           requested_by: string;
           student_id: string;
@@ -260,6 +261,7 @@ export type Database = {
         Insert: {
           created_at?: string;
           id?: string;
+          last_message_at?: string | null;
           request_status?: string;
           requested_by: string;
           student_id: string;
@@ -268,6 +270,7 @@ export type Database = {
         Update: {
           created_at?: string;
           id?: string;
+          last_message_at?: string | null;
           request_status?: string;
           requested_by?: string;
           student_id?: string;

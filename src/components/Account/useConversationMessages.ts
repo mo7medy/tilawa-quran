@@ -45,6 +45,13 @@ const useConversationMessages = (userId: string | undefined, id: string) => {
         mutate();
       },
     );
+    channel.on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'direct_conversations', filter: `id=eq.${id}` },
+      () => {
+        mutate();
+      },
+    );
     channel.subscribe((status) => {
       if (status === 'SUBSCRIBED') mutate();
     });

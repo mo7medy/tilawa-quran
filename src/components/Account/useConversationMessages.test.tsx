@@ -21,6 +21,29 @@ const wrapper = ({ children }: { children: ReactNode }): JSX.Element => (
 );
 afterEach(() => vi.clearAllMocks());
 describe('Independent conversation history', () => {
+  it('clears all loaded history pages when retention updates the conversation', async () => {
+    let purged = false;
+    vi.mocked(tilawaFetch).mockImplementation(async (path) => {
+      const older = path.includes('before=');
+      return {
+        items: purged ? [] : [{ id: older ? 'old' : 'recent', created_at: '2026-08-01' }],
+        hasMore: !purged && !older,
+        nextCursor: !purged && !older ? { before: '2026-08-01', cursor: 'recent' } : null,
+      };
+    });
+    const { result } = renderHook(() => useConversationMessages('student', 'thread'), { wrapper });
+    await waitFor(() => expect(result.current.messages).toHaveLength(1));
+    await act(() => result.current.loadEarlier());
+    expect(result.current.messages).toHaveLength(2);
+    const update = channel.on.mock.calls.find(
+      ([, options]) => options.table === 'direct_conversations',
+    );
+    expect(update?.[1]).toMatchObject({ event: 'UPDATE', filter: 'id=eq.thread' });
+    purged = true;
+    await act(async () => update?.[2]());
+    await waitFor(() => expect(result.current.messages).toEqual([]));
+    expect(result.current.hasMore).toBe(false);
+  });
   it('rebuilds contiguous history pages after a burst of messages on reconnect', async () => {
     let newest = false;
     vi.mocked(tilawaFetch).mockImplementation(async (path) => {
