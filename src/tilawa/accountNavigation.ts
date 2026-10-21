@@ -18,6 +18,8 @@ const getAccountQuerySuffix = (query: AccountQuery): string => {
       : '',
   );
   if (typeof query.r === 'string' && query.r) params.set('r', query.r);
+  const redirect = query.redirectTo ?? query.redirect;
+  if (typeof redirect === 'string' && redirect) params.set('redirectTo', redirect);
   const suffix = params.toString();
   return suffix ? `?${suffix}` : '';
 };

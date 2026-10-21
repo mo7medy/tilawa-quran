@@ -68,6 +68,8 @@
 }
 .nav {
   display: flex;
+  flex: 1;
+  justify-content: center;
   align-items: center;
   gap: 24px;
   a {
@@ -84,6 +86,54 @@
       text-underline-offset: 6px;
     }
     @include tilawa.academy-focus-visible;
+  }
+}
+.shortcuts {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.iconShortcut,
+.messageShortcut {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border-radius: 50%;
+  color: var(--tilawa-link);
+  border: 1px solid var(--tilawa-control-border);
+  background: var(--tilawa-glass-chip);
+  @include tilawa.academy-focus-visible;
+}
+.messageShortcut {
+  display: none;
+}
+.badge {
+  position: absolute;
+  inset-block-start: -4px;
+  inset-inline-end: -4px;
+  min-inline-size: 18px;
+  padding: 1px 4px;
+  border-radius: 12px;
+  font-size: 11px;
+  line-height: 1.6;
+  background: var(--tilawa-button);
+  color: var(--tilawa-on-primary);
+  text-align: center;
+}
+.inlineBadge {
+  margin-inline-start: 6px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-size: 12px;
+  background: var(--tilawa-container);
+  color: var(--tilawa-link);
+}
+@media (max-width: 1200px) {
+  .messageShortcut {
+    display: inline-flex;
   }
 }
 .actions {
@@ -155,6 +205,12 @@
   .inner {
     gap: 16px;
     padding-block: 12px;
+  }
+  .inner > .shortcuts {
+    margin-inline-start: auto;
+  }
+  .inner > .shortcuts + button {
+    margin-inline-start: 0;
   }
 }
 @media (max-width: 360px) {

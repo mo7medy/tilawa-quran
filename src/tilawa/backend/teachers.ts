@@ -16,9 +16,13 @@ export const signAvatar = async (client: SupabaseClient, row: Row): Promise<Row>
 };
 export const signSnapshot = async (client: SupabaseClient, snapshot: Row): Promise<Row> => ({
   ...snapshot,
-  profile: await signAvatar(client, object(snapshot.profile)),
-  teachers: await Promise.all(rows(snapshot.teachers).map((t) => signAvatar(client, t))),
-  people: await Promise.all(rows(snapshot.people).map((p) => signAvatar(client, p))),
+  ...(snapshot.profile && { profile: await signAvatar(client, object(snapshot.profile)) }),
+  ...(Array.isArray(snapshot.teachers) && {
+    teachers: await Promise.all(rows(snapshot.teachers).map((t) => signAvatar(client, t))),
+  }),
+  ...(Array.isArray(snapshot.people) && {
+    people: await Promise.all(rows(snapshot.people).map((p) => signAvatar(client, p))),
+  }),
 });
 export const loadPublicTeachers = async (): Promise<AcademyTeacherProfile[]> => {
   const config = getSupabaseConfiguration();

@@ -50,8 +50,7 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow: hidden;
   color: var(--tilawa-ink);
   color-scheme: var(--tilawa-color-scheme);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Tahoma, Arial, sans-serif;
@@ -87,6 +86,18 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  flex-shrink: 0;
+  padding-block-end: 16px;
+  border-block-end: 1px solid var(--tilawa-border);
+}
+.body {
+  flex: 1;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  padding: 4px;
+  margin-inline: -4px;
 }
 .brand {
   display: flex;
@@ -110,7 +121,7 @@
   font-size: 21px;
   font-family: inherit;
   font-weight: 650;
-  margin-block: 32px 8px;
+  margin-block: 20px 8px;
 }
 .description {
   color: var(--tilawa-muted);
@@ -118,22 +129,40 @@
   line-height: 1.6;
   margin-block-end: 22px;
 }
+.navigation {
+  margin-block-end: 24px;
+}
+.linkGroup + .linkGroup {
+  border-block-start: 1px solid var(--tilawa-border);
+  margin-block-start: 16px;
+  padding-block-start: 16px;
+}
+.groupTitle {
+  margin-block: 0 10px;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--tilawa-muted);
+  font-weight: 600;
+}
 .links {
   display: grid;
   gap: 4px;
-  margin-block-end: 24px;
   a {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-    min-block-size: 50px;
+    min-block-size: 46px;
     padding: 10px 12px;
     border-radius: 12px;
     color: var(--tilawa-ink);
     text-decoration: none;
     font-weight: 550;
     font-size: 16px;
+    span {
+      min-inline-size: 0;
+      overflow-wrap: anywhere;
+    }
     transition: background-color 160ms ease;
     svg {
       color: var(--tilawa-link);
@@ -145,6 +174,16 @@
       background: var(--tilawa-container);
       color: var(--tilawa-secondary-text);
     }
+  }
+}
+.quickLinks {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  a {
+    border: 1px solid var(--tilawa-border);
+    font-size: 14px;
+    justify-content: center;
+    text-align: center;
   }
 }
 .arabic .links svg {
@@ -200,6 +239,15 @@
 @media (max-width: 1200px) {
   .trigger {
     display: inline-flex;
+  }
+}
+@media (min-width: 768px) {
+  .drawer {
+    inline-size: 400px;
+    inset-block: 16px;
+    inset-inline-end: 16px;
+    max-block-size: calc(100dvh - 32px);
+    padding: 24px;
   }
 }
 @media (max-width: 360px) {

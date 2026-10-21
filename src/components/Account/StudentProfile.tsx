@@ -1,109 +1,132 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import styles from './Account.module.scss';
-import AccountSettings from './AccountSettings';
-import { Field, Panel, Status, TextField } from './AccountUi';
-import PhotoField from './PhotoField';
+import AccountAvatar from './AccountAvatar';
+import { Panel, Status } from './AccountUi';
+import profileStyles from './StudentProfile.module.scss';
+import StudentProfileFields from './StudentProfileFields';
+import StudentProfileView from './StudentProfileView';
 import { useAccountUi } from './useAccountUi';
 
+import { countryOptions, validStudentProfile } from '@/tilawa/account/profile';
+import type { StudentAccount } from '@/tilawa/account/types';
+
 const StudentProfile = (): JSX.Element => {
-  const { t, state, dispatch, busy } = useAccountUi();
-  const [photo, setPhoto] = useState(state.student.photo);
+  const { t, state, dispatch, busy, lang } = useAccountUi();
+  const [draft, setDraft] = useState<StudentAccount | null>(null);
   const [saved, setSaved] = useState(false);
-  const [version, setVersion] = useState(0);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState<'validation' | 'save' | null>(null);
+  const [saving, setSaving] = useState(false);
+  const pending = useRef(false);
+  const editButton = useRef<HTMLButtonElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const wasEditing = useRef(false);
+  const editing = !!draft;
+  useEffect(() => {
+    if (!wasEditing.current && editing) {
+      formRef.current?.querySelector<HTMLInputElement>('[name="name"]')?.focus();
+    }
+    if (wasEditing.current && !editing) editButton.current?.focus();
+    wasEditing.current = editing;
+  }, [editing]);
+  const { student } = state;
   return (
     <>
-      <Panel title={t('personal-information')}>
+      <Panel>
+        <div className={profileStyles.hero}>
+          <AccountAvatar large name={student.name} photo={student.photo} />
+          <div className={profileStyles.identity}>
+            <span className={profileStyles.role}>{t('student')}</span>
+            <h2>{student.name || t('profile')}</h2>
+            <small>
+              {countryOptions(lang, student.country).find(
+                (option) => option.value === student.country,
+              )?.label || t('profile-ui.not-added')}
+            </small>
+          </div>
+          {!draft && (
+            <button
+              type="button"
+              ref={editButton}
+              onClick={() => {
+                setDraft({ ...student });
+                setError(null);
+                setSaved(false);
+              }}
+            >
+              {t('profile-ui.edit')}
+            </button>
+          )}
+        </div>
+      </Panel>
+      {saved && <Status>{t('saved')}</Status>}
+      {draft ? (
         <form
-          key={version}
-          onChange={() => setSaved(false)}
+          ref={formRef}
           onSubmit={async (event) => {
             event.preventDefault();
-            const form = new FormData(event.currentTarget);
-            const birthDate = String(form.get('birthDate'));
-            if (
-              ['name', 'country', 'goal', 'schedule'].some(
-                (field) => !String(form.get(field)).trim(),
-              ) ||
-              !Number.isFinite(Date.parse(`${birthDate}T00:00:00Z`)) ||
-              birthDate > new Date().toISOString().slice(0, 10)
-            ) {
-              setError(true);
+            if (pending.current) return;
+            if (!validStudentProfile(draft)) {
+              setError('validation');
               return;
             }
-            const succeeded = await dispatch({
-              type: 'student',
-              value: {
-                ...state.student,
-                photo,
-                name: String(form.get('name')).trim(),
-                country: String(form.get('country')),
-                birthDate,
-                goal: String(form.get('goal')),
-                schedule: String(form.get('schedule')),
-              },
-            });
-            if (succeeded === false) return;
-            setSaved(true);
-            setError(false);
+            pending.current = true;
+            setSaving(true);
+            setError(null);
+            try {
+              const result = await dispatch({
+                type: 'student',
+                value: { ...draft, name: draft.name.trim(), country: draft.country.trim() },
+              });
+              if (result === false) {
+                setError('save');
+                return;
+              }
+              setDraft(null);
+              setSaved(true);
+            } catch {
+              setError('save');
+            } finally {
+              pending.current = false;
+              setSaving(false);
+            }
           }}
         >
-          <PhotoField value={photo} onChange={setPhoto} />
-          <div className={styles.twoColumns}>
-            <Field
-              label={t('full-name')}
-              name="name"
-              defaultValue={state.student.name}
-              required
-              maxLength={100}
-              autoComplete="name"
+          <fieldset className={styles.profileFields} disabled={busy || saving}>
+            <StudentProfileFields
+              draft={draft}
+              onChange={(value) => {
+                setDraft(value);
+                setError(null);
+              }}
             />
-            <Field
-              label={t('country')}
-              name="country"
-              defaultValue={state.student.country}
-              required
-              maxLength={80}
-              autoComplete="country-name"
-            />
-            <Field
-              label={t('birth-date')}
-              name="birthDate"
-              type="date"
-              defaultValue={state.student.birthDate}
-              required
-            />
-            <Field
-              label={t('preferred-schedule')}
-              name="schedule"
-              defaultValue={state.student.schedule}
-              required
-              maxLength={200}
-            />
-          </div>
-          <TextField label={t('learning-goal')} name="goal" value={state.student.goal} required />
-          <div className={styles.actions}>
-            <button type="submit" disabled={busy}>
-              {t('save-preview')}
+          </fieldset>
+          {error && (
+            <Status error>
+              {t(error === 'validation' ? 'invalid-profile' : 'profile-ui.save-failed')}
+            </Status>
+          )}
+          <div className={profileStyles.saveBar}>
+            <button type="submit" disabled={busy || saving}>
+              {t(saving ? 'saving' : 'save-preview')}
             </button>
             <button
               type="button"
+              className={styles.secondary}
+              disabled={saving}
               onClick={() => {
-                setPhoto(state.student.photo);
-                setVersion(version + 1);
+                setDraft(null);
+                setError(null);
                 setSaved(false);
-                setError(false);
               }}
             >
               {t('cancel-edit')}
             </button>
           </div>
-          {saved && <Status>{t('saved')}</Status>}
-          {error && <Status error>{t('invalid-profile')}</Status>}
         </form>
-      </Panel>
-      <AccountSettings />
+      ) : (
+        <StudentProfileView />
+      )}
     </>
   );
 };

@@ -5,7 +5,6 @@ import useTranslation from 'next-translate/useTranslation';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { TestId } from '../../../../tests/test-ids';
-import ProfileAvatarButton from '../NavbarBody/ProfileAvatarButton';
 
 import SiteLanguageDialog from '@/components/Academy/SiteLanguageDialog';
 import SiteNavigationDrawer from '@/components/Academy/SiteNavigationDrawer';
@@ -16,7 +15,6 @@ import {
   setIsNavigationDrawerOpen,
   setLockVisibilityState,
 } from '@/redux/slices/navbar';
-import { isLoggedIn } from '@/utils/auth/login';
 import { getLoginNavigationUrl, getMyQuranNavigationUrl, RECITERS_URL } from '@/utils/navigation';
 import { stripLocalePrefix } from '@/utils/tilawaRoutes';
 
@@ -25,7 +23,6 @@ const NavigationDrawer = (): JSX.Element => {
   const { events, locales, asPath } = useRouter();
   const dispatch = useDispatch();
   const isOpen = useSelector(selectIsNavigationDrawerOpen);
-  const isUserLoggedIn = isLoggedIn();
   const continueReadingUrl = useGetContinueReadingUrl();
   const { changingLocale, onLanguageChange } = useLanguageChange();
   const onOpenChange = useCallback(
@@ -68,9 +65,6 @@ const NavigationDrawer = (): JSX.Element => {
           onLanguageChange={onLanguageChange}
           onNavigate={handleClose}
         />
-      }
-      accountActions={
-        isUserLoggedIn ? <ProfileAvatarButton isPopoverPortalled={false} /> : undefined
       }
       onCloseAutoFocus={(event) => {
         event.preventDefault();

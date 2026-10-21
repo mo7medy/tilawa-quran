@@ -1,0 +1,25 @@
+.avatar {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  inline-size: 42px;
+  block-size: 42px;
+  border-radius: 50%;
+  background: var(--tilawa-container);
+  color: var(--tilawa-link);
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 600;
+  img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+}
+.large {
+  inline-size: 88px;
+  block-size: 88px;
+  border-radius: 26px;
+  font-size: 30px;
+}

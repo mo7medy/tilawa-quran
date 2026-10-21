@@ -2,18 +2,16 @@
 import type { ReactNode } from 'react';
 
 import * as Dialog from '@radix-ui/react-dialog';
-import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
 
-import SITE_NAVIGATION_LINKS from '../../tilawa/siteNavigation';
-
+import AcademyDrawerAccount from './AcademyDrawerAccount';
 import AcademyIcon from './AcademyIcon';
 import AcademyLanguageSwitch from './AcademyLanguageSwitch';
 import AcademyLink from './AcademyLink';
 import styles from './AcademyMobileMenu.module.scss';
 import AcademyThemeControl from './AcademyThemeControl';
-
-import { useOptionalAccountPreview } from '@/components/Account/AccountContext';
+import SiteNavigationLinks from './SiteNavigationLinks';
+import useAccountNavigation from './useAccountNavigation';
 
 interface SiteNavigationDrawerProps {
   isOpen: boolean;
@@ -26,12 +24,6 @@ interface SiteNavigationDrawerProps {
   loginHref?: string;
   onCloseAutoFocus?: (event: Event) => void;
 }
-
-const MENU_LINKS = [
-  ...SITE_NAVIGATION_LINKS,
-  { href: '/quran', key: 'read-quran' },
-  { href: '/profile', key: 'my-account' },
-] as const;
 
 /**
  * The shared glass navigation panel for the academy and Quran reader.
@@ -48,10 +40,10 @@ const SiteNavigationDrawer = ({
   loginHref = '/sign-in',
   onCloseAutoFocus,
 }: SiteNavigationDrawerProps): JSX.Element => {
-  const account = useOptionalAccountPreview();
+  const { signedIn } = useAccountNavigation();
+  const { t: tAccount } = useTranslation('account');
   const { t: tCommon, lang } = useTranslation('common');
   const t = (key: string): string => tCommon(`site-nav.${key}`);
-  const { pathname } = useRouter();
   const handleClose = (): void => onOpenChange(false);
 
   return (
@@ -75,50 +67,34 @@ const SiteNavigationDrawer = ({
               <AcademyIcon name="close" />
             </Dialog.Close>
           </div>
-          <Dialog.Title className={styles.title}>{t('header.menu-title')}</Dialog.Title>
-          <Dialog.Description className={styles.description}>
-            {t('header.menu-description')}
-          </Dialog.Description>
-          <nav className={styles.links} aria-label={t('nav-label')}>
-            {MENU_LINKS.map(({ href, key }) => (
-              <AcademyLink
-                key={key}
-                href={href}
-                onClick={handleClose}
-                ariaCurrent={pathname === href ? 'page' : undefined}
-              >
-                <span>{t(`header.${key}`)}</span>
-                <AcademyIcon name="arrow" />
-              </AcademyLink>
-            ))}
-            {extraLinks.map(({ href, label }) => (
-              <AcademyLink key={href} href={href} onClick={handleClose}>
-                <span>{label}</span>
-                <AcademyIcon name="arrow" />
-              </AcademyLink>
-            ))}
-          </nav>
-          <div className={styles.bottom}>
-            <AcademyThemeControl />
-            <div className={styles.language}>
-              <span>{t('language-switch.label')}</span>
-              {languageControl ?? <AcademyLanguageSwitch onNavigate={handleClose} />}
+          <div className={styles.body}>
+            <Dialog.Title className={styles.title}>
+              {signedIn ? tAccount('account-sections') : t('header.menu-title')}
+            </Dialog.Title>
+            <Dialog.Description className={styles.description}>
+              {signedIn ? tAccount('profile-ui.navigation-note') : t('header.menu-description')}
+            </Dialog.Description>
+            <SiteNavigationLinks onNavigate={handleClose} extraLinks={extraLinks} />
+            <div className={styles.bottom}>
+              <AcademyThemeControl />
+              <div className={styles.language}>
+                <span>{t('language-switch.label')}</span>
+                {languageControl ?? <AcademyLanguageSwitch onNavigate={handleClose} />}
+              </div>
+              {accountActions ??
+                (signedIn ? (
+                  <AcademyDrawerAccount onNavigate={handleClose} />
+                ) : (
+                  <>
+                    <AcademyLink href={loginHref} className={styles.login} onClick={handleClose}>
+                      {t('header.login')}
+                    </AcademyLink>
+                    <AcademyLink href="/register" className={styles.register} onClick={handleClose}>
+                      {t('account.register-link')}
+                    </AcademyLink>
+                  </>
+                ))}
             </div>
-            {accountActions ??
-              (account?.userId ? (
-                <AcademyLink href="/profile" className={styles.login} onClick={handleClose}>
-                  {t('header.my-account')}
-                </AcademyLink>
-              ) : (
-                <>
-                  <AcademyLink href={loginHref} className={styles.login} onClick={handleClose}>
-                    {t('header.login')}
-                  </AcademyLink>
-                  <AcademyLink href="/register" className={styles.register} onClick={handleClose}>
-                    {t('account.register-link')}
-                  </AcademyLink>
-                </>
-              ))}
           </div>
         </Dialog.Content>
       </Dialog.Portal>

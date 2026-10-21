@@ -13,6 +13,7 @@ afterEach(cleanup);
 const profileSections = [
   [],
   ['learning'],
+  ['settings'],
   ['lessons'],
   ['teachers'],
   ['packages'],

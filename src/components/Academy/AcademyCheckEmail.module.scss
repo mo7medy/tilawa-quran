@@ -1,0 +1,127 @@
+@use './tokens' as tilawa;
+
+.page {
+  padding: clamp(32px, 6vw, 72px) 16px;
+  line-height: 1.65;
+}
+.panel {
+  max-inline-size: 560px;
+  margin-inline: auto;
+  border: 1px solid var(--tilawa-border);
+  border-radius: 28px;
+  background: var(--tilawa-card);
+  color: var(--tilawa-ink);
+  padding: clamp(24px, 5vw, 44px);
+  text-align: center;
+  h1 {
+    font-size: clamp(28px, 4vw, 38px);
+    line-height: 1.25;
+    margin-block-end: 16px;
+  }
+  > p:not(.eyebrow) {
+    color: var(--tilawa-muted);
+  }
+  form {
+    margin-block-start: 24px;
+    text-align: start;
+  }
+  label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  input {
+    box-sizing: border-box;
+    inline-size: 100%;
+    min-block-size: 50px;
+    border: 1px solid var(--tilawa-border);
+    border-radius: 12px;
+    background: var(--tilawa-bg);
+    color: var(--tilawa-ink);
+    font: inherit;
+    font-size: 16px;
+    padding: 12px;
+    margin-block-start: 8px;
+    @include tilawa.academy-focus-visible;
+  }
+  button {
+    inline-size: 100%;
+    min-block-size: 52px;
+    border-radius: 999px;
+    border: 1px solid var(--tilawa-button);
+    background: var(--tilawa-button);
+    color: var(--tilawa-on-primary);
+    font: inherit;
+    font-weight: 600;
+    padding: 12px;
+    cursor: pointer;
+    &:hover:not(:disabled) {
+      background: var(--tilawa-deep);
+    }
+    &:disabled {
+      opacity: 0.65;
+      cursor: default;
+    }
+    @include tilawa.academy-focus-visible;
+  }
+}
+.icon {
+  display: grid;
+  place-items: center;
+  inline-size: 72px;
+  block-size: 72px;
+  border-radius: 24px;
+  margin-inline: auto;
+  margin-block-end: 22px;
+  background: var(--tilawa-container);
+  color: var(--tilawa-link);
+  svg {
+    inline-size: 32px;
+    block-size: 32px;
+  }
+}
+.eyebrow {
+  color: var(--tilawa-link);
+  font-size: 12px;
+  font-weight: 700;
+  margin-block-end: 12px;
+}
+.steps {
+  display: grid;
+  gap: 12px;
+  margin-block: 24px;
+  p {
+    display: flex;
+    align-items: start;
+    gap: 10px;
+  }
+  svg {
+    flex-shrink: 0;
+    margin-block-start: 4px;
+    color: var(--tilawa-link);
+  }
+}
+.hint {
+  color: var(--tilawa-muted);
+  font-size: 14px;
+  margin-block-end: 22px;
+}
+.feedback {
+  padding: 14px;
+  background: var(--tilawa-container);
+  border-radius: 12px;
+  margin-block-start: 18px;
+}
+.links {
+  display: grid;
+  gap: 8px;
+  margin-block-start: 20px;
+  a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-block-size: 44px;
+    color: var(--tilawa-link);
+    @include tilawa.academy-focus-visible;
+  }
+}

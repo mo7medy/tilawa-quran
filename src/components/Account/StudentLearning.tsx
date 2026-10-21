@@ -4,6 +4,7 @@ import { getTeacherName } from '../../tilawa/teachers';
 import styles from './Account.module.scss';
 import { AccountLink, Panel } from './AccountUi';
 import { LessonCard } from './LessonList';
+import StudentOverviewPanels from './StudentOverviewPanels';
 import { useAccountUi } from './useAccountUi';
 
 const StudentLearning = (): JSX.Element => {
@@ -13,22 +14,30 @@ const StudentLearning = (): JSX.Element => {
       ? undefined
       : state.lessons
           .filter(
-            (lesson) => lesson.status === 'upcoming' && Date.parse(lesson.scheduledAt) > Date.now(),
+            (lesson) =>
+              lesson.status === 'upcoming' &&
+              Date.parse(lesson.scheduledAt) + lesson.duration * 60000 > Date.now(),
           )
           .sort((a, b) => Date.parse(a.scheduledAt) - Date.parse(b.scheduledAt))[0];
   return (
     <>
       <Panel title={t('next-lesson')}>
-        {next ? <LessonCard lesson={next} /> : <p>{t('no-lessons')}</p>}
+        {next ? (
+          <LessonCard lesson={next} />
+        ) : (
+          <>
+            <p>{t('profile-ui.no-next-lesson')}</p>
+            <div className={styles.actions}>
+              <AccountLink to="/teachers">{t('find-teacher')}</AccountLink>
+              <AccountLink to="/pricing">{t('profile-ui.explore-packages')}</AccountLink>
+            </div>
+          </>
+        )}
+        <small>
+          {t('timezone')}: {state.student.zone}
+        </small>
       </Panel>
-      <div className={styles.twoColumns}>
-        {['lessons', 'packages', 'teachers', 'messages'].map((section) => (
-          <Panel key={section} title={t(section)}>
-            <p>{t(`intro.${section}`)}</p>
-            <AccountLink to={`/profile/${section}`}>{t('open-section')}</AccountLink>
-          </Panel>
-        ))}
-      </div>
+      <StudentOverviewPanels />
     </>
   );
 };

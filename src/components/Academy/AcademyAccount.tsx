@@ -16,6 +16,7 @@ interface AcademyAccountProps {
 
 const AcademyAccount = ({ mode }: AcademyAccountProps): JSX.Element => {
   const { t } = useTranslation('academy');
+  const { t: tAccount } = useTranslation('account');
   const { query } = useRouter();
   const selection = readAcademyPlanSelection(query);
   const isRecovery = mode === 'sign-in' && query.recovery === '1';
@@ -31,6 +32,16 @@ const AcademyAccount = ({ mode }: AcademyAccountProps): JSX.Element => {
             <h1 id="account-title">{t(`account.${formMode}.title`)}</h1>
             <p>{t(`account.${formMode}.subtitle`)}</p>
           </div>
+          {mode === 'sign-in' && query.authError === '1' && (
+            <div className={styles.feedback} role="alert">
+              <p>
+                {tAccount('confirmation.invalid-link')}{' '}
+                <AcademyLink href="/auth/check-email">
+                  {tAccount('confirmation.resend')}
+                </AcademyLink>
+              </p>
+            </div>
+          )}
           <AcademyAccountForm key={formMode} mode={formMode} />
           <div className={styles.accountLinks}>
             {isRecovery ? (

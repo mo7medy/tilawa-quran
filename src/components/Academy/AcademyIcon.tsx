@@ -1,5 +1,11 @@
 interface AcademyIconProps {
   name:
+    | 'search'
+    | 'more'
+    | 'send'
+    | 'mail'
+    | 'user'
+    | 'bell'
     | 'chat'
     | 'book'
     | 'star'
@@ -18,6 +24,12 @@ interface AcademyIconProps {
 }
 
 const paths: Record<AcademyIconProps['name'], string> = {
+  search: 'M21 21l-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z',
+  more: 'M12 5h.01M12 12h.01M12 19h.01',
+  send: 'm22 2-7 20-4-9-9-4L22 2ZM22 2 11 13',
+  user: 'M20 21v-2a6 6 0 0 0-6-6h-4a6 6 0 0 0-6 6v2M16 6a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z',
+  bell: 'M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 21h4',
+  mail: 'M3 5h18v14H3V5Zm0 1 9 7 9-7',
   sun: 'M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5M17 12a5 5 0 1 1-10 0 5 5 0 0 1 10 0Z',
   moon: 'M20.7 13A9 9 0 0 1 11 3.3 9 9 0 1 0 20.7 13Z',
   monitor: 'M4 3h16a1 1 0 0 1 1 1v12H3V4a1 1 0 0 1 1-1Zm4 18h8m-4-5v5',

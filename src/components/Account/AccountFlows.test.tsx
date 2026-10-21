@@ -18,12 +18,14 @@ describe('Connected account screens', () => {
         <AccountPage area="profile" />
       </AccountPreviewProvider>,
     );
+    fireEvent.click(screen.getByRole('button', { name: 'Edit profile' }));
     const name = screen.getByLabelText('Full name') as HTMLInputElement;
     fireEvent.change(name, { target: { value: 'Taylor demo' } });
     fireEvent.submit(name.closest('form'));
     await waitFor(() => expect(screen.getByRole('status').textContent).toContain('updated'));
     expect(screen.getAllByText('Taylor demo').length).toBeGreaterThan(0);
     fireEvent.click(screen.getByRole('button', { name: 'Reset examples' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Edit profile' }));
     expect((screen.getByLabelText('Full name') as HTMLInputElement).value).toBe('Alex · Demo');
     expect(screen.queryByRole('status')).toBeNull();
   });
@@ -34,10 +36,19 @@ describe('Connected account screens', () => {
         <AccountPage area="profile" />
       </AccountPreviewProvider>,
     );
-    const date = screen.getByLabelText('Date of birth') as HTMLInputElement;
+    fireEvent.click(screen.getByRole('button', { name: 'Edit profile' }));
+    const date = screen.getByLabelText('Date of birth (optional)') as HTMLInputElement;
     fireEvent.change(date, { target: { value: '2099-01-01' } });
     fireEvent.submit(date.closest('form'));
     expect(screen.getByRole('alert').textContent).toContain('not in the future');
+    fireEvent.click(screen.getByRole('button', { name: 'Discard changes' }));
+    routeAccount('profile', ['settings']);
+    cleanup();
+    render(
+      <AccountPreviewProvider>
+        <AccountPage area="profile" />
+      </AccountPreviewProvider>,
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Change password' }));
     expect(screen.getByRole('dialog').querySelector('input[type="password"]')).toBeNull();
   });

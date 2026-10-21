@@ -6,6 +6,7 @@ import AccountMessages from './AccountMessages';
 import AccountNotifications from './AccountNotifications';
 import AccountPager from './AccountPager';
 import AccountReviews from './AccountReviews';
+import AccountSettings from './AccountSettings';
 import { AccountLink, Panel } from './AccountUi';
 import AvailabilityEditor from './AvailabilityEditor';
 import BookingRequests from './BookingRequests';
@@ -26,7 +27,7 @@ interface AccountPageProps {
 }
 
 const AccountPage = ({ area }: AccountPageProps): JSX.Element => {
-  const { t, router, state, role, backend, loading, userId, error, snapshot, refresh } =
+  const { t, router, state, role, backend, loading, userId, error, snapshot, refresh, readFailed } =
     useAccountUi();
   if (backend && (loading || !userId)) {
     return (
@@ -50,7 +51,7 @@ const AccountPage = ({ area }: AccountPageProps): JSX.Element => {
       </AccountLayout>
     );
   }
-  if (backend && error && !snapshot) {
+  if (backend && error && (!snapshot || readFailed)) {
     return (
       <AccountLayout title={t('profile')}>
         <Panel>
@@ -111,6 +112,7 @@ const AccountPage = ({ area }: AccountPageProps): JSX.Element => {
           <TeacherEditor />
         ),
       learning: <StudentLearning />,
+      settings: <AccountSettings />,
       lessons: (
         <>
           <LessonList />
@@ -141,9 +143,10 @@ const AccountPage = ({ area }: AccountPageProps): JSX.Element => {
       </Panel>
     );
   }
+  const pathKey = section === 'messages' ? router.asPath.split('?')[0] : router.asPath;
   return (
     <AccountLayout title={t(title)}>
-      <div key={backend ? `${userId}:${router.asPath}` : state.revision}>{content}</div>
+      <div key={backend ? `${userId}:${pathKey}` : state.revision}>{content}</div>
       <AccountPager />
     </AccountLayout>
   );

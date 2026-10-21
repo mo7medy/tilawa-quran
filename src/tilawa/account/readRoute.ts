@@ -17,6 +17,7 @@ export const accountReadRoute = (
   if (path[0] !== 'profile' && !(path[0] === 'dashboard' && path[1] === 'teacher')) return null;
   const section =
     path[path[0] === 'profile' ? 1 : 2] ?? (path[0] === 'profile' ? 'profile' : 'dashboard');
+  if (path[0] === 'profile' && section === 'settings') return null;
   const view =
     ({ learning: 'home', student: 'profile', teacher: 'profile' } as Record<string, string>)[
       section

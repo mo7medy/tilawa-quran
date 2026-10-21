@@ -35,6 +35,10 @@ vi.mock('next-translate/useTranslation', () => ({
 }));
 vi.mock('@/icons/globe.svg', () => ({ default: () => <svg aria-hidden="true" /> }));
 vi.mock('@/utils/auth/login', () => ({ isLoggedIn: () => mocks.loggedIn }));
+vi.mock('@/components/Account/AccountContext', () => ({
+  useOptionalAccountPreview: () =>
+    mocks.loggedIn ? { userId: 'reader-user', snapshot: { teacher: null } } : null,
+}));
 vi.mock('@/hooks/useGetContinueReadingUrl', () => ({ default: () => '/ar/22?startingVerse=1' }));
 vi.mock('@/hooks/useLanguageChange', () => ({
   default: () => ({
@@ -135,7 +139,10 @@ describe('Reader shared glass navigation', () => {
     const store = renderMenu();
     const menu = screen.getByRole('dialog');
     expect(menu.getAttribute('dir')).toBe('rtl');
-    expect(within(menu).getByRole('button', { name: 'Account' })).toBeDefined();
+    expect(within(menu).getByRole('link', { name: 'profile' }).getAttribute('href')).toBe(
+      '/profile',
+    );
+    expect(within(menu).getByRole('button', { name: 'logout' })).toBeDefined();
     expect(within(menu).queryByRole('link', { name: 'site-nav.header.login' })).toBeNull();
     act(() => mocks.handlers.get('routeChangeComplete')?.());
     await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());

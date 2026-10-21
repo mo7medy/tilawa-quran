@@ -20,7 +20,7 @@ const LiveAccountProvider = ({ children }: { children: ReactNode }): JSX.Element
   const [busy, setBusy] = useState(false);
   const [operationError, setOperationError] = useState('');
   const { user, authLoading } = useLiveSession(setOperationError);
-  const { data, error, refresh } = useAccountReads(user?.id);
+  const { data, error, loading, readError, refresh } = useAccountReads(user?.id);
   const state = useMemo(() => (data ? mapAccountSnapshot(data) : emptyAccount()), [data]);
   const command = useCallback(
     async <T,>(action: string, payload: unknown): Promise<T> => {
@@ -87,14 +87,16 @@ const LiveAccountProvider = ({ children }: { children: ReactNode }): JSX.Element
     [command, state.student.avatarPath, state.teacher.avatarPath, state.coupons, user?.id],
   );
   const logout = useCallback(async (): Promise<void> => {
-    await getBrowserSupabase().auth.signOut();
+    const { error: failure } = await getBrowserSupabase().auth.signOut();
+    if (failure) throw failure;
   }, []);
   const value = useMemo(
     () => ({
       state,
       dispatch,
       backend: true,
-      loading: authLoading || (!!user && !data && !error),
+      loading: authLoading || (!!user && loading && !error),
+      readFailed: !!readError,
       busy,
       error:
         operationError ||
@@ -111,6 +113,8 @@ const LiveAccountProvider = ({ children }: { children: ReactNode }): JSX.Element
       authLoading,
       user,
       data,
+      loading,
+      readError,
       error,
       busy,
       operationError,

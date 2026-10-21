@@ -1,81 +1,61 @@
-/* eslint-disable react/no-multi-comp -- A small mode wrapper selects the colocated live or isolated design-preview component. */
-import { useEffect, useRef, useState } from 'react';
+/* eslint-disable react/no-multi-comp -- The wrapper selects the real backend or isolated preview. */
+import { useState } from 'react';
 
-import styles from './Account.module.scss';
-import { Panel } from './AccountUi';
 import LiveMessages from './LiveMessages';
+import MessageThread from './messages/MessageThread';
+import MessageWorkspace from './messages/MessageWorkspace';
 import { useAccountUi } from './useAccountUi';
 
 const DemoMessages = (): JSX.Element => {
   const { t, role, state, dispatch, router } = useAccountUi();
   const [text, setText] = useState('');
-  const end = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    end.current?.scrollIntoView?.({ block: 'nearest' });
-  }, [state.messages.length]);
-  const counterpart =
-    role === 'student' ? state.teacher.publicProfile.displayName : state.student.name;
+  const [selected, setSelected] = useState(true);
+  const conversation = {
+    id: 'preview-conversation',
+    name: role === 'student' ? state.teacher.publicProfile.displayName : state.student.name,
+    photo: role === 'student' ? state.teacher.publicProfile.photoUrl : state.student.photo,
+    role: role === 'student' ? ('teacher' as const) : ('student' as const),
+    preview: state.messages[state.messages.length - 1]?.text,
+  };
   return (
-    <Panel title={t('messages')}>
-      <div className={styles.messaging}>
-        <aside>
-          <strong>{t('conversations')}</strong>
-          <p>{counterpart}</p>
-          <small>{t('demo-conversation')}</small>
-        </aside>
-        <div>
-          <div
-            className={styles.messages}
-            role="log"
-            aria-label={t('conversation')}
-            aria-live="polite"
-          >
-            {router.query.view === 'empty' ? (
-              <p>{t('no-messages')}</p>
-            ) : (
-              state.messages.map((message) => (
-                <article
-                  key={message.id}
-                  className={message.role === role ? styles.sent : styles.received}
-                >
-                  <small>{message.role === role ? t('you') : counterpart}</small>
-                  <p>{message.text}</p>
-                </article>
-              ))
-            )}
-            <div ref={end} />
-          </div>
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              if (!text.trim()) return;
-              dispatch({ type: 'message', role, text });
-              setText('');
+    <>
+      <MessageWorkspace
+        conversations={[conversation]}
+        selectedId={selected ? conversation.id : ''}
+        onSelect={() => setSelected(true)}
+        onBack={() => setSelected(false)}
+      >
+        {selected && (
+          <MessageThread
+            header={{ conversation, onBack: () => setSelected(false) }}
+            history={{
+              messages:
+                router.query.view === 'empty'
+                  ? []
+                  : state.messages.map((message) => ({
+                      id: message.id,
+                      mine: message.role === role,
+                      body: message.text,
+                      createdAt: message.createdAt,
+                    })),
             }}
-          >
-            <label htmlFor="account-accountmessages-1813" className={styles.field}>
-              {t('your-message')}
-              <textarea
-                id="account-accountmessages-1813"
-                value={text}
-                maxLength={2000}
-                required
-                rows={3}
-                onChange={(event) => setText(event.target.value)}
-              />
-            </label>
-            <button type="submit" disabled={!text.trim()}>
-              {t('send-preview')}
-            </button>
-            <small>{t('message-local')}</small>
-          </form>
-        </div>
-      </div>
-    </Panel>
+            composer={{
+              value: text,
+              onChange: setText,
+              onSend: async (body) =>
+                (await dispatch({ type: 'message', role, text: body })) !== false,
+            }}
+          />
+        )}
+      </MessageWorkspace>
+      <small>{t('message-local')}</small>
+    </>
   );
 };
+
 const AccountMessages = (): JSX.Element => {
   const { backend } = useAccountUi();
   return backend ? <LiveMessages /> : <DemoMessages />;
 };
+
 export default AccountMessages;

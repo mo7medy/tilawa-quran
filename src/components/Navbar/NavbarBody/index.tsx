@@ -10,10 +10,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import styles from './NavbarBody.module.scss';
 import ProfileAvatarButton from './ProfileAvatarButton';
 
+import AcademyAccountMenu from '@/components/Academy/AcademyAccountMenu';
+import AcademyAccountShortcuts from '@/components/Academy/AcademyAccountShortcuts';
 import AcademyThemeControl from '@/components/Academy/AcademyThemeControl';
+import useAccountNavigation from '@/components/Academy/useAccountNavigation';
 import Button, { ButtonShape, ButtonVariant } from '@/dls/Button/Button';
 import Spinner from '@/dls/Spinner/Spinner';
-import useIsLoggedIn from '@/hooks/auth/useIsLoggedIn';
 import useNavbarDrawerActions from '@/hooks/useNavbarDrawerActions';
 import IconGlobe from '@/icons/globe.svg';
 import IconMenu from '@/icons/menu.svg';
@@ -46,7 +48,7 @@ const NavbarBody = (): JSX.Element => {
   const isNavigationDrawerOpen = useSelector(selectIsNavigationDrawerOpen);
   const isSettingsDrawerOpen = useSelector(selectIsSettingsDrawerOpen);
   const isLanguageDrawerOpen = useSelector(selectIsLanguageDrawerOpen);
-  const { isLoggedIn } = useIsLoggedIn();
+  const { signedIn: isLoggedIn } = useAccountNavigation();
   const router = useRouter();
   const isQuranReaderRoute = isQuranReaderRoutePathname(router.pathname);
   const normalizedPathname = router.asPath.split(/[?#]/)[0];
@@ -123,19 +125,27 @@ const NavbarBody = (): JSX.Element => {
       >
         <div className={styles.centerVertically}>
           <div className={styles.rightCTA}>
-            <AcademyThemeControl isCompact />
-            {!isLoggedIn && <ProfileAvatarButton />}
-            <Button
-              tooltip={t('languages')}
-              variant={ButtonVariant.Ghost}
-              onClick={openLanguageDrawer}
-              shape={ButtonShape.Circle}
-              shouldFlipOnRTL={false}
-              ariaLabel={t('languages')}
-              data-testid="open-language-drawer"
-            >
-              <IconGlobe />
-            </Button>
+            <span className={styles.desktopControl}>
+              <AcademyThemeControl isCompact />
+            </span>
+            {!isLoggedIn && (
+              <span className={styles.desktopControl}>
+                <ProfileAvatarButton />
+              </span>
+            )}
+            <span className={styles.desktopControl}>
+              <Button
+                tooltip={t('languages')}
+                variant={ButtonVariant.Ghost}
+                onClick={openLanguageDrawer}
+                shape={ButtonShape.Circle}
+                shouldFlipOnRTL={false}
+                ariaLabel={t('languages')}
+                data-testid="open-language-drawer"
+              >
+                <IconGlobe />
+              </Button>
+            </span>
             <Button
               tooltip={t('search.title')}
               variant={ButtonVariant.Ghost}
@@ -156,7 +166,12 @@ const NavbarBody = (): JSX.Element => {
                 </div>,
                 document.body,
               )}
-            {isLoggedIn && <ProfileAvatarButton />}
+            <AcademyAccountShortcuts />
+            {isLoggedIn && (
+              <span className={styles.desktopControl}>
+                <AcademyAccountMenu />
+              </span>
+            )}
 
             <Button
               tooltip={t('menu')}

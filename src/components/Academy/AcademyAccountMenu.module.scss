@@ -1,0 +1,54 @@
+@use './tokens' as tilawa;
+.trigger {
+  border: 0;
+  background: transparent;
+  border-radius: 50%;
+  padding: 0;
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  cursor: pointer;
+  @include tilawa.academy-focus-visible;
+}
+.menu {
+  @include tilawa.academy-tokens;
+  z-index: 900;
+  min-inline-size: 220px;
+  max-inline-size: calc(100vw - 32px);
+  padding: 8px;
+  border: 1px solid var(--tilawa-border);
+  border-radius: 16px;
+  background: var(--tilawa-card);
+  color: var(--tilawa-ink);
+  box-shadow: var(--tilawa-glass-shadow);
+  font-family: 'Cairo', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  [role='menuitem'] {
+    display: flex;
+    align-items: center;
+    min-block-size: 44px;
+    padding: 10px 14px;
+    border-radius: 9px;
+    cursor: pointer;
+    color: inherit;
+    text-decoration: none;
+    outline: none;
+  }
+  [data-highlighted] {
+    background: var(--tilawa-container);
+  }
+  [data-disabled] {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+.label {
+  padding: 10px 14px;
+  max-inline-size: 260px;
+  overflow-wrap: anywhere;
+  color: var(--tilawa-muted);
+}
+.separator {
+  margin-block: 6px;
+  block-size: 1px;
+  background: var(--tilawa-border);
+}

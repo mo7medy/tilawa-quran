@@ -1,0 +1,64 @@
+.hero {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  flex-wrap: wrap;
+}
+.identity {
+  flex: 1;
+  min-inline-size: 160px;
+  h2 {
+    margin-block: 4px 6px;
+    font-size: clamp(24px, 3vw, 32px);
+  }
+}
+.role {
+  display: inline-flex;
+  color: var(--tilawa-link);
+  background: var(--tilawa-container);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.details {
+  display: grid;
+  gap: 24px;
+  margin: 0;
+  div {
+    min-inline-size: 0;
+  }
+  dt {
+    font-size: 13px;
+    color: var(--tilawa-muted);
+    margin-block-end: 6px;
+  }
+  dd {
+    margin: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+}
+.missing {
+  color: var(--tilawa-muted);
+  font-size: 14px;
+}
+.saveBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--tilawa-border);
+  border-radius: 16px;
+  background: var(--tilawa-card);
+}
+@media (max-width: 767px) {
+  .saveBar {
+    position: sticky;
+    inset-block-end: 12px;
+    z-index: 3;
+    padding-block-end: max(16px, env(safe-area-inset-bottom));
+  }
+  .hero {
+    gap: 16px;
+  }
+}

@@ -411,6 +411,133 @@ try {
     code: '42501',
   });
   checks++;
+  // Student account redesign: real profile data, optional preferences and bounded summaries.
+  await actor(uid(3));
+  const minimalProfile = {
+    value: {
+      name: 'Alex Reader',
+      country: 'United Kingdom',
+      zone: 'Europe/London',
+      photo: '',
+      birthDate: '',
+      goal: '',
+      schedule: '',
+    },
+  };
+  const profileKey = crypto.randomUUID();
+  await command(minimalProfile, profileKey, 'student');
+  await command(minimalProfile, profileKey, 'student');
+  const own = (await query('select public.tilawa_account_bootstrap() a'))[0].a;
+  check(own.profile.display_name, 'Alex Reader', 'name and country alone save and replay');
+  check(own.student.birth_date, null, 'optional birthday is null');
+  check(own.student.learning_goal, '', 'optional goal stays empty');
+  await assert.rejects(
+    () =>
+      command(
+        { ...minimalProfile, value: { ...minimalProfile.value, name: 'Changed' } },
+        profileKey,
+        'student',
+      ),
+    /IDEMPOTENCY_CONFLICT/,
+  );
+  checks++;
+  for (const invalid of [
+    { name: '' },
+    { country: '' },
+    { zone: 'Missing/Zone' },
+    { birthDate: '2099-01-01' },
+    { birthDate: '2024-02-30' },
+    { birthDate: 'not-a-date' },
+    { goal: 42 },
+  ]) {
+    await assert.rejects(
+      () =>
+        command({ value: { ...minimalProfile.value, ...invalid } }, crypto.randomUUID(), 'student'),
+      /INVALID_PROFILE/,
+    );
+    checks++;
+  }
+  await assert.rejects(
+    () =>
+      command(
+        { value: { ...minimalProfile.value, photo: uid(4) + '/avatar.webp' } },
+        crypto.randomUUID(),
+        'student',
+      ),
+    /INVALID_PHOTO/,
+  );
+  checks++;
+  const home = (await query("select public.tilawa_account_view('home') a"))[0].a;
+  check(
+    home.subscriptions[0].credits_summary,
+    subscription.credits_summary,
+    'home package balance matches full package view',
+  );
+  check(home.recentConversations.length, 1, 'home contains only participant conversations');
+  check(
+    home.recentConversations[0].preview,
+    'Old conversation message',
+    'home uses the latest visible message',
+  );
+  check(
+    Object.hasOwn(home.recentConversations[0], 'student_id'),
+    false,
+    'home conversation projection omits private record fields',
+  );
+  check(own.unreadMessages, 0, 'own sent messages do not count as unread');
+  await actor(uid(2));
+  check(
+    (await query('select public.tilawa_account_bootstrap() a'))[0].a.unreadMessages,
+    221,
+    'unread count includes history beyond paginated messages',
+  );
+  await command(
+    { conversationId: uid(3002), operation: 'read' },
+    crypto.randomUUID(),
+    'conversation',
+  );
+  check(
+    (await query('select public.tilawa_account_bootstrap() a'))[0].a.unreadMessages,
+    1,
+    'reading a conversation updates account badge',
+  );
+  await actor(uid(4));
+  check(
+    (await query("select public.tilawa_account_view('home') a"))[0].a.subscriptions.length,
+    0,
+    'home cannot expose another student package',
+  );
+  await actor(uid(3));
+  await db.exec(
+    `reset role;insert into public.direct_conversation_user_states(conversation_id,user_id,hidden_at) values('${uid(
+      3001,
+    )}','${uid(3)}',now());`,
+  );
+  await actor(uid(3));
+  check(
+    (await query("select public.tilawa_account_view('home') a"))[0].a.recentConversations.length,
+    0,
+    'hidden conversations are excluded from overview',
+  );
+  await db.exec('reset role');
+  check(
+    (
+      await query(
+        "select has_function_privilege('authenticated','private.tilawa_command_before_profile(text,jsonb,uuid)','execute') allowed",
+      )
+    )[0].allowed,
+    false,
+    'previous command helper is not directly executable',
+  );
+  check(
+    (
+      await query(
+        "select has_function_privilege('anon','public.tilawa_account_bootstrap()','execute') allowed",
+      )
+    )[0].allowed,
+    false,
+    'anonymous users cannot read account badges',
+  );
   console.log(`${checks} isolated backend checks passed`);
 } finally {
   await db.close();

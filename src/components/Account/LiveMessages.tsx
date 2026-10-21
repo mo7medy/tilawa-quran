@@ -1,189 +1,137 @@
-/* eslint-disable max-lines -- Keep this cohesive form or typed data contract together; reader services are split by feature. */
 import { useEffect, useRef, useState } from 'react';
 
-import styles from './Account.module.scss';
-import { Panel } from './AccountUi';
+import ConversationNotice from './messages/ConversationNotice';
+import conversationItems from './messages/messageModels';
+import styles from './messages/Messages.module.scss';
+import MessageThread from './messages/MessageThread';
+import MessageWorkspace from './messages/MessageWorkspace';
+import useOpenConversation from './messages/useOpenConversation';
 import { useAccountUi } from './useAccountUi';
 import useConversationMessages from './useConversationMessages';
 
-import { object, rows, string } from '@/tilawa/backend/mappers';
-import type { Row } from '@/tilawa/backend/mappers';
+import { string } from '@/tilawa/backend/rows';
 
 const LiveMessages = (): JSX.Element => {
-  const { t, snapshot, userId, router, command, busy, teacherFor, studentFor } = useAccountUi();
-  const [text, setText] = useState('');
-  const opened = useRef('');
-  const bottom = useRef<HTMLDivElement>(null);
-  const conversations = rows(snapshot?.conversations);
-  const id =
-    typeof router.query.conversation === 'string'
-      ? router.query.conversation
-      : string(conversations[0]?.id);
-  const conversation = conversations.find((c) => c.id === id);
-  const { messages, hasMore, loadingOlder, olderError, loadEarlier, error, loading } =
-    useConversationMessages(userId, id);
-  const latest = string(messages[messages.length - 1]?.id);
-  const peerName = (c: Row): string =>
-    c.teacher_id === userId
-      ? studentFor(string(c.student_id)).name
-      : teacherFor(string(c.teacher_id)).publicProfile.displayName;
+  const { t, snapshot, state, userId, router, command, busy } = useAccountUi();
+  const [drafts, setDrafts] = useState<Record<string, string>>({});
+  const [actionFailed, setActionFailed] = useState(false);
+  const read = useRef('');
+  const actionPending = useRef(false);
+  const id = typeof router.query.conversation === 'string' ? router.query.conversation : '';
+  const conversations = conversationItems(snapshot, state, userId, t('message-ui.unknown-person'));
+  const conversation = conversations.find((item) => item.id === id);
+  const hasConversation = !!conversation;
+  const history = useConversationMessages(userId, conversation ? id : '');
+  const opening = useOpenConversation();
+  const latest = string(history.messages[history.messages.length - 1]?.id);
   useEffect(() => {
-    const peer = typeof router.query.peer === 'string' ? router.query.peer : '';
-    if (!peer || opened.current === peer || !command) return;
-    opened.current = peer;
-    command<{ id: string }>('conversation', { peerId: peer })
-      .then((result) =>
-        router.replace(`/profile/messages?conversation=${result.id}`, undefined, { shallow: true }),
-      )
-      .catch(() => {
-        opened.current = '';
+    if (!id || !hasConversation || !command || history.loading || history.error) return undefined;
+    const markRead = (): void => {
+      const key = `${id}:${latest}`;
+      if (document.visibilityState !== 'visible' || read.current === key) return;
+      read.current = key;
+      command('conversation', { conversationId: id, operation: 'read' }).catch(() => {
+        read.current = '';
       });
-  }, [router, command]);
-  useEffect(() => {
-    bottom.current?.scrollIntoView?.({ block: 'nearest' });
-    if (id && command) {
-      command('conversation', { conversationId: id, operation: 'read' }).catch(() => undefined);
+    };
+    markRead();
+    document.addEventListener('visibilitychange', markRead);
+    return () => document.removeEventListener('visibilitychange', markRead);
+  }, [id, hasConversation, latest, command, history.loading, history.error]);
+  const select = (next: string): void => {
+    const query = { ...router.query };
+    delete query.peer;
+    delete query.conversation;
+    if (next) query.conversation = next;
+    router
+      .push({ pathname: router.pathname, query }, undefined, { shallow: true })
+      .catch(() => setActionFailed(true));
+  };
+  const act = async (operation: string): Promise<void> => {
+    if (!command || actionPending.current) return;
+    actionPending.current = true;
+    setActionFailed(false);
+    try {
+      await command('conversation', { conversationId: id, operation });
+    } catch {
+      setActionFailed(true);
+    } finally {
+      actionPending.current = false;
     }
-  }, [id, latest, command]);
+  };
+  const disabled =
+    !conversation ||
+    busy ||
+    history.loading ||
+    !!history.error ||
+    conversation.blocked ||
+    conversation.status === 'rejected' ||
+    (conversation.status === 'pending' &&
+      (!conversation.requestedByMe || history.messages.length > 0));
   return (
-    <Panel title={t('messages')}>
-      <div className={styles.messaging}>
-        <aside>
-          <strong>{t('conversations')}</strong>
-          {!conversations.length && <p>{t('no-messages')}</p>}
-          {conversations.map((c) => (
-            <button
-              type="button"
-              className={styles.secondary}
-              key={string(c.id)}
-              aria-pressed={c.id === id}
-              onClick={() => {
-                router.push(`/profile/messages?conversation=${c.id}`, undefined, {
-                  shallow: true,
-                });
-              }}
-            >
-              {peerName(c)} {c.request_status === 'pending' ? `· ${t('message-request')}` : ''}
+    <>
+      {(actionFailed || opening.failed) && (
+        <div role="alert" className={styles.error}>
+          {t('backend-error')}
+          {opening.failed && (
+            <button type="button" onClick={() => opening.retry()}>
+              {t('retry')}
             </button>
-          ))}
-        </aside>
-        <div>
-          {conversation && (
-            <>
-              <h3>{peerName(conversation)}</h3>
-              {conversation.request_status === 'pending' && (
-                <div className={styles.notice}>
-                  <p>{t('message-request-pending')}</p>
-                  {conversation.requested_by !== userId && (
-                    <div className={styles.actions}>
-                      {['accept', 'reject'].map((operation) => (
-                        <button
-                          type="button"
-                          key={operation}
-                          disabled={busy}
-                          onClick={() => {
-                            command?.('conversation', { conversationId: id, operation }).catch(
-                              () => undefined,
-                            );
-                          }}
-                        >
-                          {t(operation === 'accept' ? 'accept-request' : 'reject-request')}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-              <button
-                type="button"
-                className={styles.secondary}
-                disabled={busy}
-                onClick={() => {
-                  command?.('conversation', {
-                    conversationId: id,
-                    operation: object(conversation.own_state).blocked ? 'unblock' : 'block',
-                  }).catch(() => undefined);
-                }}
-              >
-                {t(object(conversation.own_state).blocked ? 'unblock' : 'block')}
-              </button>
-              {(loading || error) && (
-                <p role={error ? 'alert' : 'status'}>{t(error ? 'backend-error' : 'loading')}</p>
-              )}
-              {hasMore && (
-                <button
-                  type="button"
-                  className={styles.secondary}
-                  disabled={loadingOlder}
-                  onClick={loadEarlier}
-                >
-                  {t('load-earlier')}
-                </button>
-              )}
-              {olderError && <p role="alert">{t('backend-error')}</p>}
-              <div
-                className={styles.messages}
-                role="log"
-                aria-label={t('conversation')}
-                aria-live="polite"
-              >
-                {messages.map((m) => (
-                  <article
-                    key={string(m.id)}
-                    className={m.sender_id === userId ? styles.sent : styles.received}
-                  >
-                    <small>{m.sender_id === userId ? t('you') : peerName(conversation)}</small>
-                    <p>{string(m.body)}</p>
-                    <time dateTime={string(m.created_at)}>
-                      {new Date(string(m.created_at)).toLocaleString(router.locale)}
-                    </time>
-                  </article>
-                ))}
-                <div ref={bottom} />
-              </div>
-              <form
-                onSubmit={async (event) => {
-                  event.preventDefault();
-                  if (!text.trim() || !command) return;
-                  try {
-                    await command('message', { conversationId: id, text });
-                    setText('');
-                  } catch {
-                    /* Shared error panel keeps the draft available. */
-                  }
-                }}
-              >
-                <label className={styles.field} htmlFor="live-message">
-                  {t('your-message')}
-                  <textarea
-                    id="live-message"
-                    rows={3}
-                    maxLength={2000}
-                    required
-                    value={text}
-                    onChange={(event) => setText(event.target.value)}
-                  />
-                </label>
-                <button
-                  type="submit"
-                  disabled={
-                    busy ||
-                    !text.trim() ||
-                    !!conversation.blocked ||
-                    conversation.request_status === 'rejected' ||
-                    (conversation.request_status === 'pending' &&
-                      (conversation.requested_by !== userId || messages.length > 0))
-                  }
-                >
-                  {t('send')}
-                </button>
-              </form>
-            </>
           )}
-          {!conversation && <p>{t('choose-conversation')}</p>}
         </div>
-      </div>
-    </Panel>
+      )}
+      {opening.opening && <p role="status">{t('message-ui.opening')}</p>}
+      <MessageWorkspace
+        conversations={conversations}
+        selectedId={id}
+        onSelect={select}
+        onBack={() => select('')}
+      >
+        {conversation && (
+          <MessageThread
+            key={id}
+            header={{
+              conversation,
+              onBack: () => select(''),
+              busy,
+              onBlock: () => {
+                act(conversation.ownBlocked ? 'unblock' : 'block');
+              },
+            }}
+            notice={<ConversationNotice conversation={conversation} busy={busy} onRespond={act} />}
+            history={{
+              messages: history.messages.map((item) => ({
+                id: string(item.id),
+                body: string(item.body),
+                createdAt: string(item.created_at),
+                mine: item.sender_id === userId,
+              })),
+              loading: history.loading,
+              error: !!history.error,
+              hasMore: history.hasMore,
+              loadingOlder: history.loadingOlder,
+              olderError: history.olderError,
+              onEarlier: history.loadEarlier,
+              onRetry: () => {
+                history.retry().catch(() => undefined);
+              },
+            }}
+            composer={{
+              value: drafts[id] ?? '',
+              disabled: !!disabled,
+              onChange: (text) => setDrafts((previous) => ({ ...previous, [id]: text })),
+              onSend: async (text) => {
+                if (!command || disabled) return false;
+                await command('message', { conversationId: id, text });
+                history.retry().catch(() => undefined);
+                return true;
+              },
+            }}
+          />
+        )}
+      </MessageWorkspace>
+    </>
   );
 };
+
 export default LiveMessages;

@@ -5,13 +5,15 @@ import useTranslation from 'next-translate/useTranslation';
 
 import SITE_NAVIGATION_LINKS from '../../tilawa/siteNavigation';
 
+import AcademyAccountMenu from './AcademyAccountMenu';
+import AcademyAccountShortcuts from './AcademyAccountShortcuts';
 import styles from './AcademyHeader.module.scss';
 import AcademyLanguageSwitch from './AcademyLanguageSwitch';
 import AcademyLink from './AcademyLink';
 import AcademyMobileMenu from './AcademyMobileMenu';
 import AcademyThemeControl from './AcademyThemeControl';
+import useAccountNavigation from './useAccountNavigation';
 
-import { useOptionalAccountPreview } from '@/components/Account/AccountContext';
 import { ROUTES } from '@/utils/navigation';
 
 interface AcademyHeaderProps {
@@ -27,7 +29,8 @@ const AcademyHeader = ({
   isVisible = true,
   isDimmed = false,
 }: AcademyHeaderProps): JSX.Element => {
-  const account = useOptionalAccountPreview();
+  const { signedIn, ready, primaryHref, primaryKey, unreadMessages } = useAccountNavigation();
+  const { t: tAccount } = useTranslation('account');
   const { t: tCommon } = useTranslation('common');
   const t = (key: string): string => tCommon(`site-nav.${key}`);
 
@@ -59,27 +62,42 @@ const AcademyHeader = ({
           <span className={styles.brandName}>{tCommon('tilawa')}</span>
         </AcademyLink>
         <nav className={styles.nav} aria-label={t('nav-label')}>
-          {SITE_NAVIGATION_LINKS.map(({ href, key }) => (
-            <AcademyLink key={key} href={href}>
-              {t(`header.${key}`)}
-            </AcademyLink>
-          ))}
+          {signedIn ? (
+            <>
+              {ready && <AcademyLink href={primaryHref}>{tAccount(primaryKey)}</AcademyLink>}
+              <AcademyLink href="/profile/messages">
+                {tAccount('messages')}
+                {unreadMessages > 0 && (
+                  <span className={styles.inlineBadge}>
+                    {unreadMessages > 99 ? '99+' : unreadMessages}
+                  </span>
+                )}
+              </AcademyLink>
+              <AcademyLink href={ROUTES.QURAN_HOME}>{t('header.read-quran')}</AcademyLink>
+            </>
+          ) : (
+            SITE_NAVIGATION_LINKS.map(({ href, key }) => (
+              <AcademyLink key={key} href={href}>
+                {t(`header.${key}`)}
+              </AcademyLink>
+            ))
+          )}
         </nav>
         <div className={actions ? styles.readerActions : styles.actions}>
-          <AcademyLink
-            href={ROUTES.QURAN_HOME}
-            className={classNames(styles.readQuran, actions && styles.readerQuranLink)}
-          >
-            {t('header.read-quran')}
-          </AcademyLink>
+          {!signedIn && (
+            <AcademyLink
+              href={ROUTES.QURAN_HOME}
+              className={classNames(styles.readQuran, actions && styles.readerQuranLink)}
+            >
+              {t('header.read-quran')}
+            </AcademyLink>
+          )}
           {actions || (
             <>
               <AcademyLanguageSwitch />
               <AcademyThemeControl isCompact />
-              <AcademyLink href="/profile" className={styles.readQuran}>
-                {t('header.my-account')}
-              </AcademyLink>
-              {!account?.userId && (
+              {signedIn && <AcademyAccountMenu />}
+              {!signedIn && (
                 <AcademyLink href="/sign-in" className={styles.login}>
                   {t('header.login')}
                 </AcademyLink>
@@ -87,7 +105,12 @@ const AcademyHeader = ({
             </>
           )}
         </div>
-        {!actions && <AcademyMobileMenu />}
+        {!actions && (
+          <>
+            <AcademyAccountShortcuts />
+            <AcademyMobileMenu />
+          </>
+        )}
       </div>
     </header>
   );

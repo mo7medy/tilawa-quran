@@ -1,4 +1,36 @@
 @use './tokens' as tilawa;
+
+.footer.compact {
+  padding-block: 24px;
+}
+.compact .inner {
+  gap: 16px;
+  padding-block: 0;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+}
+.compact .brand {
+  align-items: center;
+}
+.compact .license {
+  margin-block-start: 0;
+  grid-column: auto;
+  border: 0;
+  padding-block-start: 0;
+}
+.compact .logo {
+  inline-size: 28px;
+  block-size: 28px;
+}
+.compact .name {
+  font-size: 22px;
+}
+@media (max-width: 767px) {
+  .compact .inner {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}
 .footer {
   @include tilawa.academy-tokens;
   background: var(--tilawa-container);

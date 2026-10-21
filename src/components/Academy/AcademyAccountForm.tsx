@@ -13,12 +13,16 @@ import AcademyIcon from './AcademyIcon';
 import { getBrowserSupabase } from '@/lib/supabase/browser';
 import { isSupabaseConfigured } from '@/lib/supabase/config';
 import { authCallbackPath, authDestination } from '@/tilawa/backend/authDestination';
+import {
+  confirmationPagePath,
+  savePendingConfirmation,
+} from '@/tilawa/backend/pendingConfirmation';
 
 interface AcademyAccountFormProps {
   mode: 'register' | 'sign-in' | 'recovery';
 }
 
-// UI preview only: no requests, session creation, credential persistence or payment.
+// Unit previews keep authentication requests disabled.
 const AcademyAccountForm = ({ mode }: AcademyAccountFormProps): JSX.Element => {
   const { t } = useTranslation('academy');
   const { t: tAccount } = useTranslation('account');
@@ -46,7 +50,7 @@ const AcademyAccountForm = ({ mode }: AcademyAccountFormProps): JSX.Element => {
         const client = getBrowserSupabase();
         const email = String(values.get('email') ?? '');
         const password = String(values.get('password') ?? '');
-        const next = router.query.redirectTo ?? router.query.redirect;
+        const next = router.query.redirectTo ?? router.query.redirect ?? router.query.r;
         const callback = `${window.location.origin}${authCallbackPath(next, router.locale)}`;
         const result = resetting
           ? await client.auth.updateUser({ password })
@@ -64,7 +68,10 @@ const AcademyAccountForm = ({ mode }: AcademyAccountFormProps): JSX.Element => {
         if (result.error) throw new Error(result.error.code ?? 'AUTH_FAILED');
         form.reset();
         setIsPasswordVisible(false);
-        if (isRegister || isRecovery) setLiveNotice('check-email');
+        if (isRegister && !('session' in result.data && result.data.session)) {
+          savePendingConfirmation(email.trim(), authDestination(next, router.locale));
+          await router.push(confirmationPagePath(next, router.locale));
+        } else if (isRecovery) setLiveNotice('check-email');
         else {
           await router.push(authDestination(next, router.locale));
         }
@@ -102,7 +109,7 @@ const AcademyAccountForm = ({ mode }: AcademyAccountFormProps): JSX.Element => {
                 options: {
                   redirectTo: `${window.location.origin}/auth/callback?${new URLSearchParams({
                     next: authDestination(
-                      router.query.redirectTo ?? router.query.redirect,
+                      router.query.redirectTo ?? router.query.redirect ?? router.query.r,
                       router.locale,
                     ),
                     lang: router.locale === 'ar' ? 'ar' : 'en',

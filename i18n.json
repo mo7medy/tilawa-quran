@@ -23,7 +23,7 @@
   "defaultLocale": "en",
   "localeDetection": false,
   "pages": {
-    "*": ["common", "error", "radio", "quick-links", "onboarding", "login"],
+    "*": ["common", "error", "radio", "quick-links", "onboarding", "login", "account"],
     "/": ["academy"],
     "/quran": ["home", "radio", "collection", "reading-goal", "reciter", "learn"],
     "/teachers": ["academy"],
@@ -113,6 +113,7 @@
     "/profile/[...section]": ["academy", "account"],
     "/dashboard/teacher/[[...section]]": ["academy", "account"],
     "/lessons/[lessonId]": ["academy", "account"],
-    "/1x2003/admin/[[...section]]": ["academy", "account"]
+    "/1x2003/admin/[[...section]]": ["academy", "account"],
+    "/auth/check-email": ["academy", "account"]
   }
 }

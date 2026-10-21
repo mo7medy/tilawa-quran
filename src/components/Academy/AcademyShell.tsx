@@ -1,10 +1,13 @@
 import React from 'react';
 
+import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
 
 import AcademyFooter from './AcademyFooter';
 import AcademyHeader from './AcademyHeader';
 import styles from './AcademyShell.module.scss';
+
+import { isAccountPath } from '@/tilawa/account/rules';
 
 interface AcademyShellProps {
   children: React.ReactNode;
@@ -22,12 +25,13 @@ interface AcademyShellProps {
  * @returns {JSX.Element} the academy shell
  */
 const AcademyShell = ({ children }: AcademyShellProps): JSX.Element => {
+  const { pathname } = useRouter();
   const { lang } = useTranslation('academy');
   return (
     <div className={`${styles.shell} ${lang === 'ar' ? styles.arabic : ''}`}>
       <AcademyHeader />
       <main>{children}</main>
-      <AcademyFooter />
+      <AcademyFooter compact={isAccountPath(pathname)} />
     </div>
   );
 };

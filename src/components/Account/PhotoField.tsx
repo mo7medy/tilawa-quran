@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState } from 'react';
 
 import styles from './Account.module.scss';
+import AccountAvatar from './AccountAvatar';
 import { useAccountUi } from './useAccountUi';
 
 const PhotoField = ({
@@ -16,23 +17,21 @@ const PhotoField = ({
   const id = useId();
   const reader = useRef<FileReader | null>(null);
   const [error, setError] = useState(false);
+  const original = role === 'teacher' ? state.teacher.publicProfile.photoUrl : state.student.photo;
   useEffect(() => () => reader.current?.abort(), []);
   return (
     <div className={styles.photoField}>
-      {value ? (
-        <img src={value} alt={t('photo')} width={80} height={80} />
-      ) : (
-        <span className={styles.avatar}>
-          {(role === 'teacher'
-            ? state.teacher.publicProfile.displayName
-            : state.student.name
-          ).slice(0, 1)}
-        </span>
-      )}
+      <AccountAvatar
+        large
+        photo={value}
+        name={role === 'teacher' ? state.teacher.publicProfile.displayName : state.student.name}
+      />
       <label htmlFor={id}>
         {isOptional ? t('teacher-wizard.optional-field', { field: t('photo') }) : t('photo')}
+        <span className={styles.photoChoose}>{t('profile-ui.change-photo')}</span>
         <input
           id={id}
+          className={styles.fileInput}
           type="file"
           accept="image/png,image/jpeg,image/webp"
           onChange={(event) => {
@@ -58,6 +57,19 @@ const PhotoField = ({
         />
         <small>{t('photo-hint')}</small>
       </label>
+      {value !== original && (
+        <button
+          type="button"
+          className={styles.secondary}
+          onClick={() => {
+            reader.current?.abort();
+            onChange(original);
+            setError(false);
+          }}
+        >
+          {t('profile-ui.undo-photo')}
+        </button>
+      )}
       {error && (
         <p role="alert" className={styles.error}>
           {t('photo-error')}

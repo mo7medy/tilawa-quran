@@ -77,6 +77,7 @@ const useConversationMessages = (userId: string | undefined, id: string) => {
       String(a.id).localeCompare(String(b.id)),
   );
   return {
+    retry: mutate,
     messages,
     hasMore: !!data?.[data.length - 1]?.hasMore,
     loadingOlder: isValidating && size > (data?.length ?? 0),

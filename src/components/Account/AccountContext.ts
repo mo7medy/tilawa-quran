@@ -12,6 +12,7 @@ interface AccountPreviewContextValue {
   dispatch: (action: PreviewAction | LiveAction) => void | Promise<boolean>;
   backend?: boolean;
   loading?: boolean;
+  readFailed?: boolean;
   busy?: boolean;
   error?: string;
   userId?: string;
