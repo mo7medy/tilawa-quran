@@ -25,6 +25,45 @@ afterEach(() => {
 });
 
 describe('Account link visibility in the header', () => {
+  it('keeps Quran selected on a chapter route while preserving reader actions', () => {
+    session.userId = 'student';
+    route.asPath = '/ar/2/255';
+    const readerAction = 'Reader settings';
+    render(<AcademyHeader actions={<button type="button">{readerAction}</button>} />);
+    const nav = within(screen.getByRole('navigation', { name: 'site-nav.nav-label' }));
+    expect(
+      nav.getByRole('link', { name: 'site-nav.header.read-quran' }).getAttribute('aria-current'),
+    ).toBe('page');
+    expect(screen.getByRole('button', { name: readerAction })).toBeDefined();
+  });
+
+  it('marks the localized message route active and exposes its unread count', () => {
+    session.userId = 'signed-in-user';
+    session.snapshot = { unreadMessages: 4 };
+    route.asPath = '/ar/profile/messages?conversation=chat-1';
+    render(<AcademyHeader />);
+    const nav = within(screen.getByRole('navigation', { name: 'site-nav.nav-label' }));
+    const link = nav.getByRole('link', { name: /messages/ });
+    expect(link.getAttribute('aria-current')).toBe('page');
+    expect(within(link).getByLabelText('profile-ui.unread-messages').textContent).toBe('4');
+    expect(
+      nav.getByRole('link', { name: 'browse-teachers' }).getAttribute('aria-current'),
+    ).toBeNull();
+  });
+
+  it('keeps one current item when viewing teacher lesson details', () => {
+    session.userId = 'teacher';
+    session.snapshot = { teacher: {} };
+    route.asPath = '/dashboard/teacher/lessons';
+    render(<AcademyHeader />);
+    const nav = screen.getByRole('navigation', { name: 'site-nav.nav-label' });
+    expect(within(nav).getByRole('link', { name: 'dashboard' }).getAttribute('aria-current')).toBe(
+      'page',
+    );
+    expect(nav.querySelectorAll('[aria-current="page"]')).toHaveLength(1);
+    expect(nav.querySelector('a a')).toBeNull();
+  });
+
   it('offers daily student links and retains the teacher dashboard for a teacher', () => {
     session.userId = 'signed-in-user';
     const { rerender } = render(<AcademyHeader />);

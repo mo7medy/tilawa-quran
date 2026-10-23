@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
 
+import AcademyIcon from './AcademyIcon';
 import AcademyLink from './AcademyLink';
 import styles from './AcademyMobileMenu.module.scss';
 import useAccountNavigation from './useAccountNavigation';
@@ -19,6 +20,7 @@ const AcademyDrawerAccount = ({ onNavigate }: { onNavigate: () => void }): JSX.E
     <>
       {account?.snapshot?.isAdmin === true && (
         <AcademyLink href={ADMIN_BASE_PATH} onClick={onNavigate}>
+          <AcademyIcon name="shield" />
           {t('admin.title')}
         </AcademyLink>
       )}
@@ -40,6 +42,7 @@ const AcademyDrawerAccount = ({ onNavigate }: { onNavigate: () => void }): JSX.E
           }
         }}
       >
+        <AcademyIcon name="logout" />
         {t(busy ? 'saving' : 'logout')}
       </button>
       {failed && <p role="alert">{t('backend-error')}</p>}

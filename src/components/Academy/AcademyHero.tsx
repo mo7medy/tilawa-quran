@@ -1,6 +1,7 @@
 import useTranslation from 'next-translate/useTranslation';
 
 import styles from './AcademyHome.module.scss';
+import AcademyIcon from './AcademyIcon';
 import AcademyLink from './AcademyLink';
 
 import ArrowRightIcon from '@/icons/arrow-right.svg';
@@ -24,6 +25,7 @@ const AcademyHero = (): JSX.Element => {
             {t('hero.cta-primary')} <ArrowRightIcon aria-hidden="true" />
           </AcademyLink>
           <AcademyLink className={styles.secondaryCta} href={ROUTES.TEACHERS}>
+            <AcademyIcon name="search" />
             {t('hero.cta-secondary')}
           </AcademyLink>
         </div>
@@ -55,9 +57,18 @@ const AcademyHero = (): JSX.Element => {
           </div>
         </div>
         <div className={styles.subjectPills} aria-hidden="true">
-          <span>{t('hero.subjects.arabic')}</span>
-          <span>{t('hero.subjects.tajweed')}</span>
-          <span>{t('hero.subjects.memorization')}</span>
+          <span>
+            <AcademyIcon name="globe" />
+            {t('hero.subjects.arabic')}
+          </span>
+          <span>
+            <AcademyIcon name="book" />
+            {t('hero.subjects.tajweed')}
+          </span>
+          <span>
+            <AcademyIcon name="graduation" />
+            {t('hero.subjects.memorization')}
+          </span>
         </div>
         <figcaption className={styles.imageCaption}>{t('hero.image-caption')}</figcaption>
       </figure>

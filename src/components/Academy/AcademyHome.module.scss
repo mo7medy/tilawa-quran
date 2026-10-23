@@ -1,19 +1,20 @@
 @use './tokens' as tilawa;
 .page {
   @include tilawa.academy-tokens;
-  max-inline-size: 1380px;
+  max-inline-size: var(--tilawa-content-width);
+  inline-size: calc(100% - 2 * var(--tilawa-gutter));
   margin-inline: auto;
-  padding-inline: clamp(20px, 4vw, 56px);
+  padding-inline: 0;
   padding-block-end: 64px;
   background: var(--tilawa-bg);
   color: var(--tilawa-ink);
 }
 .hero {
   display: grid;
-  grid-template-columns: 1.04fr 1fr;
+  grid-template-columns: minmax(0, 1.04fr) minmax(0, 1fr);
   align-items: center;
   gap: 32px;
-  padding-block: 28px 32px;
+  padding-block: 48px;
 }
 .eyebrow {
   margin-block: 0 22px;
@@ -34,22 +35,23 @@
   }
 }
 .heroTitle {
-  font-size: clamp(40px, 4.9vw, 72px);
-  line-height: 1.06;
+  font-size: clamp(36px, 4.6vw, 64px);
+  line-height: 1.15;
   font-weight: 500;
-  letter-spacing: -0.045em;
+  letter-spacing: -0.035em;
   color: var(--tilawa-ink);
   margin-block: 0 24px;
   em {
-    font-style: italic;
-    font-weight: 400;
+    font-style: normal;
+    color: var(--tilawa-link);
+    font-weight: inherit;
   }
   span {
     display: block;
   }
 }
 .heroSubtitle {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--tilawa-ui-font);
   font-size: clamp(18px, 1.65vw, 24px);
   line-height: 1.5;
   color: var(--tilawa-muted);
@@ -78,7 +80,7 @@
   justify-content: center;
   align-items: center;
   gap: 12px;
-  border-radius: 999px;
+  border-radius: var(--tilawa-radius-control);
   padding-block: 14px;
   padding-inline: 26px;
   text-decoration: none;
@@ -112,7 +114,7 @@
   gap: 10px;
   min-block-size: 44px;
   margin-block-start: 10px;
-  font-size: 12px;
+  font-size: 14px;
   color: var(--tilawa-link);
   text-decoration: none;
   svg {
@@ -155,7 +157,7 @@
 .lessonLabel {
   margin-block: 0 12px;
   color: var(--tilawa-ink);
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--tilawa-ui-font);
   font-size: 13px;
 }
 .lessonPhotos {
@@ -195,11 +197,14 @@
   display: grid;
   gap: 10px;
   span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     background: var(--tilawa-container);
     color: var(--tilawa-ink);
     padding-block: 10px;
     padding-inline: 18px;
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--tilawa-ui-font);
     font-size: 13px;
     border-radius: 999px;
     box-shadow: 0 6px 20px #103e3808;
@@ -236,13 +241,13 @@
 .sectionSubtitle {
   margin: 0;
   color: var(--tilawa-muted);
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--tilawa-ui-font);
   font-size: 16px;
 }
 .programGrid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr;
-  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
 }
 .programCard {
   position: relative;
@@ -279,7 +284,7 @@
   color: inherit;
 }
 .programDescription {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--tilawa-ui-font);
   line-height: 1.5;
   font-size: 15px;
   color: inherit;
@@ -383,7 +388,7 @@
   block-size: 44px;
   border-radius: 50%;
   background: var(--tilawa-container);
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--tilawa-ui-font);
   font-size: 22px;
 }
 .stepTitle {
@@ -394,7 +399,7 @@
   color: var(--tilawa-ink);
 }
 .stepDescription {
-  font-family: Georgia, 'Times New Roman', serif;
+  font-family: var(--tilawa-ui-font);
   font-size: 14px;
   color: var(--tilawa-muted);
   line-height: 1.5;
@@ -593,5 +598,48 @@
   .primaryCta,
   .secondaryCta {
     transition: none;
+  }
+}
+
+.sectionIcon,
+.programIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 48px;
+  block-size: 48px;
+  border-radius: 16px;
+  background: var(--tilawa-container);
+  color: var(--tilawa-link);
+  margin-block-end: 16px;
+}
+.programIcon {
+  background: var(--tilawa-card);
+  box-shadow: var(--tilawa-shadow-card);
+}
+.programCard {
+  border: 1px solid var(--tilawa-border);
+}
+.stepNumber {
+  color: var(--tilawa-link);
+  background: var(--tilawa-container);
+  border-radius: 16px;
+}
+.steps {
+  gap: 24px;
+}
+.heroSubtitle {
+  font-size: 18px;
+  max-inline-size: 46ch;
+}
+@media (max-width: 767px) {
+  .page {
+    padding-inline: 0;
+  }
+  .hero {
+    padding-block: 32px;
+  }
+  .heroTitle {
+    font-size: clamp(32px, 7vw, 44px);
   }
 }

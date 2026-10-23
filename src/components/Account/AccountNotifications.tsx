@@ -1,5 +1,5 @@
 import styles from './Account.module.scss';
-import { AccountLink, Panel } from './AccountUi';
+import { AccountLink, EmptyState, Panel } from './AccountUi';
 import { useAccountUi } from './useAccountUi';
 
 import { rows, string } from '@/tilawa/backend/mappers';
@@ -8,9 +8,9 @@ const AccountNotifications = (): JSX.Element => {
   const { t, snapshot, command, busy } = useAccountUi();
   const notifications = rows(snapshot?.notifications);
   return (
-    <Panel title={t('notifications')}>
+    <Panel icon="bell" title={t('notifications')}>
       <p>{t('backend-ui.unread', { count: snapshot?.unreadNotifications ?? 0 })}</p>
-      {!notifications.length && <p>{t('no-notifications')}</p>}
+      {!notifications.length && <EmptyState icon="bell" description={t('no-notifications')} />}
       {notifications.map((item) => (
         <article className={styles.listCard} key={string(item.id)}>
           <div>

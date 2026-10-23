@@ -18,7 +18,7 @@ const TeacherFinance = ({ withdrawal = false }: { withdrawal?: boolean }): JSX.E
   const empty = router.query.view === 'empty';
   return (
     <>
-      <Panel title={t('balances')}>
+      <Panel icon="wallet" title={t('balances')}>
         <p>{t(backend ? 'finance-live-note' : 'finance-demo')}</p>
         <dl className={styles.details}>
           <div>
@@ -43,7 +43,7 @@ const TeacherFinance = ({ withdrawal = false }: { withdrawal?: boolean }): JSX.E
         )}
       </Panel>
       {withdrawal ? (
-        <Panel title={t('request-withdrawal')}>
+        <Panel icon="wallet" title={t('request-withdrawal')}>
           <form
             onChange={() => setResult('')}
             onSubmit={async (event) => {
@@ -96,7 +96,7 @@ const TeacherFinance = ({ withdrawal = false }: { withdrawal?: boolean }): JSX.E
           </form>
         </Panel>
       ) : (
-        <Panel title={t('transactions')}>
+        <Panel icon="wallet" title={t('transactions')}>
           {empty || (backend && !rows(snapshot?.earnings).length) ? (
             <p>{t('no-transactions')}</p>
           ) : backend ? (
@@ -123,7 +123,7 @@ const TeacherFinance = ({ withdrawal = false }: { withdrawal?: boolean }): JSX.E
         </Panel>
       )}
       {(!backend || withdrawal) && (
-        <Panel title={t('withdrawal-history')}>
+        <Panel icon="clock" title={t('withdrawal-history')}>
           {empty || !state.withdrawals.length ? (
             <p className={styles.empty}>{t('no-withdrawals')}</p>
           ) : (

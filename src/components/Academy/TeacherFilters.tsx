@@ -2,6 +2,7 @@ import { useId } from 'react';
 
 import useTranslation from 'next-translate/useTranslation';
 
+import AcademyIcon from './AcademyIcon';
 import styles from './TeachersDirectory.module.scss';
 
 export type TeacherSubjectFilter = 'all' | 'arabic' | 'quran';
@@ -17,6 +18,7 @@ interface TeacherFiltersProps {
   onSubjectChange: (subject: TeacherSubjectFilter) => void;
 }
 
+const SUBJECT_ICONS = { all: 'users', arabic: 'globe', quran: 'book' } as const;
 const SUBJECTS = ['all', 'arabic', 'quran'] as const;
 
 const TeacherFilters = ({
@@ -42,12 +44,16 @@ const TeacherFilters = ({
             aria-pressed={subject === item}
             onClick={() => onSubjectChange(item)}
           >
+            <AcademyIcon name={SUBJECT_ICONS[item]} />
             {t(`teachers.filters.${item}`)}
           </button>
         ))}
       </div>
       <label className={styles.searchLabel} htmlFor={`${controlId}-search`}>
-        <span className={styles.srOnly}>{t('teachers.search-label')}</span>
+        <span className={styles.filterLabel}>
+          <AcademyIcon name="search" />
+          {t('teachers.search-label')}
+        </span>
         <input
           id={`${controlId}-search`}
           type="search"
@@ -58,7 +64,10 @@ const TeacherFilters = ({
         />
       </label>
       <label className={styles.selectLabel} htmlFor={`${controlId}-gender`}>
-        <span className={styles.srOnly}>{t('marketplace.gender-label')}</span>
+        <span className={styles.filterLabel}>
+          <AcademyIcon name="users" />
+          {t('marketplace.gender-label')}
+        </span>
         <select
           id={`${controlId}-gender`}
           className={styles.filterSelect}
@@ -71,7 +80,10 @@ const TeacherFilters = ({
         </select>
       </label>
       <label className={styles.selectLabel} htmlFor={`${controlId}-price`}>
-        <span className={styles.srOnly}>{t('marketplace.price-label')}</span>
+        <span className={styles.filterLabel}>
+          <AcademyIcon name="wallet" />
+          {t('marketplace.price-label')}
+        </span>
         <select
           id={`${controlId}-price`}
           className={styles.filterSelect}

@@ -13,7 +13,7 @@ const AvailabilityEditor = (): JSX.Element => {
   const [zone, setZone] = useState(state.availabilityZone);
   const [message, setMessage] = useState('');
   return (
-    <Panel title={t('availability')}>
+    <Panel icon="clock" title={t('availability')}>
       <p>{t('availability-description')}</p>
       <form
         onChange={() => setMessage('')}

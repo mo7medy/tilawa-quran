@@ -47,10 +47,11 @@
   inline-size: min(100%, 300px);
 }
 .inner {
-  max-inline-size: 1380px;
+  max-inline-size: var(--tilawa-content-width);
+  inline-size: calc(100% - 2 * var(--tilawa-gutter));
   margin-inline: auto;
   padding-block: 44px;
-  padding-inline: clamp(20px, 4vw, 56px);
+  padding-inline: 0;
   display: grid;
   grid-template-columns: 1.3fr 1fr;
   gap: 28px 40px;
@@ -88,6 +89,7 @@
   a {
     display: inline-flex;
     align-items: center;
+    gap: 8px;
     min-block-size: 44px;
     color: var(--tilawa-ink);
     text-decoration: none;

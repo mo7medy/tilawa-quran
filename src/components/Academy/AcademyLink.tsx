@@ -3,13 +3,12 @@ import React from 'react';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 
-interface AcademyLinkProps {
+interface AcademyLinkProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, 'href'> {
   id?: string;
   href: string;
   className?: string;
   ariaLabel?: string;
   title?: string;
-  onClick?: () => void;
   ariaCurrent?: 'page';
   children: React.ReactNode;
 }
@@ -24,31 +23,41 @@ interface AcademyLinkProps {
  * @param {AcademyLinkProps} props link props
  * @returns {JSX.Element} localized link
  */
-const AcademyLink = ({
-  id,
-  href,
-  className,
-  ariaLabel,
-  title,
-  onClick,
-  ariaCurrent,
-  children,
-}: AcademyLinkProps): JSX.Element => {
-  const { locale } = useRouter();
-  return (
-    <NextLink
-      id={id}
-      href={href}
-      locale={locale}
-      className={className}
-      aria-label={ariaLabel}
-      title={title}
-      onClick={onClick}
-      aria-current={ariaCurrent}
-    >
-      {children}
-    </NextLink>
-  );
-};
+const AcademyLink = React.forwardRef<HTMLAnchorElement, AcademyLinkProps>(
+  (
+    {
+      id,
+      href,
+      className,
+      ariaLabel,
+      title,
+      onClick,
+      ariaCurrent,
+      children,
+      ...linkProps
+    }: AcademyLinkProps,
+    ref,
+  ): JSX.Element => {
+    const { locale } = useRouter();
+    return (
+      <NextLink
+        {...linkProps}
+        ref={ref}
+        id={id}
+        href={href}
+        locale={locale}
+        className={className}
+        aria-label={ariaLabel ?? linkProps['aria-label']}
+        title={title}
+        onClick={onClick}
+        aria-current={ariaCurrent ?? linkProps['aria-current']}
+      >
+        {children}
+      </NextLink>
+    );
+  },
+);
+
+AcademyLink.displayName = 'AcademyLink';
 
 export default AcademyLink;

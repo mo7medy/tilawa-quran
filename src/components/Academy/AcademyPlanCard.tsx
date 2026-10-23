@@ -26,6 +26,9 @@ const AcademyPlanCard = ({ plan, subject }: AcademyPlanCardProps): JSX.Element =
   const isFeatured = plan.id === 'progress';
   return (
     <article className={`${styles.card} ${isFeatured ? styles.featured : ''}`}>
+      <div className={styles.planIcon}>
+        <AcademyIcon name={isFeatured ? 'sparkles' : 'package'} size={24} />
+      </div>
       <div className={styles.cardIntro}>
         <div className={styles.cardLabel}>
           <span>{t(`pricing.plans.${plan.id}.name`)}</span>

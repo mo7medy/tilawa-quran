@@ -1,12 +1,14 @@
 import useTranslation from 'next-translate/useTranslation';
 
 import styles from './AcademyHome.module.scss';
+import AcademyIcon from './AcademyIcon';
 import AcademyLink from './AcademyLink';
 
 import ArrowRightIcon from '@/icons/arrow-right.svg';
 import { ROUTES } from '@/utils/navigation';
 
 const PROGRAMS = ['arabic', 'tajweed', 'memorization'] as const;
+const PROGRAM_ICONS = { arabic: 'globe', tajweed: 'book', memorization: 'graduation' } as const;
 const EXTRA_PROGRAMS = ['revision', 'fiqh'] as const;
 
 const AcademyPrograms = (): JSX.Element => {
@@ -31,6 +33,9 @@ const AcademyPrograms = (): JSX.Element => {
               className={styles.programImage}
             />
             <div className={styles.programCopy}>
+              <span className={styles.programIcon}>
+                <AcademyIcon name={PROGRAM_ICONS[program]} size={24} />
+              </span>
               <h3 className={styles.programTitle}>{t(`programs.items.${program}.title`)}</h3>
               <p className={styles.programDescription}>
                 {t(`programs.items.${program}.description`)}
@@ -65,6 +70,9 @@ const AcademyPrograms = (): JSX.Element => {
         <div className={styles.extraGrid}>
           {EXTRA_PROGRAMS.map((program) => (
             <article key={program}>
+              <span className={styles.sectionIcon}>
+                <AcademyIcon name={program === 'revision' ? 'calendar' : 'book'} size={24} />
+              </span>
               <h3>{t(`programs.items.${program}.title`)}</h3>
               <p>{t(`programs.items.${program}.description`)}</p>
             </article>

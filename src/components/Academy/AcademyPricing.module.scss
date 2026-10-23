@@ -1,9 +1,10 @@
 @use './tokens' as tilawa;
 
 .page {
-  max-inline-size: 1280px;
+  max-inline-size: var(--tilawa-content-width);
+  inline-size: calc(100% - 2 * var(--tilawa-gutter));
   margin-inline: auto;
-  padding: 48px 32px 60px;
+  padding: 48px 0 64px;
   line-height: 1.6;
   a,
   button,
@@ -92,7 +93,8 @@
   min-inline-size: 0;
   padding: 30px;
   border: 1px solid var(--tilawa-border);
-  border-radius: 26px;
+  border-radius: var(--tilawa-radius-card);
+  box-shadow: var(--tilawa-shadow-card);
   background: var(--tilawa-card);
   display: flex;
   flex-direction: column;
@@ -370,4 +372,42 @@
   .page * {
     transition: none;
   }
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding-inline: 0;
+  }
+}
+
+.planIcon {
+  inline-size: 48px;
+  block-size: 48px;
+  display: grid;
+  place-items: center;
+  background: var(--tilawa-container);
+  color: var(--tilawa-link);
+  border-radius: 16px;
+  margin-block-end: 24px;
+}
+.featured .planIcon {
+  background: var(--tilawa-accent-soft);
+  color: var(--tilawa-accent);
+}
+.featured {
+  border-color: var(--tilawa-primary);
+  box-shadow: 0 0 0 1px var(--tilawa-primary), var(--tilawa-shadow-card);
+}
+.intro h1 {
+  font-weight: 700;
+}
+.intro em {
+  font-style: normal;
+}
+.choose {
+  border-radius: var(--tilawa-radius-control);
+}
+.price {
+  min-block-size: 56px;
+  align-items: baseline;
 }

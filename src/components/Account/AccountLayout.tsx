@@ -4,19 +4,26 @@ import type { ReactNode } from 'react';
 
 import { stripLocalePrefix } from '../../utils/tilawaRoutes';
 import AcademyLink from '../Academy/AcademyLink';
+import AccountNavigation from '../Academy/AccountNavigation';
 import NextSeoWrapper from '../NextSeoWrapper';
 
 import styles from './Account.module.scss';
 import AccountAvatar from './AccountAvatar';
 import { useAccountUi } from './useAccountUi';
 
-import { STUDENT_ACCOUNT_LINKS, TEACHER_ACCOUNT_LINKS } from '@/tilawa/account/navigation';
+import { STUDENT_ACCOUNT_GROUPS, TEACHER_ACCOUNT_GROUPS } from '@/tilawa/account/navigation';
+import type { AccountNavigationGroup } from '@/tilawa/account/navigation';
 import { ADMIN_BASE_PATH, isAdminRoutePathname } from '@/tilawa/adminSections';
 
-const ADMIN_LINKS = [
-  [`${ADMIN_BASE_PATH}/teachers`, 'admin.title'],
-  [`${ADMIN_BASE_PATH}/settings`, 'admin.settings'],
-  ['/profile', 'profile'],
+const ADMIN_GROUPS: readonly AccountNavigationGroup[] = [
+  {
+    key: 'navigation.account',
+    links: [
+      { href: `${ADMIN_BASE_PATH}/teachers`, key: 'admin.title', icon: 'shield' },
+      { href: `${ADMIN_BASE_PATH}/settings`, key: 'admin.settings', icon: 'settings' },
+      { href: '/profile', key: 'profile', icon: 'user' },
+    ],
+  },
 ];
 
 const AccountLayout = ({
@@ -29,11 +36,11 @@ const AccountLayout = ({
   const { t, role, href, router, dispatch, state, backend, busy, error, refresh } = useAccountUi();
   const current = stripLocalePrefix(router.asPath.split('?')[0], router.locales ?? ['en', 'ar']);
   const { view } = router.query;
-  const links = isAdminRoutePathname(router.pathname)
-    ? ADMIN_LINKS
+  const groups = isAdminRoutePathname(router.pathname)
+    ? ADMIN_GROUPS
     : role === 'teacher'
-    ? TEACHER_ACCOUNT_LINKS
-    : STUDENT_ACCOUNT_LINKS.map(({ href: to, key }) => [to, key]);
+    ? TEACHER_ACCOUNT_GROUPS
+    : STUDENT_ACCOUNT_GROUPS;
   const failure = view === 'error' || view === 'loading';
   return (
     <div className={styles.page}>
@@ -95,18 +102,11 @@ const AccountLayout = ({
               <strong>
                 {role === 'teacher' ? state.teacher.publicProfile.displayName : state.student.name}
               </strong>
+              <small>{t(role === 'teacher' ? 'teacher' : 'student')}</small>
             </div>
           </div>
           <nav className={styles.desktopNav} aria-label={t('account-sections')}>
-            {links.map(([to, label]) => (
-              <AcademyLink
-                key={to}
-                href={href(to)}
-                ariaCurrent={current === to ? 'page' : undefined}
-              >
-                {t(label)}
-              </AcademyLink>
-            ))}
+            <AccountNavigation groups={groups} current={current} hrefFor={href} />
           </nav>
         </aside>
         <div className={styles.content}>

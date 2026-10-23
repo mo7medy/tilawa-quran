@@ -1,4 +1,5 @@
-interface AcademyIconProps {
+export interface AcademyIconProps {
+  size?: 20 | 24;
   name:
     | 'search'
     | 'more'
@@ -20,10 +21,40 @@ interface AcademyIconProps {
     | 'close'
     | 'sun'
     | 'moon'
-    | 'monitor';
+    | 'monitor'
+    | 'calendar'
+    | 'dashboard'
+    | 'users'
+    | 'package'
+    | 'settings'
+    | 'logout'
+    | 'chevron'
+    | 'wallet'
+    | 'ticket'
+    | 'graduation'
+    | 'shield'
+    | 'sparkles';
 }
 
+export type AcademyIconName = AcademyIconProps['name'];
+
 const paths: Record<AcademyIconProps['name'], string> = {
+  calendar:
+    'M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm3 10h2m4 0h2m-8 4h2',
+  dashboard: 'M3 3h7v7H3Zm11 0h7v7h-7ZM3 14h7v7H3Zm11 0h7v7h-7Z',
+  users:
+    'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2m20 0v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75M13 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z',
+  package: 'm12 2 9 5v10l-9 5-9-5V7Zm0 10 9-5M12 12 3 7m9 5v10M7.5 4.5l9 5',
+  settings:
+    'm9 3-1 3-3 1-2 3 2 2-1 3 2 3 3-1 3 2 3-2 3 1 2-3-1-3 2-2-2-3-3-1-1-3H9Zm6 9a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z',
+  logout: 'M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4m7-16 5 7-5 7M9 12h12',
+  chevron: 'm6 9 6 6 6-6',
+  wallet: 'M20 8V5a2 2 0 0 0-2-2H5a3 3 0 0 0 0 6h15v12H5a3 3 0 0 1-3-3V6m18 7h-5v4h5m-2-2h.01',
+  ticket: 'M3 7h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4V7Zm11 0v2m0 4v2m0 2v2',
+  graduation: 'm2 9 10-5 10 5-10 5L2 9Zm4 2v6c4 3 8 3 12 0v-6m4-2v7',
+  shield: 'm12 2 8 4v6c0 5-8 10-8 10S4 17 4 12V6l8-4Zm-4 10 3 3 5-6',
+  sparkles:
+    'm12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5L12 3ZM4 3v4M2 5h4m14 13v4m-2-2h4',
   search: 'M21 21l-5-5M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Z',
   more: 'M12 5h.01M12 12h.01M12 19h.01',
   send: 'm22 2-7 20-4-9-9-4L22 2ZM22 2 11 13',
@@ -48,10 +79,10 @@ const paths: Record<AcademyIconProps['name'], string> = {
   arrow: 'M4 12h16m-6-6 6 6-6 6',
 };
 
-const AcademyIcon = ({ name }: AcademyIconProps): JSX.Element => (
+const AcademyIcon = ({ name, size = 20 }: AcademyIconProps): JSX.Element => (
   <svg
-    width="20"
-    height="20"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"

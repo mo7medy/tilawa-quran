@@ -8,6 +8,7 @@ import getAccountQuerySuffix from '../../tilawa/accountNavigation';
 import styles from './AcademyAccount.module.scss';
 import AcademyAccountForm from './AcademyAccountForm';
 import AcademyAccountSummary from './AcademyAccountSummary';
+import AcademyIcon from './AcademyIcon';
 import AcademyLink from './AcademyLink';
 
 interface AcademyAccountProps {
@@ -21,6 +22,7 @@ const AcademyAccount = ({ mode }: AcademyAccountProps): JSX.Element => {
   const selection = readAcademyPlanSelection(query);
   const isRecovery = mode === 'sign-in' && query.recovery === '1';
   const formMode = isRecovery ? 'recovery' : mode;
+  const accountIcon = mode === 'register' ? 'graduation' : 'user';
   const suffix = getAccountQuerySuffix(query);
   return (
     <div className={styles.page}>
@@ -28,6 +30,9 @@ const AcademyAccount = ({ mode }: AcademyAccountProps): JSX.Element => {
         <AcademyAccountSummary selection={selection} />
         <section className={styles.panel} aria-labelledby="account-title">
           <div className={styles.panelIntro}>
+            <span className={styles.introIcon}>
+              <AcademyIcon name={isRecovery ? 'shield' : accountIcon} size={24} />
+            </span>
             <p className={styles.eyebrow}>{t('account.welcome')}</p>
             <h1 id="account-title">{t(`account.${formMode}.title`)}</h1>
             <p>{t(`account.${formMode}.subtitle`)}</p>
@@ -67,7 +72,10 @@ const AcademyAccount = ({ mode }: AcademyAccountProps): JSX.Element => {
               <strong>{t('account.teacher-title')}</strong>
               <p>{t('account.teacher-description')}</p>
             </div>
-            <AcademyLink href="/teachers/apply">{t('account.teacher-link')}</AcademyLink>
+            <AcademyLink href="/teachers/apply">
+              <AcademyIcon name="graduation" />
+              {t('account.teacher-link')}
+            </AcademyLink>
           </div>
         </section>
       </div>

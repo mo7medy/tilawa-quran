@@ -34,14 +34,15 @@
 }
 .filters {
   display: flex;
-  align-items: center;
+  align-items: end;
   flex-wrap: wrap;
-  gap: 12px;
-  padding: 18px;
+  gap: 16px;
+  padding: 20px;
   margin-block: 24px;
   background: var(--tilawa-card);
   border: 1px solid var(--tilawa-border);
-  border-radius: 18px;
+  border-radius: var(--tilawa-radius-card);
+  box-shadow: var(--tilawa-shadow-card);
 }
 .subjects {
   display: flex;
@@ -49,10 +50,14 @@
   flex-wrap: wrap;
 }
 .filter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   font: inherit;
   font-size: 14px;
   min-block-size: 44px;
-  padding: 10px 18px;
+  padding: 10px 14px;
   border: 1px solid var(--tilawa-border);
   color: var(--tilawa-ink);
   background: transparent;
@@ -193,6 +198,7 @@
   max-inline-size: 65ch;
 }
 .profileLink {
+  gap: 8px;
   min-block-size: 44px;
   display: inline-flex;
   align-items: center;
@@ -440,4 +446,86 @@
   .card {
     transition: none;
   }
+}
+
+.filterLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-block-end: 8px;
+  font-size: 12px;
+  color: var(--tilawa-muted);
+  svg {
+    inline-size: 16px;
+    block-size: 16px;
+    color: var(--tilawa-link);
+  }
+}
+.card {
+  border-radius: var(--tilawa-radius-card);
+  box-shadow: var(--tilawa-shadow-card);
+}
+.cardActions {
+  padding-inline-start: 20px;
+  border-inline-start: 1px solid var(--tilawa-border);
+}
+.cardRating svg {
+  color: var(--tilawa-accent);
+}
+.bookButton,
+.messageButton,
+.filter {
+  border-radius: var(--tilawa-radius-control);
+}
+@media (max-width: 767px) {
+  .cardActions {
+    border-inline-start: 0;
+    padding-inline-start: 0;
+  }
+  .subjects {
+    inline-size: 100%;
+  }
+  .subjects .filter {
+    flex: 1;
+    padding-inline: 10px;
+  }
+  .filters {
+    padding: 16px;
+  }
+  .searchLabel {
+    flex-basis: 100%;
+  }
+  .selectLabel {
+    flex: 1 1 120px;
+  }
+}
+
+.emptyIcon {
+  display: inline-flex;
+  padding: 12px;
+  border-radius: 16px;
+  background: var(--tilawa-card);
+  color: var(--tilawa-link);
+  margin-block-end: 16px;
+}
+.loadingCards {
+  display: grid;
+  gap: 16px;
+  color: var(--tilawa-muted);
+}
+.skeletonCard {
+  min-block-size: 184px;
+  border-radius: var(--tilawa-radius-card);
+  background: var(--tilawa-notice);
+  border: 1px solid var(--tilawa-border);
+}
+.loadError {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding: 24px;
+  border: 1px solid var(--tilawa-border);
+  border-radius: var(--tilawa-radius-card);
+  color: var(--tilawa-muted);
+  margin-block-end: 24px;
 }

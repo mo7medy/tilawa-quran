@@ -6,7 +6,7 @@ import { formatAccountDate } from '../../tilawa/account/time';
 import type { Lesson } from '../../tilawa/account/types';
 
 import styles from './Account.module.scss';
-import { AccountLink, Panel } from './AccountUi';
+import { AccountLink, EmptyState, Panel } from './AccountUi';
 import { useAccountUi } from './useAccountUi';
 
 export const LessonCard = ({ lesson }: { lesson: Lesson }): JSX.Element => {
@@ -79,7 +79,7 @@ const LessonList = (): JSX.Element => {
       {lessons.length ? (
         lessons.map((lesson) => <LessonCard key={lesson.id} lesson={lesson} />)
       ) : (
-        <p className={styles.empty}>{t('no-lessons')}</p>
+        <EmptyState icon="calendar" description={t('no-lessons')} />
       )}
     </Panel>
   );

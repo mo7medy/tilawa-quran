@@ -22,7 +22,7 @@ const TeacherStudents = ({ studentId }: { studentId?: string }): JSX.Element => 
   }
   return (
     <>
-      <Panel title={studentId ? selectedStudent.name : t('students')}>
+      <Panel icon="users" title={studentId ? selectedStudent.name : t('students')}>
         {students.map((student) => (
           <div className={styles.listCard} key={student.id}>
             <div>
@@ -58,7 +58,7 @@ const TeacherStudents = ({ studentId }: { studentId?: string }): JSX.Element => 
         )}
       </Panel>
       {studentId && (
-        <Panel title={t('lessons')}>
+        <Panel icon="calendar" title={t('lessons')}>
           {state.lessons
             .filter((lesson) => !studentId || lesson.studentId === studentId)
             .map((lesson) => (

@@ -16,7 +16,7 @@ const AccountSettings = (): JSX.Element => {
   const [error, setError] = useState(false);
   const [busy, setBusy] = useState(false);
   return (
-    <Panel title={t('settings')}>
+    <Panel icon="settings" title={t('settings')}>
       <p>{t('profile-ui.security-note')}</p>
       <div className={styles.twoColumns}>
         <div className={styles.settingCard}>

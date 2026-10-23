@@ -37,7 +37,9 @@
   :global(h1),
   :global(h2),
   :global(h3) {
-    font-family: Georgia, 'Times New Roman', serif;
+    font-family: var(--tilawa-ui-font);
+    font-weight: 700;
+    letter-spacing: -0.02em;
   }
 
   :global([dir='rtl']) & {
@@ -72,4 +74,37 @@
 
 .shell :global([lang='ar']) {
   font-family: 'Cairo', Tahoma, Arial, sans-serif;
+}
+
+.shell {
+  :global(button),
+  :global(a) {
+    -webkit-tap-highlight-color: transparent;
+  }
+  :global(svg) {
+    flex-shrink: 0;
+  }
+  :global(h1),
+  :global(h2),
+  :global(h3) {
+    overflow-wrap: anywhere;
+  }
+  :global(input),
+  :global(select),
+  :global(textarea) {
+    font-size: 16px;
+  }
+  :global(a),
+  :global(button) {
+    transition-duration: 180ms;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shell *,
+  .shell *::before,
+  .shell *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
 }

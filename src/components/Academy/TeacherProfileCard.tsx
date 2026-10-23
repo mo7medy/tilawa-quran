@@ -51,6 +51,7 @@ const TeacherProfileCard = ({ teacher }: TeacherProfileCardProps): JSX.Element =
         <p className={styles.introduction}>{teacher.introduction?.[lang === 'ar' ? 'ar' : 'en']}</p>
         <AcademyLink className={styles.profileLink} href={href}>
           {t('teachers.view-profile')}
+          <AcademyIcon name="arrow" />
         </AcademyLink>
       </div>
       <div className={styles.cardActions}>
@@ -64,6 +65,7 @@ const TeacherProfileCard = ({ teacher }: TeacherProfileCardProps): JSX.Element =
             : t('marketplace.new-teacher')}
         </p>
         <AcademyLink href={`${href}?action=booking`} className={styles.bookButton}>
+          <AcademyIcon name="calendar" />
           {t('profile.choose-lesson')}
         </AcademyLink>
         <AcademyLink href={`${href}?action=message`} className={styles.messageButton}>

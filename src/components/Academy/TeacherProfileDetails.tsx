@@ -31,7 +31,10 @@ const TeacherProfileDetails = ({ teacher, onBook }: TeacherProfileDetailsProps):
         ))}
       </nav>
       <section className={styles.panel} id="about">
-        <h2>{t('profile.sections.about')}</h2>
+        <h2>
+          <AcademyIcon name="user" size={24} />
+          {t('profile.sections.about')}
+        </h2>
         <p>{teacher.biography?.[locale]}</p>
         <div className={styles.factRow}>
           <span>{t('profile.audience')}</span>
@@ -39,7 +42,10 @@ const TeacherProfileDetails = ({ teacher, onBook }: TeacherProfileDetailsProps):
         </div>
       </section>
       <section className={styles.panel} id="languages">
-        <h2>{t('marketplace.i-speak')}</h2>
+        <h2>
+          <AcademyIcon name="globe" size={24} />
+          {t('marketplace.i-speak')}
+        </h2>
         <ul className={styles.languageList}>
           {teacher.teachingLanguages?.map((item) => (
             <li key={item}>
@@ -52,7 +58,10 @@ const TeacherProfileDetails = ({ teacher, onBook }: TeacherProfileDetailsProps):
       </section>
       <TeacherReviews teacher={teacher} />
       <section className={styles.panel} id="qualifications">
-        <h2>{t('marketplace.resume')}</h2>
+        <h2>
+          <AcademyIcon name="shield" size={24} />
+          {t('marketplace.resume')}
+        </h2>
         <h3 className={styles.resumeHeading}>{t('marketplace.certifications')}</h3>
         {teacher.qualifications?.length > 0 ? (
           <ul className={styles.qualifications}>
@@ -68,7 +77,10 @@ const TeacherProfileDetails = ({ teacher, onBook }: TeacherProfileDetailsProps):
         )}
       </section>
       <section className={styles.panel} id="lessons">
-        <h2>{t('profile.sections.lessons')}</h2>
+        <h2>
+          <AcademyIcon name="calendar" size={24} />
+          {t('profile.sections.lessons')}
+        </h2>
         <div className={styles.lessonDescriptions}>
           {['intro', 'follow_up', 'intensive_review'].map((item) => (
             <article key={item}>

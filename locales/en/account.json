@@ -6,13 +6,13 @@
   "reset": "Reset examples",
   "student": "Student",
   "teacher": "Teacher",
-  "profile": "My profile",
-  "learning": "My learning",
-  "lessons": "My lessons",
+  "profile": "Personal information",
+  "learning": "Overview",
+  "lessons": "Lessons",
   "teachers": "My teachers",
   "packages": "My packages",
   "messages": "Messages",
-  "dashboard": "Teacher dashboard",
+  "dashboard": "Teaching dashboard",
   "teacher-profile": "Teaching profile",
   "requests": "Booking requests",
   "availability": "Availability",
@@ -742,5 +742,17 @@
     "no-next-lesson": "You have no upcoming lessons. Explore teachers and find the right support for your learning.",
     "save-failed": "We could not save your changes. Your draft is still here; please try again."
   },
-  "browse-teachers": "Find teachers"
+  "browse-teachers": "Find teachers",
+  "navigation": {
+    "learning": "Learning",
+    "communication": "Communication",
+    "account": "Account",
+    "teaching": "Teaching",
+    "finance": "Finances"
+  },
+  "visual": {
+    "welcome": "Welcome, {{name}}",
+    "teachers-empty": "Meet your next teacher",
+    "packages-empty": "Make room for learning"
+  }
 }

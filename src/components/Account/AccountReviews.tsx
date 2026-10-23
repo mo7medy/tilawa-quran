@@ -7,7 +7,7 @@ const AccountReviews = (): JSX.Element => {
   const reviews =
     router.query.view === 'empty' ? [] : state.lessons.filter((lesson) => lesson.review);
   return (
-    <Panel title={t('reviews')}>
+    <Panel icon="star" title={t('reviews')}>
       {reviews.length ? (
         reviews.map((lesson) => (
           <article className={styles.listCard} key={lesson.id}>

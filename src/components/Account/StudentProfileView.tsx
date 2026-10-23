@@ -39,7 +39,11 @@ const StudentProfileView = (): JSX.Element => {
   return (
     <div className={styles.twoColumns}>
       {items.map((section) => (
-        <Panel key={section.title} title={t(section.title)}>
+        <Panel
+          key={section.title}
+          title={t(section.title)}
+          icon={section.title === 'personal-information' ? 'user' : 'graduation'}
+        >
           <dl className={profileStyles.details}>
             {section.values.map(([label, value]) => (
               <div key={label}>

@@ -2,14 +2,19 @@ import { useRouter } from 'next/router';
 import useTranslation from 'next-translate/useTranslation';
 
 import AcademyIcon from './AcademyIcon';
+import type { AcademyIconName } from './AcademyIcon';
 import AcademyLink from './AcademyLink';
 import styles from './AcademyMobileMenu.module.scss';
+import AccountNavigation from './AccountNavigation';
 import useAccountNavigation from './useAccountNavigation';
 
-import { STUDENT_ACCOUNT_LINKS, TEACHER_ACCOUNT_LINKS } from '@/tilawa/account/navigation';
+import { STUDENT_ACCOUNT_GROUPS, TEACHER_ACCOUNT_GROUPS } from '@/tilawa/account/navigation';
 import SITE_NAVIGATION_LINKS from '@/tilawa/siteNavigation';
 import { stripLocalePrefix } from '@/utils/tilawaRoutes';
 
+const destinationIcon = (href: string): AcademyIconName =>
+  SITE_NAVIGATION_LINKS.find((link) => link.href === href)?.icon ??
+  (href === '/quran' ? 'book' : 'dashboard');
 const SiteNavigationLinks = ({
   onNavigate,
   extraLinks,
@@ -25,16 +30,10 @@ const SiteNavigationLinks = ({
     (router.asPath || router.pathname).split(/[?#]/)[0],
     router.locales ?? ['en', 'ar'],
   );
-  const accountLinks = teacher
-    ? [
-        ...TEACHER_ACCOUNT_LINKS.filter(
-          ([to]) => !['/profile/messages', '/profile/notifications'].includes(to),
-        ).map(([href, key]) => ({ href, key })),
-        { href: '/profile/settings', key: 'settings' },
-      ]
-    : STUDENT_ACCOUNT_LINKS;
+  const accountGroups = teacher ? TEACHER_ACCOUNT_GROUPS : STUDENT_ACCOUNT_GROUPS;
+  const accountLinks = accountGroups.flatMap(({ links }) => links);
   const primaryLinks = signedIn
-    ? accountLinks.map(({ href, key }) => ({ href, label: t(key) }))
+    ? []
     : [...SITE_NAVIGATION_LINKS, { href: '/quran', key: 'read-quran' }].map(({ href, key }) => ({
         href,
         label: common(`site-nav.header.${key}`),
@@ -45,7 +44,7 @@ const SiteNavigationLinks = ({
         { href: '/profile/messages', label: t('messages') },
         { href: '/quran', label: t('profile-ui.read-quran') },
         { href: '/profile/notifications', label: t('notifications') },
-      ].filter(({ href }) => !primaryLinks.some((link) => link.href === href))
+      ].filter(({ href }) => !accountLinks.some((link) => link.href === href))
     : [];
   const groups = [
     { links: primaryLinks, quick: false },
@@ -53,6 +52,9 @@ const SiteNavigationLinks = ({
   ];
   return (
     <nav className={styles.navigation} aria-label={common('site-nav.nav-label')}>
+      {signedIn && (
+        <AccountNavigation groups={accountGroups} current={current} onNavigate={onNavigate} />
+      )}
       {groups.map(({ links, quick }, group) =>
         links.length ? (
           <div key={group === 0 ? 'primary' : 'extra'} className={styles.linkGroup}>
@@ -65,7 +67,10 @@ const SiteNavigationLinks = ({
                   onClick={onNavigate}
                   ariaCurrent={current === href ? 'page' : undefined}
                 >
-                  <span>{label}</span>
+                  <span className={styles.destinationLabel}>
+                    <AcademyIcon name={destinationIcon(href)} />
+                    {label}
+                  </span>
                   {!quick && <AcademyIcon name="arrow" />}
                 </AcademyLink>
               ))}

@@ -17,7 +17,7 @@ const BookingRequests = ({ requestId }: { requestId?: string }): JSX.Element => 
             (item.status !== 'pending' || item.amountCents === 0),
         );
   return (
-    <Panel title={t(requestId ? 'request-details' : 'requests')}>
+    <Panel icon="mail" title={t(requestId ? 'request-details' : 'requests')}>
       {!items.length && <p>{t(requestId ? 'not-found' : 'no-requests')}</p>}
       {items.map((request) => (
         <article className={styles.listCard} key={request.id}>

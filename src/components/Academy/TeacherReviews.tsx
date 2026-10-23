@@ -14,7 +14,10 @@ const TeacherReviews = ({ teacher }: TeacherReviewsProps): JSX.Element => {
   return (
     <>
       <section className={styles.panel} id="reviews">
-        <h2>{t('marketplace.student-reviews')}</h2>
+        <h2>
+          <AcademyIcon name="star" size={24} />
+          {t('marketplace.student-reviews')}
+        </h2>
         {teacher.reviewCount > 0 && (
           <p className={styles.reviewScore}>
             <AcademyIcon name="star" />
@@ -43,7 +46,10 @@ const TeacherReviews = ({ teacher }: TeacherReviewsProps): JSX.Element => {
         )}
       </section>
       <section className={styles.panel} aria-labelledby="lesson-ratings">
-        <h2 id="lesson-ratings">{t('marketplace.lesson-rating')}</h2>
+        <h2 id="lesson-ratings">
+          <AcademyIcon name="graduation" size={24} />
+          {t('marketplace.lesson-rating')}
+        </h2>
         <div className={styles.ratingGrid}>
           {(['reassurance', 'clarity', 'progress', 'preparation'] as const).map((key) => (
             <div key={key}>

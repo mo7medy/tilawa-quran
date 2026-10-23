@@ -4,7 +4,7 @@ import { ACADEMY_PLANS, ACADEMY_LESSON_MINUTES } from '../../tilawa/academyPlans
 import { formatAccountDate } from '../../tilawa/account/time';
 
 import styles from './Account.module.scss';
-import { AccountLink, Panel, PreviewDialog } from './AccountUi';
+import { AccountLink, EmptyState, Panel, PreviewDialog } from './AccountUi';
 import { useAccountUi } from './useAccountUi';
 
 const StudentPackages = (): JSX.Element => {
@@ -23,6 +23,7 @@ const StudentPackages = (): JSX.Element => {
           <Panel
             key={subscription.id}
             title={t(academy ? 'academy-package' : 'teacher-subscription')}
+            icon="package"
           >
             <span className={styles.badge}>{t(`subject.${subscription.subject}`)}</span>
             <h3>
@@ -70,7 +71,9 @@ const StudentPackages = (): JSX.Element => {
             {backend && (
               <p>
                 {t('reserved-lessons')}: {subscription.reservedLessons ?? 0} · {t('expires')}:{' '}
-                {formatAccountDate(subscription.expiresAt, state.student.zone, lang)}
+                {subscription.expiresAt
+                  ? formatAccountDate(subscription.expiresAt, state.student.zone, lang)
+                  : t('profile-ui.not-added')}
               </p>
             )}
             {academy && plan.giftLessons > 0 && (
@@ -115,8 +118,15 @@ const StudentPackages = (): JSX.Element => {
       })}
       {!items.length && (
         <Panel>
-          <p>{t('no-packages')}</p>
-          <AccountLink to="/pricing">{t('browse-packages')}</AccountLink>
+          <EmptyState
+            icon="package"
+            title={t('visual.packages-empty')}
+            description={t('no-packages')}
+          >
+            <AccountLink to="/pricing" primary>
+              {t('browse-packages')}
+            </AccountLink>
+          </EmptyState>
         </Panel>
       )}
       {selection && (

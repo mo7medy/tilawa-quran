@@ -11,7 +11,7 @@ const Coupons = (): JSX.Element => {
   const [editing, setEditing] = useState<Partial<Coupon> | null>(null);
   const [error, setError] = useState(false);
   return (
-    <Panel title={t('coupons')}>
+    <Panel icon="ticket" title={t('coupons')}>
       <button
         type="button"
         onClick={() => {

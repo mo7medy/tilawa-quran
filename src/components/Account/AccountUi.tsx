@@ -5,6 +5,7 @@ import type { InputHTMLAttributes, ReactNode } from 'react';
 import * as Dialog from '@radix-ui/react-dialog';
 
 import AcademyIcon from '../Academy/AcademyIcon';
+import type { AcademyIconName } from '../Academy/AcademyIcon';
 import AcademyLink from '../Academy/AcademyLink';
 
 import styles from './Account.module.scss';
@@ -12,25 +13,41 @@ import { useAccountUi } from './useAccountUi';
 
 export const Panel = ({
   title,
+  icon,
   children,
 }: {
   title?: string;
+  icon?: AcademyIconName;
   children: ReactNode;
 }): JSX.Element => (
   <section className={styles.panel}>
-    {title && <h2>{title}</h2>}
+    {title && (
+      <h2 className={styles.panelTitle}>
+        {icon && <AcademyIcon name={icon} size={24} />}
+        {title}
+      </h2>
+    )}
     {children}
   </section>
 );
-export const AccountLink = ({ to, children }: { to: string; children: ReactNode }): JSX.Element => {
+export const AccountLink = ({
+  to,
+  children,
+  primary = false,
+}: {
+  to: string;
+  children: ReactNode;
+  primary?: boolean;
+}): JSX.Element => {
   const { href } = useAccountUi();
   return (
-    <AcademyLink className={styles.link} href={href(to)}>
+    <AcademyLink className={primary ? styles.primaryLink : styles.link} href={href(to)}>
       {children}
       <AcademyIcon name="arrow" />
     </AcademyLink>
   );
 };
+export { default as EmptyState } from './AccountEmptyState';
 export const Field = ({
   label,
   ...props

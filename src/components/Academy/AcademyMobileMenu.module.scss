@@ -314,3 +314,15 @@
     transition: none;
   }
 }
+
+.destinationLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.arabic .destinationLabel svg {
+  transform: none;
+}
+.navigation > .linkGroup {
+  margin-block-start: 20px;
+}

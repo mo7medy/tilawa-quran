@@ -2,14 +2,14 @@
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(230px, 30%) minmax(0, 1fr);
+  grid-template-columns: minmax(248px, 32%) minmax(0, 1fr);
   block-size: clamp(420px, calc(100dvh - 230px), 800px);
   min-inline-size: 0;
   overflow: hidden;
   border: 1px solid var(--tilawa-border);
-  border-radius: 24px;
+  border-radius: var(--tilawa-radius-card);
   background: var(--tilawa-card);
-  box-shadow: 0 8px 28px rgba(5, 25, 40, 0.04);
+  box-shadow: var(--tilawa-shadow-card);
   h2,
   h3,
   p {
@@ -25,6 +25,7 @@
   min-inline-size: 0;
   min-block-size: 0;
   border-inline-end: 1px solid var(--tilawa-border);
+  background: var(--tilawa-bg);
 }
 .directoryHeading {
   padding: 22px 18px 16px;
@@ -88,8 +89,9 @@
     background: var(--tilawa-notice);
   }
   &[aria-pressed='true'] {
-    background: var(--tilawa-container);
-    border-color: var(--tilawa-control-border);
+    background: var(--tilawa-card);
+    border-color: var(--tilawa-primary);
+    box-shadow: var(--tilawa-shadow-card);
   }
 }
 .conversationText {
@@ -369,7 +371,7 @@
   min-block-size: 76px;
   max-block-size: 160px;
   resize: vertical;
-  font-size: 15px;
+  font-size: 16px;
 }
 .workspace .send {
   display: inline-flex;

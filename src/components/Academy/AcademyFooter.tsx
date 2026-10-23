@@ -1,6 +1,7 @@
 import useTranslation from 'next-translate/useTranslation';
 
 import styles from './AcademyFooter.module.scss';
+import AcademyIcon from './AcademyIcon';
 import AcademyLink from './AcademyLink';
 import AcademyThemeControl from './AcademyThemeControl';
 
@@ -33,14 +34,34 @@ const AcademyFooter = ({ compact = false }: { compact?: boolean }): JSX.Element 
         </div>
         {!compact && (
           <nav className={styles.links} aria-label={t('nav-label')}>
-            <AcademyLink href={ROUTES.ACADEMY_HOME}>{t('header.academy')}</AcademyLink>
-            <AcademyLink href={ROUTES.TEACHERS}>{t('header.teachers')}</AcademyLink>
-            <AcademyLink href="/pricing">{t('header.pricing')}</AcademyLink>
+            <AcademyLink href={ROUTES.ACADEMY_HOME}>
+              <AcademyIcon name="graduation" />
+              {t('header.academy')}
+            </AcademyLink>
+            <AcademyLink href={ROUTES.TEACHERS}>
+              <AcademyIcon name="users" />
+              {t('header.teachers')}
+            </AcademyLink>
+            <AcademyLink href="/pricing">
+              <AcademyIcon name="package" />
+              {t('header.pricing')}
+            </AcademyLink>
             {!account?.userId && (
-              <AcademyLink href="/register">{t('account.register-link')}</AcademyLink>
+              <AcademyLink href="/register">
+                <AcademyIcon name="user" />
+                {t('account.register-link')}
+              </AcademyLink>
             )}
-            <AcademyLink href={ROUTES.QURAN_HOME}>{t('footer.read-quran')}</AcademyLink>
-            {!account?.userId && <AcademyLink href="/sign-in">{t('footer.login')}</AcademyLink>}
+            <AcademyLink href={ROUTES.QURAN_HOME}>
+              <AcademyIcon name="book" />
+              {t('footer.read-quran')}
+            </AcademyLink>
+            {!account?.userId && (
+              <AcademyLink href="/sign-in">
+                <AcademyIcon name="user" />
+                {t('footer.login')}
+              </AcademyLink>
+            )}
           </nav>
         )}
         {!compact && (

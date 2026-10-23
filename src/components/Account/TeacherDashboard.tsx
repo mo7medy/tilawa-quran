@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 
+import { TEACHER_ACCOUNT_GROUPS } from '../../tilawa/account/navigation';
 import { localDateTime } from '../../tilawa/account/time';
 import type { ApprovalStatus } from '../../tilawa/account/types';
+import AcademyIcon from '../Academy/AcademyIcon';
 
 import styles from './Account.module.scss';
 import { AccountLink, Panel } from './AccountUi';
@@ -40,7 +42,10 @@ const TeacherDashboard = (): JSX.Element => {
         <div className={styles.row}>
           <div>
             <span className={styles.badge}>{t(`approval.${state.teacher.approval}`)}</span>
-            <h2>{state.teacher.publicProfile.displayName}</h2>
+            <h2 className={styles.panelTitle}>
+              <AcademyIcon name="graduation" size={24} />
+              {state.teacher.publicProfile.displayName}
+            </h2>
             <p>{t('teacher-welcome')}</p>
           </div>
           <AccountLink to="/profile/teacher">{t('edit-profile')}</AccountLink>
@@ -69,7 +74,7 @@ const TeacherDashboard = (): JSX.Element => {
       </Panel>
       {approved ? (
         <>
-          <Panel title={t('today-lessons')}>
+          <Panel icon="calendar" title={t('today-lessons')}>
             {lessons.length ? (
               lessons.map((lesson) => <LessonCard key={lesson.id} lesson={lesson} />)
             ) : (
@@ -78,7 +83,15 @@ const TeacherDashboard = (): JSX.Element => {
           </Panel>
           <div className={styles.twoColumns}>
             {TOOLS.map((tool) => (
-              <Panel key={tool} title={t(tool)}>
+              <Panel
+                key={tool}
+                title={t(tool)}
+                icon={
+                  TEACHER_ACCOUNT_GROUPS.flatMap(({ links }) => links).find(
+                    ({ key }) => key === tool,
+                  )?.icon
+                }
+              >
                 <AccountLink to={`/dashboard/teacher/${tool}`}>{t('open-section')}</AccountLink>
               </Panel>
             ))}

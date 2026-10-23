@@ -1,9 +1,10 @@
 @use './tokens' as tilawa;
 
 .page {
-  max-inline-size: 1220px;
+  max-inline-size: var(--tilawa-content-width);
+  inline-size: calc(100% - 2 * var(--tilawa-gutter));
   margin-inline: auto;
-  padding: 56px 32px 72px;
+  padding: 48px 0 64px;
   line-height: 1.6;
 }
 .layout {
@@ -398,4 +399,38 @@
   .submit {
     transition: none;
   }
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding-inline: 0;
+  }
+}
+
+.introIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 52px;
+  block-size: 52px;
+  border-radius: 16px;
+  margin-block-end: 16px;
+  background: var(--tilawa-container);
+  color: var(--tilawa-link);
+}
+.panel {
+  border-radius: var(--tilawa-radius-card);
+  box-shadow: var(--tilawa-shadow-card);
+}
+.panelIntro h1 {
+  font-weight: 700;
+}
+.teach a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.field input {
+  font-size: 16px;
+  border-radius: var(--tilawa-radius-control);
 }

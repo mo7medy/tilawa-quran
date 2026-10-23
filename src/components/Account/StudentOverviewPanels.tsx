@@ -1,5 +1,5 @@
 import styles from './Account.module.scss';
-import { AccountLink, Panel } from './AccountUi';
+import { AccountLink, EmptyState, Panel } from './AccountUi';
 import { useAccountUi } from './useAccountUi';
 
 import { ACADEMY_PLANS } from '@/tilawa/academyPlans';
@@ -14,12 +14,11 @@ const StudentOverviewPanels = (): JSX.Element => {
   const recent = readAccountOverview(snapshot).recentConversations;
   return (
     <div className={styles.twoColumns}>
-      <Panel title={t('profile-ui.active-packages')}>
+      <Panel title={t('profile-ui.active-packages')} icon="package">
         {!active.length && (
-          <>
-            <p>{t('profile-ui.no-active-package')}</p>
+          <EmptyState description={t('profile-ui.no-active-package')}>
             <AccountLink to="/pricing">{t('profile-ui.explore-packages')}</AccountLink>
-          </>
+          </EmptyState>
         )}
         {active.map((item) => (
           <article key={item.id} className={styles.summaryItem}>
@@ -50,8 +49,8 @@ const StudentOverviewPanels = (): JSX.Element => {
           <AccountLink to="/profile/packages">{t('profile-ui.package-details')}</AccountLink>
         )}
       </Panel>
-      <Panel title={t('profile-ui.recent-conversations')}>
-        {!recent.length && <p>{t('no-messages')}</p>}
+      <Panel title={t('profile-ui.recent-conversations')} icon="chat">
+        {!recent.length && <EmptyState description={t('no-messages')} />}
         {recent.map((item) => (
           <article key={item.id} className={styles.summaryItem}>
             <h3>{item.peerName || t('profile-ui.conversation')}</h3>

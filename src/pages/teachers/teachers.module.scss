@@ -1,6 +1,7 @@
 .page {
-  max-inline-size: 1380px;
+  max-inline-size: var(--tilawa-content-width);
+  inline-size: calc(100% - 2 * var(--tilawa-gutter));
   margin-inline: auto;
-  padding-inline: clamp(20px, 4vw, 56px);
+  padding-inline: 0;
   padding-block: 36px 64px;
 }

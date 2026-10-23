@@ -23,7 +23,7 @@ const LessonDetails = ({ lessonId }: { lessonId: string }): JSX.Element => {
   const zone = role === 'teacher' ? state.availabilityZone : state.student.zone;
   return (
     <>
-      <Panel title={t(`subject.${lesson.subject}`)}>
+      <Panel icon="book" title={t(`subject.${lesson.subject}`)}>
         <span className={styles.badge}>{t(`status.${lesson.status}`)}</span>
         <dl className={styles.details}>
           <div>
@@ -69,7 +69,7 @@ const LessonDetails = ({ lessonId }: { lessonId: string }): JSX.Element => {
           {t(role === 'student' ? 'message-teacher' : 'message-student')}
         </AccountLink>
       </Panel>
-      <Panel title={t('meeting')}>
+      <Panel icon="play" title={t('meeting')}>
         {lesson.meetingUrl ? (
           <a href={lesson.meetingUrl} target="_blank" rel="noopener noreferrer">
             {t('join-lesson')}
@@ -78,10 +78,10 @@ const LessonDetails = ({ lessonId }: { lessonId: string }): JSX.Element => {
           <p>{t('meeting-unavailable')}</p>
         )}
       </Panel>
-      <Panel title={t('lesson-actions')}>
+      <Panel icon="calendar" title={t('lesson-actions')}>
         <LessonActions lesson={lesson} />
       </Panel>
-      <Panel title={t('history')}>
+      <Panel icon="clock" title={t('history')}>
         {lesson.history.length ? (
           <ul className={styles.history}>
             {lesson.history.map((item, index) => (

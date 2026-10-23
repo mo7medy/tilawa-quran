@@ -6,13 +6,13 @@
   "reset": "إعادة ضبط الأمثلة",
   "student": "طالب",
   "teacher": "معلم",
-  "profile": "ملفي الشخصي",
-  "learning": "مساحتي التعليمية",
+  "profile": "بياناتي الشخصية",
+  "learning": "نظرة عامة",
   "lessons": "دروسي",
   "teachers": "معلموني",
   "packages": "باقاتي",
   "messages": "الرسائل",
-  "dashboard": "لوحة المعلم",
+  "dashboard": "لوحة التدريس",
   "teacher-profile": "ملف التدريس",
   "requests": "طلبات الحجز",
   "availability": "إدارة التوفر",
@@ -742,5 +742,17 @@
     "no-next-lesson": "ليس لديك حصص قادمة. استكشف المعلمين واختر من يساعدك على التعلّم.",
     "save-failed": "تعذّر حفظ التغييرات. احتفظنا بتعديلاتك في النموذج؛ يرجى المحاولة مرة أخرى."
   },
-  "browse-teachers": "تصفّح المعلمين"
+  "browse-teachers": "تصفّح المعلمين",
+  "navigation": {
+    "learning": "التعلّم",
+    "communication": "التواصل",
+    "account": "الحساب",
+    "teaching": "التدريس",
+    "finance": "الشؤون المالية"
+  },
+  "visual": {
+    "welcome": "مرحبًا، {{name}}",
+    "teachers-empty": "تعرّف على معلّمك القادم",
+    "packages-empty": "خطوتك التالية في التعلّم"
+  }
 }

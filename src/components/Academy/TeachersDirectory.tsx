@@ -9,6 +9,8 @@ import AcademyLink from './AcademyLink';
 import TeacherFilters, { TeacherSubjectFilter } from './TeacherFilters';
 import TeacherProfileCard from './TeacherProfileCard';
 import styles from './TeachersDirectory.module.scss';
+import TeachersDirectoryEmpty from './TeachersDirectoryEmpty';
+import TeachersDirectoryFeedback from './TeachersDirectoryFeedback';
 
 import { tilawaFetch } from '@/tilawa/backend/http';
 import { mapTeacher, rows } from '@/tilawa/backend/mappers';
@@ -30,7 +32,7 @@ const TeachersDirectory = ({
   const [gender, setGender] = useState('all');
   const [maxPrice, setMaxPrice] = useState('all');
   const live = process.env.NODE_ENV !== 'test';
-  const { data, error, isValidating } = useSWR(
+  const { data, error, isValidating, mutate } = useSWR(
     live ? 'tilawa-public-teachers' : null,
     async () => rows(await tilawaFetch('teachers')).map(mapTeacher),
     { fallbackData: initialTeachers },
@@ -38,6 +40,8 @@ const TeachersDirectory = ({
   const directory = live
     ? { status: data?.length ? 'ready' : 'empty', teachers: data ?? [] }
     : getTeachersDirectoryState();
+  const loading = live && !data && isValidating;
+  const failed = !!error && !data;
   const teachers = directory.teachers.filter(
     (teacher) =>
       (subject === 'all' ||
@@ -88,41 +92,27 @@ const TeachersDirectory = ({
           onSubjectChange={setSubject}
         />
       )}
-      {live && !data && isValidating && <p role="status">{t('teachers.loading')}</p>}
-      {error && <p role="alert">{t('teachers.load-error')}</p>}
+      <TeachersDirectoryFeedback
+        loading={loading}
+        failed={!!error}
+        onRetry={() => {
+          mutate();
+        }}
+      />
       {directory.status === 'preview' && (
         <p className={styles.previewNotice}>{t('teachers.preview-notice')}</p>
       )}
-      {directory.status !== 'empty' && teachers.length > 0 ? (
-        <ul className={styles.list}>
-          {teachers.map((teacher) => (
-            <TeacherProfileCard key={teacher.id} teacher={teacher} />
-          ))}
-        </ul>
-      ) : (
-        <div className={styles.empty} data-testid="teachers-empty-state" role="status">
-          <div className={styles.emptyCopy}>
-            <p className={styles.emptyTitle}>
-              {t(directory.status === 'empty' ? 'teachers.empty-title' : 'teachers.no-results')}
-            </p>
-            <p className={styles.emptyDescription}>
-              {t(
-                directory.status === 'empty'
-                  ? 'teachers.empty-description'
-                  : 'teachers.no-results-description',
-              )}
-            </p>
-          </div>
-          <img
-            className={styles.emptyPhoto}
-            src="/tilawa/academy/hero-teacher.webp"
-            alt={t('hero.image-alt')}
-            width={1100}
-            height={733}
-            loading="lazy"
-          />
-        </div>
-      )}
+      {!loading &&
+        !failed &&
+        (directory.status !== 'empty' && teachers.length > 0 ? (
+          <ul className={styles.list}>
+            {teachers.map((teacher) => (
+              <TeacherProfileCard key={teacher.id} teacher={teacher} />
+            ))}
+          </ul>
+        ) : (
+          <TeachersDirectoryEmpty hasTeachers={directory.status !== 'empty'} />
+        ))}
       {isStandalonePage && (
         <aside className={styles.application} aria-labelledby="teacher-application-title">
           <div>

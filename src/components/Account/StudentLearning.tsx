@@ -2,7 +2,7 @@
 import { getTeacherName } from '../../tilawa/teachers';
 
 import styles from './Account.module.scss';
-import { AccountLink, Panel } from './AccountUi';
+import { AccountLink, EmptyState, Panel } from './AccountUi';
 import { LessonCard } from './LessonList';
 import StudentOverviewPanels from './StudentOverviewPanels';
 import { useAccountUi } from './useAccountUi';
@@ -21,17 +21,18 @@ const StudentLearning = (): JSX.Element => {
           .sort((a, b) => Date.parse(a.scheduledAt) - Date.parse(b.scheduledAt))[0];
   return (
     <>
-      <Panel title={t('next-lesson')}>
+      <Panel
+        title={t(next ? 'next-lesson' : 'visual.welcome', { name: state.student.name })}
+        icon={next ? 'calendar' : 'sparkles'}
+      >
         {next ? (
           <LessonCard lesson={next} />
         ) : (
-          <>
-            <p>{t('profile-ui.no-next-lesson')}</p>
-            <div className={styles.actions}>
-              <AccountLink to="/teachers">{t('find-teacher')}</AccountLink>
-              <AccountLink to="/pricing">{t('profile-ui.explore-packages')}</AccountLink>
-            </div>
-          </>
+          <EmptyState description={t('profile-ui.no-next-lesson')}>
+            <AccountLink to="/teachers" primary>
+              {t('find-teacher')}
+            </AccountLink>
+          </EmptyState>
         )}
         <small>
           {t('timezone')}: {state.student.zone}
@@ -47,8 +48,11 @@ export const StudentTeachers = (): JSX.Element => {
   if (router.query.view === 'empty' || teachers.length === 0) {
     return (
       <Panel>
-        <p>{t('no-teachers')}</p>
-        <AccountLink to="/teachers">{t('find-teacher')}</AccountLink>
+        <EmptyState icon="users" title={t('visual.teachers-empty')} description={t('no-teachers')}>
+          <AccountLink to="/teachers" primary>
+            {t('find-teacher')}
+          </AccountLink>
+        </EmptyState>
       </Panel>
     );
   }

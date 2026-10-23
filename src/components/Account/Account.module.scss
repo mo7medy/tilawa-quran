@@ -2,18 +2,21 @@
 
 .page {
   @include tilawa.academy-tokens;
-  max-inline-size: 1360px;
+  max-inline-size: var(--tilawa-content-width);
   margin: 32px auto 72px;
-  padding-inline: 24px;
+  inline-size: calc(100% - 2 * var(--tilawa-gutter));
+  padding-inline: 0;
   color: var(--tilawa-ink);
   line-height: 1.65;
   h1 {
-    font-size: clamp(26px, 3vw, 38px);
+    font-size: clamp(26px, 3vw, 32px);
+    font-weight: 700;
     line-height: 1.25;
     margin: 0;
   }
   h2 {
-    font-size: 22px;
+    font-size: 20px;
+    font-weight: 650;
     line-height: 1.4;
     margin-block: 0 18px;
   }
@@ -129,40 +132,21 @@
 }
 .layout {
   display: grid;
-  grid-template-columns: 248px minmax(0, 1fr);
+  grid-template-columns: 240px minmax(0, 1fr);
   align-items: start;
-  gap: 30px;
+  gap: 24px;
 }
 .navigation {
   position: sticky;
   inset-block-start: 112px;
   max-block-size: calc(100dvh - 140px);
   overflow-y: auto;
-  background: var(--tilawa-glass);
-  border: 1px solid var(--tilawa-glass-border);
-  border-radius: 24px;
-  padding: 20px 14px;
-  box-shadow: var(--tilawa-glass-shadow);
-  backdrop-filter: blur(20px);
-  nav {
-    display: grid;
-    gap: 4px;
-  }
-  nav a {
-    color: var(--tilawa-ink);
-    text-decoration: none;
-    border-radius: 12px;
-    min-block-size: 44px;
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    box-sizing: border-box;
-  }
-  nav a:hover,
-  nav a[aria-current='page'] {
-    background: var(--tilawa-container);
-    color: var(--tilawa-secondary-text);
-  }
+  scrollbar-width: thin;
+  background: var(--tilawa-card);
+  border: 1px solid var(--tilawa-border);
+  border-radius: var(--tilawa-radius-card);
+  padding: 20px 12px;
+  box-shadow: var(--tilawa-shadow-card);
 }
 @media (max-width: 1200px) {
   .layout {
@@ -254,8 +238,9 @@
 .panel {
   background: var(--tilawa-card);
   border: 1px solid var(--tilawa-border);
-  border-radius: 22px;
-  padding: clamp(18px, 3vw, 30px);
+  border-radius: var(--tilawa-radius-card);
+  box-shadow: var(--tilawa-shadow-card);
+  padding: 24px;
   margin-block-end: 20px;
   min-inline-size: 0;
 }
@@ -567,5 +552,69 @@
   border-block-end: 1px solid var(--tilawa-border);
   &:last-of-type {
     border-block-end: 0;
+  }
+}
+
+.panelTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  svg {
+    color: var(--tilawa-link);
+    flex-shrink: 0;
+  }
+}
+.emptyState {
+  display: grid;
+  justify-items: start;
+  gap: 12px;
+  padding-block: 8px;
+  > span {
+    display: grid;
+    place-items: center;
+    inline-size: 48px;
+    block-size: 48px;
+    border-radius: 16px;
+    background: var(--tilawa-container);
+    color: var(--tilawa-link);
+  }
+  p {
+    margin: 0;
+    color: var(--tilawa-muted);
+    max-inline-size: 60ch;
+  }
+  h2,
+  h3 {
+    margin: 0;
+  }
+}
+.page .primaryLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 16px;
+  min-block-size: 44px;
+  background: var(--tilawa-button);
+  color: var(--tilawa-on-primary);
+  border-radius: var(--tilawa-radius-control);
+  text-decoration: none;
+  font-weight: 600;
+  &:hover {
+    background: var(--tilawa-deep);
+  }
+}
+@media (max-width: 767px) {
+  .page {
+    padding-inline: 0;
+  }
+  .panel {
+    padding: 20px;
+  }
+}
+
+.primaryLink svg {
+  :global([dir='rtl']) & {
+    transform: rotate(180deg);
   }
 }

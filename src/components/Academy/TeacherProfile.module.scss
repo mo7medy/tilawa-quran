@@ -1,8 +1,9 @@
 @use './tokens' as tilawa;
 .page {
-  max-inline-size: 1240px;
+  max-inline-size: var(--tilawa-content-width);
+  inline-size: calc(100% - 2 * var(--tilawa-gutter));
   padding-block: 24px 64px;
-  padding-inline: clamp(20px, 4vw, 48px);
+  padding-inline: 0;
   margin-inline: auto;
   color: var(--tilawa-ink);
 }
@@ -27,7 +28,7 @@
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 344px;
-  gap: 0 48px;
+  gap: 0 32px;
   align-items: start;
 }
 .profileHero {
@@ -916,5 +917,32 @@
   }
   .applicationPage {
     padding-inline: 20px;
+  }
+}
+
+.panel h2 {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 22px;
+  svg {
+    color: var(--tilawa-link);
+  }
+}
+.primaryButton,
+.secondaryButton {
+  border-radius: var(--tilawa-radius-control);
+}
+.panel {
+  border-radius: var(--tilawa-radius-card);
+}
+.statistics {
+  border-radius: var(--tilawa-radius-card);
+  background: var(--tilawa-notice);
+  padding: 20px;
+}
+@media (max-width: 767px) {
+  .page {
+    padding-inline: 0;
   }
 }

@@ -12,7 +12,7 @@ const TeacherEditor = (): JSX.Element => {
   const [message, setMessage] = useState('');
   return (
     <>
-      <Panel title={t('teacher-profile')}>
+      <Panel icon="graduation" title={t('teacher-profile')}>
         <span className={styles.badge}>{t(`approval.${state.teacher.approval}`)}</span>
         <div className={styles.actions}>
           <AccountLink
@@ -48,7 +48,7 @@ const TeacherEditor = (): JSX.Element => {
         <TeacherRegistrationForm />
       </Panel>
       {backend && (
-        <Panel title={t('application-status')}>
+        <Panel icon="shield" title={t('application-status')}>
           {Array.isArray(snapshot?.approvalEvents) &&
             snapshot.approvalEvents.slice(0, 3).map((item) => {
               const event = item as { id: string; reason: string; status: string };
