@@ -53,6 +53,12 @@ callbacks are rejected (403), and an invalid account session fails closed (401).
 Turnstile-backed upload, replaying the actually consumed challenge on the same staging upload
 endpoint was rejected with `CHALLENGE_FAILED` (403). Tokens were never logged or committed.
 
+A second editor-driven export used a one-second H.264 background carrying an audible test tone. The
+preview reported that background as muted and decoded. The completed output was 1080 x 1920, 30 fps,
+H.264/AAC, 11,712 ms and 320,901 bytes. Decoded audio SHA-256 matched the first image-backed export
+exactly, confirming that the uploaded video's audio did not enter the rendered soundtrack. Reopening
+the editor restored the saved project and its completed job.
+
 The existing `/media` page was checked on the full staging website after the Remotion upgrade: Quran
 text and fonts loaded, background video decoded, preview playback controls worked, and no browser
 error was observed. Its existing AWS/Lambda export service was not exercised or redeployed.
@@ -66,6 +72,7 @@ error was observed. Its existing AWS/Lambda export service was not exercised or 
   font choices, fixed font-byte verification, overflow prevention and library actions. These tests
   explicitly mock content/account APIs; they complement the real guest cycle above.
 - Whole-project TypeScript and scoped ESLint passed. Changed files are formatted.
+- GitHub validation and restricted Modal deployment both passed for code revision `ba6af56`.
 
 The SQLite/API tests also exercise owner isolation, explicit guest claim, atomic quota reservation,
 duplicate requests, cancellation, stale attempts, retry/watchdog recovery, expiry and deletion
@@ -85,3 +92,7 @@ Keep the public launch closed until these gates are resolved. The staging genera
 enabled only for acceptance testing; deployment configuration defaults to disabled. Private links
 expire even before physical cleanup. Query strings are redacted in Worker observability. Never
 commit local proof credentials, session cookies or signed URLs.
+
+Cloudflare Builds cache restoration was disabled and the trigger's cache purged after a rebuild
+exhausted disk while reinstalling dependencies. Documentation-only changes to this record and the
+renderer README are excluded from the website trigger. Only the intended staging branch is allowed.
