@@ -45,7 +45,7 @@ def callback(path, payload):
     return response.json()
 
 
-@app.function(cpu=2, memory=4096, timeout=1200, max_containers=2, secrets=secrets)
+@app.function(cpu=4, memory=4096, timeout=1200, max_containers=2, secrets=secrets)
 def render(job_id: str, attempt: int):
     import httpx
     from media import download, inspect_media

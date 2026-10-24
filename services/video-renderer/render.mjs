@@ -90,7 +90,7 @@ try {
     maxRate: '4000k',
     bufferSize: '8000k',
     pixelFormat: 'yuv420p',
-    concurrency: 1,
+    concurrency: 2,
     puppeteerInstance: browser,
     logLevel: 'error',
     onProgress: ({ progress }) => {

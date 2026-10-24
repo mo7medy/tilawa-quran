@@ -39,7 +39,9 @@ Modal secret: only `STUDIO_ORIGIN` and the matching `STUDIO_SIGNING_SECRET`. Set
 and `STUDIO_MODAL_SECRET_NAME` to the isolated environment names, then run
 `modal deploy services/video-renderer/app.py` with Modal SDK 1.6.2. Its private dispatcher requires
 a Modal proxy token; put that token only in the Worker secrets. Temporary job directories are
-removed after execution. No GPU is needed. Default limits: 2 CPU, 4 GiB, 20 minutes, two containers.
+removed after execution. No GPU is needed. Default limits: 4 CPU, 4 GiB, 20 minutes, two containers.
+Each job renders two frames concurrently inside one export. The initial 2-CPU, one-frame setting was
+too slow near the 180-second output ceiling in the staging benchmark.
 
 The GitHub workflow validates the implementation and deploys Modal only from pushes to
 `codex/video-studio` (or an explicitly requested manual staging run on that branch). Its
