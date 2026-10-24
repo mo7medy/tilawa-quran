@@ -48,7 +48,8 @@ export const callModal = async (
     },
     body: JSON.stringify(payload),
     signal: AbortSignal.timeout(15000),
-    redirect: 'error',
+    // Workers supports manual/follow only. Reject redirects below without forwarding credentials.
+    redirect: 'manual',
   });
   assert(response.ok, 'RENDERER_UNAVAILABLE', 503);
   return response.json();

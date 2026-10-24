@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention -- Preserve standard HTTP headers, provider payloads and D1 column names at the boundary. */
+/* eslint-disable react-func/max-lines-per-function -- The streamed upload, probe dispatch and failure cleanup share one state transition boundary. */
 import type { ReadableStream as WorkerStream } from '@cloudflare/workers-types';
 
 import { StudioOwner } from '../contracts';
@@ -106,13 +107,23 @@ export const receiveUpload = async (
     .bind(id)
     .first();
   assert(claimed, 'INVALID_STATE', 409);
+  let phase = 'stream';
   try {
     await putStream(env, row.object_key, request, row.size, row.mime);
     await env.VIDEO_STUDIO_DB.prepare("UPDATE studio_assets SET status='uploaded' WHERE id=?")
       .bind(id)
       .run();
+    phase = 'probe';
     await probeUpload(env, row);
   } catch (error) {
+    // eslint-disable-next-line no-console -- Phase and error type only; never include file data, URLs or credentials.
+    console.error(
+      JSON.stringify({
+        event: 'studio_upload_failure',
+        phase,
+        category: error instanceof Error ? error.name : 'Unknown',
+      }),
+    );
     await env.VIDEO_STUDIO_PRIVATE.delete(row.object_key);
     await env.VIDEO_STUDIO_DB.prepare("UPDATE studio_assets SET status='failed' WHERE id=?")
       .bind(id)

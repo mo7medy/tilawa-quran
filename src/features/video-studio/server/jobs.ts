@@ -126,9 +126,9 @@ export const cancelJob = async (env: StudioEnv, owner: StudioOwner, id: string):
   const row = await getJob(env, owner, id);
   if (['completed', 'cancelled', 'failed', 'expired'].includes(row.status)) return;
   await env.VIDEO_STUDIO_DB.prepare(
-    "UPDATE studio_jobs SET status=CASE WHEN status='queued' THEN 'cancelled' ELSE 'cancel_requested' END WHERE id=? AND owner=? AND status IN ('queued','preparing','rendering','uploading')",
+    "UPDATE studio_jobs SET finished_at=CASE WHEN status='queued' THEN ? ELSE finished_at END,status=CASE WHEN status='queued' THEN 'cancelled' ELSE 'cancel_requested' END WHERE id=? AND owner=? AND status IN ('queued','preparing','rendering','uploading')",
   )
-    .bind(id, owner.id)
+    .bind(Date.now(), id, owner.id)
     .run();
   if (row.call_id) {
     try {

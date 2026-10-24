@@ -6,6 +6,26 @@ import assetPaths from './fixtures/asset-paths.json';
 
 const setup = async (page: Page, registered = true): Promise<void> => {
   let saved: Record<string, unknown>[] = [];
+  // Sparse local checkouts omit interface fonts. Serve available tracked proof bytes without
+  // triggering Next's catch-all 404 compilation and development reloads during scene assertions.
+  await page.route('**/fonts/**', async (route) => {
+    const source = new URL(route.request().url()).pathname;
+    const hash = Object.keys(assetPaths).find((key) => assetPaths[key] === source);
+    if (!hash) {
+      await route.abort();
+      return;
+    }
+    let bytes: Buffer;
+    try {
+      bytes = await fs.readFile(path.join('public', source));
+    } catch {
+      bytes = await fs.readFile(path.join('.local-runtime/studio-proof-assets/blobs', hash));
+    }
+    await route.fulfill({
+      body: bytes,
+      contentType: source.endsWith('.ttf') ? 'font/ttf' : 'font/woff2',
+    });
+  });
   await page.route('**/api/video-studio/**', async (route) => {
     const request = route.request();
     const url = new URL(request.url());
@@ -59,7 +79,9 @@ const setup = async (page: Page, registered = true): Promise<void> => {
       };
     else if (endpoint === 'resolve') {
       const { spec } = request.postDataJSON();
-      const manifest = structuredClone(baseline);
+      const manifest = JSON.parse(
+        await fs.readFile(`tests/video-studio/fixtures/${spec.font}.json`, 'utf8'),
+      );
       manifest.spec = spec;
       body = { manifest, hash: `preview-${spec.font}-${spec.fontSize}-${spec.template}` };
     } else if (endpoint === 'projects' && request.method() === 'POST') {
@@ -159,4 +181,30 @@ test('200 percent zoom keeps the content controls operable', async ({ page }) =>
       () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
     ),
   ).toBe(true);
+});
+
+for (const font of ['code_v1', 'code_v2', 'text_indopak', 'tajweed_v4']) {
+  test(`the shared scene loads ${font} without a font fallback`, async ({ page }) => {
+    await setup(page);
+    await page.goto('/video-studio');
+    await page.locator('summary').filter({ hasText: 'Quran font' }).click();
+    await page.getByLabel('Script and font').selectOption(font);
+    await page.getByLabel('Last ayah', { exact: true }).fill('2');
+    await page.getByRole('button', { name: 'Prepare preview', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Generate video', exact: true })).toBeEnabled();
+    await expect(page.locator('[data-studio-text]').first()).toBeVisible();
+  });
+}
+
+test('overflow in any ayah prevents generation', async ({ page }) => {
+  await setup(page);
+  await page.goto('/video-studio');
+  await page.route('**/api/video-studio/resolve', async (route) => {
+    const manifest = structuredClone(baseline);
+    manifest.verses[1].translation = 'A translation that cannot fit. '.repeat(600);
+    await route.fulfill({ json: { manifest, hash: 'overflow-fixture' } });
+  });
+  await page.getByRole('button', { name: 'Prepare preview', exact: true }).click();
+  await expect(page.getByRole('alert').filter({ hasText: 'An ayah or translation' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Generate video', exact: true })).toBeDisabled();
 });

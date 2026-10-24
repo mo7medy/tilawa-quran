@@ -4,7 +4,10 @@ import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
 
 const origin = 'https://tilawa-video-studio-staging.muhammad5mdk.workers.dev';
-const statePath = '.local-runtime/studio-proof-runs.json';
+const extended = process.env.STUDIO_PROOF_SUITE === 'extended';
+const statePath = extended
+  ? '.local-runtime/studio-proof-extended-runs.json'
+  : '.local-runtime/studio-proof-runs.json';
 const action = process.argv[2];
 const require = createRequire(import.meta.url);
 const wrangler = `${require
@@ -27,7 +30,28 @@ if (action === 'prepare') {
   ).manifest.spec;
   const runs = [];
   const statements = [];
-  for (const font of ['qpc_uthmani_hafs', 'code_v1', 'code_v2', 'text_indopak', 'tajweed_v4']) {
+  const cases = extended
+    ? [
+        { font: 'qpc_uthmani_hafs', ratio: 'portrait', quality: 1080 },
+        {
+          font: 'code_v1',
+          ratio: 'landscape',
+          quality: 720,
+          chapterId: 2,
+          from: 5,
+          to: 6,
+          fontSize: 40,
+          translationSize: 22,
+        },
+        { font: 'code_v2', ratio: 'square', quality: 1080 },
+        { font: 'text_indopak', mushafLines: '16_lines', ratio: 'square', quality: 1080 },
+        { font: 'tajweed_v4', ratio: 'portrait', quality: 1080 },
+      ]
+    : ['qpc_uthmani_hafs', 'code_v1', 'code_v2', 'text_indopak', 'tajweed_v4'].map((font) => ({
+        font,
+      }));
+  for (const testCase of cases) {
+    const { font } = testCase;
     const session = await request('session');
     const spec = {
       ...baseline,
@@ -37,6 +61,7 @@ if (action === 'prepare') {
       from: 1,
       to: 2,
       quality: 720,
+      ...testCase,
     };
     const project = await request('projects', { spec }, session.cookie);
     const resolved = await request('resolve', { spec }, session.cookie);
@@ -134,9 +159,14 @@ if (action === 'prepare') {
     const response = await fetch(data.url);
     if (!response.ok) throw new Error(`Download failed: ${response.status}`);
     const bytes = Buffer.from(await response.arrayBuffer());
-    await fs.writeFile(`.local-runtime/studio-proof-${run.font}.mp4`, bytes);
     await fs.writeFile(
-      `tests/video-studio/fixtures/${run.font}.json`,
+      `.local-runtime/studio-proof-${extended ? 'extended-' : ''}${run.font}.mp4`,
+      bytes,
+    );
+    await fs.writeFile(
+      extended
+        ? `.local-runtime/studio-proof-extended-${run.font}.json`
+        : `tests/video-studio/fixtures/${run.font}.json`,
       JSON.stringify(run.manifest, null, 2),
     );
     console.log(JSON.stringify({ font: run.font, downloadedBytes: bytes.length }));

@@ -26,12 +26,14 @@ export const maintainStudio = async (env: StudioEnv): Promise<void> => {
     if (retry) status = 'queued';
     const changed = await db
       .prepare(
-        'UPDATE studio_jobs SET status=?,error=?,attempt=attempt+?,lease_until=0,dispatch_at=0,call_id=NULL,charged=?,output_key=NULL,output_size=0 WHERE id=? AND attempt=? AND status=? AND lease_until<=? RETURNING id',
+        'UPDATE studio_jobs SET status=?,error=?,attempt=attempt+?,progress=CASE WHEN ? THEN 0 ELSE progress END,finished_at=?,lease_until=0,dispatch_at=0,call_id=NULL,charged=?,output_key=NULL,output_size=0 WHERE id=? AND attempt=? AND status=? AND lease_until<=? RETURNING id',
       )
       .bind(
         status,
         cancelled ? null : 'RENDERER_TIMEOUT',
         Number(retry),
+        Number(retry),
+        retry ? null : now,
         cancelled ? row.charged : 0,
         row.id,
         row.attempt,

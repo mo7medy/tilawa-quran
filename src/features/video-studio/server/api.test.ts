@@ -12,10 +12,21 @@ import { defaultSpec, ResolvedVideoManifest } from '../contracts';
 import { handleStudio } from './api';
 import { capability, sign } from './crypto';
 import { manifestHash } from './jobs';
+import { callModal } from './jobTransport';
+import { maintainStudio } from './maintenance';
 import { StudioEnv } from './runtime';
 
-const { resolved } = vi.hoisted(() => ({ resolved: vi.fn() }));
+const { resolved, verifiedUser } = vi.hoisted(() => ({ resolved: vi.fn(), verifiedUser: vi.fn() }));
 vi.mock('./content', () => ({ catalog: vi.fn(), resolveManifest: resolved, assetIndex: vi.fn() }));
+vi.mock('@/lib/supabase/config', () => ({
+  getSupabaseConfiguration: () => ({
+    url: 'https://account.example.test',
+    publishableKey: 'public-test-key',
+  }),
+}));
+vi.mock('@supabase/ssr', () => ({
+  createServerClient: (_url, _key, options) => ({ auth: { getUser: () => verifiedUser(options) } }),
+}));
 const fixture: ResolvedVideoManifest = {
   version: '1',
   renderVersion: 'studio-1',
@@ -127,6 +138,7 @@ beforeEach(async () => {
     ),
   );
   resolved.mockResolvedValue(fixture);
+  verifiedUser.mockResolvedValue({ data: { user: null }, error: new Error('Expired session') });
   const session = await request('session', undefined, 'GET', '');
   cookie = session.headers.get('set-cookie').split(';')[0];
 });
@@ -136,6 +148,18 @@ afterEach(() => {
 });
 
 describe('studio ownership and durable jobs', () => {
+  it('uses supported manual redirects and never forwards private Modal credentials to a redirect', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(
+      new Response(null, { status: 302, headers: { Location: 'https://untrusted.example.test' } }),
+    );
+    await expect(callModal(env, '/probe', {})).rejects.toMatchObject({
+      code: 'RENDERER_UNAVAILABLE',
+    });
+    expect(fetch).toHaveBeenLastCalledWith(
+      'https://private.modal.run/probe',
+      expect.objectContaining({ redirect: 'manual' }),
+    );
+  });
   it('isolates guest browser sessions and rejects foreign origins', async () => {
     const id = await project();
     expect((await request(`projects/${id}`)).status).toBe(200);
@@ -225,5 +249,98 @@ describe('studio ownership and durable jobs', () => {
     env.STUDIO_ENABLED = '0';
     expect((await job(id)).status).toBe(503);
     expect(sqlite.prepare('SELECT COUNT(*) AS n FROM studio_jobs').get().n).toBe(0);
+  });
+  it('verifies account identity, keeps rotated cookies separate and isolates account switches', async () => {
+    verifiedUser.mockImplementation(async (options) => {
+      options.cookies.setAll([
+        {
+          name: 'sb-test-auth-token.0',
+          value: 'rotated-0',
+          options: { httpOnly: true, path: '/' },
+        },
+        {
+          name: 'sb-test-auth-token.1',
+          value: 'rotated-1',
+          options: { httpOnly: true, path: '/' },
+        },
+      ]);
+      return { data: { user: { id: 'account-one' } }, error: null };
+    });
+    const accountCookie = 'sb-test-auth-token=untrusted-browser-value';
+    const created = await request('projects', { spec: defaultSpec }, 'POST', accountCookie);
+    expect(created.status).toBe(201);
+    expect(created.headers.getSetCookie()).toHaveLength(2);
+    const value = await created.json();
+    expect(value.expiresAt - Date.now()).toBeGreaterThan(29 * 86400000);
+    expect((await request(`projects/${value.id}`)).status).toBe(404);
+    verifiedUser.mockResolvedValue({ data: { user: { id: 'account-two' } }, error: null });
+    expect((await request(`projects/${value.id}`, undefined, 'GET', accountCookie)).status).toBe(
+      404,
+    );
+    verifiedUser.mockResolvedValue({ data: { user: null }, error: new Error('Expired session') });
+    expect((await request('session', undefined, 'GET', accountCookie)).status).toBe(401);
+  });
+  it('claims a guest project only by explicit account action', async () => {
+    const id = await project();
+    verifiedUser.mockResolvedValue({ data: { user: { id: 'account-one' } }, error: null });
+    const accountCookie = `${cookie}; sb-test-auth-token=verified-remotely`;
+    expect(await (await request('projects', undefined, 'GET', accountCookie)).json()).toEqual([]);
+    const copied = await request(`projects/${id}/claim`, {}, 'POST', accountCookie);
+    expect(copied.status).toBe(201);
+    expect((await copied.json()).id).not.toBe(id);
+    expect((await request(`projects/${id}`)).status).toBe(200);
+  });
+  it('reconciles a lost renderer only once, refunds failure and rejects late callbacks', async () => {
+    const { id } = await (await job(await project())).json();
+    await internal('claim', { jobId: id, attempt: 1 });
+    sqlite.prepare('UPDATE studio_jobs SET lease_until=0 WHERE id=?').run(id);
+    await maintainStudio(env);
+    expect(await (await request(`jobs/${id}`)).json()).toMatchObject({
+      status: 'queued',
+      attempt: 2,
+    });
+    expect(
+      (await internal('progress', { jobId: id, attempt: 1, status: 'rendering', progress: 90 }))
+        .status,
+    ).toBe(409);
+    await internal('claim', { jobId: id, attempt: 2 });
+    sqlite.prepare('UPDATE studio_jobs SET lease_until=0 WHERE id=?').run(id);
+    await maintainStudio(env);
+    expect(await (await request(`jobs/${id}`)).json()).toMatchObject({
+      status: 'failed',
+      attempt: 2,
+    });
+    const session = await (await request('session')).json();
+    expect(session.quota.remaining).toBe(2);
+  });
+  it('rejects oversized files and unverified uploads and cleans expired private objects', async () => {
+    expect(
+      (
+        await request('uploads', {
+          mime: 'image/png',
+          size: 10 * 1048576 + 1,
+          challenge: 'valid-challenge',
+        })
+      ).status,
+    ).toBe(413);
+    expect(
+      (await request('uploads', { mime: 'image/svg+xml', size: 100, challenge: 'valid-challenge' }))
+        .status,
+    ).toBe(422);
+    const upload = await (
+      await request('uploads', { mime: 'image/png', size: 100, challenge: 'valid-challenge' })
+    ).json();
+    await internal('asset', {
+      assetId: upload.id,
+      valid: true,
+      metadata: { mime: 'image/png', width: 100, height: 100 },
+    });
+    expect(await (await request(`uploads/${upload.id}`)).json()).toMatchObject({
+      status: 'pending',
+    });
+    sqlite.prepare('UPDATE studio_assets SET expires_at=0 WHERE id=?').run(upload.id);
+    await maintainStudio(env);
+    expect(env.VIDEO_STUDIO_PRIVATE.delete).toHaveBeenCalledWith(`uploads/${upload.id}`);
+    expect((await request(`uploads/${upload.id}`)).status).toBe(404);
   });
 });

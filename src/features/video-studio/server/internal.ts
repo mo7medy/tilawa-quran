@@ -34,7 +34,7 @@ export const internalRequest = async (
   const attempt = Number(data.attempt);
   if (path[0] === 'claim') {
     const row = await env.VIDEO_STUDIO_DB.prepare(
-      "UPDATE studio_jobs SET status='preparing',lease_until=?,started_at=COALESCE(started_at,?) WHERE id=? AND attempt=? AND status='queued' AND expires_at>? AND (SELECT COUNT(*) FROM studio_jobs WHERE status IN ('preparing','rendering','uploading','cancel_requested') AND lease_until>?)<2 RETURNING *",
+      "UPDATE studio_jobs SET status='preparing',error=NULL,lease_until=?,started_at=COALESCE(started_at,?) WHERE id=? AND attempt=? AND status='queued' AND expires_at>? AND (SELECT COUNT(*) FROM studio_jobs WHERE status IN ('preparing','rendering','uploading','cancel_requested') AND lease_until>?)<2 RETURNING *",
     )
       .bind(now + 300000, now, id, attempt, now, now)
       .first<JobRow>();
@@ -82,9 +82,9 @@ export const internalRequest = async (
   );
   if (row.status === 'cancel_requested') {
     await env.VIDEO_STUDIO_DB.prepare(
-      "UPDATE studio_jobs SET status='cancelled',lease_until=0 WHERE id=? AND attempt=? AND status='cancel_requested'",
+      "UPDATE studio_jobs SET status='cancelled',lease_until=0,finished_at=? WHERE id=? AND attempt=? AND status='cancel_requested'",
     )
-      .bind(id, attempt)
+      .bind(now, id, attempt)
       .run();
     return json({ cancel: true });
   }
@@ -126,9 +126,17 @@ export const internalRequest = async (
         : 'RENDER_FAILED';
       const retry = data.retryable === true && row.attempt < 2;
       await env.VIDEO_STUDIO_DB.prepare(
-        'UPDATE studio_jobs SET status=?,error=?,attempt=attempt+?,dispatch_at=0,call_id=NULL,lease_until=0,charged=0,output_key=NULL,output_size=0 WHERE id=? AND attempt=? AND status=?',
+        'UPDATE studio_jobs SET status=?,error=?,attempt=attempt+?,progress=0,finished_at=?,dispatch_at=0,call_id=NULL,lease_until=0,charged=0,output_key=NULL,output_size=0 WHERE id=? AND attempt=? AND status=?',
       )
-        .bind(retry ? 'queued' : 'failed', error, Number(retry), id, attempt, row.status)
+        .bind(
+          retry ? 'queued' : 'failed',
+          error,
+          Number(retry),
+          retry ? null : now,
+          id,
+          attempt,
+          row.status,
+        )
         .run();
       if (row.output_key) await env.VIDEO_STUDIO_PRIVATE.delete(row.output_key);
     }
