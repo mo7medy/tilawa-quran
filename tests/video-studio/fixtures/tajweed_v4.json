@@ -1,0 +1,127 @@
+{
+  "version": "1",
+  "renderVersion": "studio-1",
+  "spec": {
+    "version": "1",
+    "title": "Staging proof tajweed_v4",
+    "chapterId": 1,
+    "from": 1,
+    "to": 2,
+    "reciterId": 7,
+    "translationId": 20,
+    "font": "tajweed_v4",
+    "mushafLines": "15_lines",
+    "fontSize": 66,
+    "translationSize": 36,
+    "lineHeight": 1.8,
+    "color": "#ffffff",
+    "alignment": "center",
+    "background": {
+      "type": "color",
+      "value": "#102b30",
+      "opacity": 0.4,
+      "position": 50
+    },
+    "template": "center",
+    "ratio": "portrait",
+    "quality": 720
+  },
+  "verses": [
+    {
+      "key": "1:1",
+      "words": [
+        {
+          "text": "ﱁ",
+          "page": 1,
+          "end": false
+        },
+        {
+          "text": "ﱂ",
+          "page": 1,
+          "end": false
+        },
+        {
+          "text": "ﱃ",
+          "page": 1,
+          "end": false
+        },
+        {
+          "text": "ﱄ",
+          "page": 1,
+          "end": false
+        },
+        {
+          "text": "ﱅ",
+          "page": 1,
+          "end": true
+        }
+      ],
+      "translation": "In the name of Allāh, the Entirely Merciful, the Especially Merciful.",
+      "startMs": 0,
+      "endMs": 6090
+    },
+    {
+      "key": "1:2",
+      "words": [
+        {
+          "text": "ﱆ",
+          "page": 1,
+          "end": false
+        },
+        {
+          "text": "ﱇ",
+          "page": 1,
+          "end": false
+        },
+        {
+          "text": "ﱈ",
+          "page": 1,
+          "end": false
+        },
+        {
+          "text": "ﱉ",
+          "page": 1,
+          "end": false
+        },
+        {
+          "text": "ﱊ",
+          "page": 1,
+          "end": true
+        }
+      ],
+      "translation": "[All] praise is [due] to Allāh, Lord of the worlds -",
+      "startMs": 6090,
+      "endMs": 11680
+    }
+  ],
+  "fonts": [
+    {
+      "url": "https://tilawa-video-studio-staging.muhammad5mdk.workers.dev/api/video-studio/assets/3ced9c0f79a08a533ca30c226d5d0eff470645b12dcad53091ce2e36575df62c",
+      "sha256": "3ced9c0f79a08a533ca30c226d5d0eff470645b12dcad53091ce2e36575df62c",
+      "family": "Studio-tajweed_v4-1"
+    },
+    {
+      "url": "https://tilawa-video-studio-staging.muhammad5mdk.workers.dev/api/video-studio/assets/8055c0ac299fcca57361e39e62dd0b73bd512e9d485ffee0059c38f3d60de2a2",
+      "sha256": "8055c0ac299fcca57361e39e62dd0b73bd512e9d485ffee0059c38f3d60de2a2",
+      "family": "StudioTranslation"
+    },
+    {
+      "url": "https://tilawa-video-studio-staging.muhammad5mdk.workers.dev/api/video-studio/assets/463729634584701ed92aaffc86122a4a1266a494a46cbd67497c3a81ca45bd59",
+      "sha256": "463729634584701ed92aaffc86122a4a1266a494a46cbd67497c3a81ca45bd59",
+      "family": "StudioTranslationFallback"
+    }
+  ],
+  "audio": {
+    "url": "https://download.quranicaudio.com/qdc/mishari_al_afasy/murattal/1.mp3",
+    "startMs": 0,
+    "endMs": 11680
+  },
+  "background": {
+    "type": "color",
+    "url": ""
+  },
+  "durationMs": 11680,
+  "width": 720,
+  "height": 1280,
+  "fps": 30
+}

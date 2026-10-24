@@ -92,3 +92,9 @@ supabase/.branches/
 .env.local
 *.stdout.log
 *.stderr.log
+.video-studio-assets/
+services/video-renderer/bundle/
+services/video-renderer/node_modules/
+!services/video-renderer/package-lock.json
+services/video-renderer/__pycache__/
+*.tsbuildinfo

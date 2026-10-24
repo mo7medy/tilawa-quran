@@ -92,6 +92,8 @@
     "/beyond-ramadan": ["ramadan-activities"],
     "/calendar": ["quranic-calendar"],
     "/media": ["media"],
+    "/video-studio": ["academy", "video-studio"],
+    "/video-studio/library": ["academy", "video-studio"],
     "/take-notes": ["take-notes"],
     "/[chapterId]/answers": ["quran-reader", "question", "reading-goal", "notes", "surah-info"],
     "/[chapterId]/answers/[questionId]": [

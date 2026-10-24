@@ -46,6 +46,7 @@ export default defineConfig({
       '@/api': path.resolve(__dirname, './src/api.ts'),
       '@/tilawa': path.resolve(__dirname, './src/tilawa'),
       '@/lib': path.resolve(__dirname, './src/lib'),
+      '@/features': path.resolve(__dirname, './src/features'),
       '@/hooks': path.resolve(__dirname, './src/hooks'),
       '@/components': path.resolve(__dirname, './src/components'),
       '@/*': `${path.resolve(__dirname, './src')}/*`,

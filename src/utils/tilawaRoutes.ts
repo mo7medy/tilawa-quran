@@ -18,6 +18,8 @@ export const ACADEMY_ROUTE_PATHNAMES: readonly string[] = [
   '/register',
   '/sign-in',
   '/profile',
+  '/video-studio',
+  '/video-studio/library',
 ];
 
 /** Locales with first-class academy content (`locales/<locale>/academy.json`). */
