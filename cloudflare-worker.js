@@ -1,9 +1,9 @@
 // OpenNext creates this module during the Cloudflare build.
 // eslint-disable-next-line import/no-unresolved
 import openNext from './.open-next/worker.js';
-import { getVisitorLocaleRedirect } from './src/tilawa/visitorLocale';
 import { handleStudio } from './src/features/video-studio/server/api';
 import { maintainStudio } from './src/features/video-studio/server/maintenance';
+import { getVisitorLocaleRedirect } from './src/tilawa/visitorLocale';
 
 // Keep generated Durable Object and other adapter exports available.
 // eslint-disable-next-line import/no-unresolved

@@ -3,6 +3,8 @@ import path from 'node:path';
 import { spawn } from 'node:child_process';
 import { createRequire } from 'node:module';
 
+import { assetStorage } from './asset-storage.mjs';
+
 const require = createRequire(import.meta.url);
 const directory = path.resolve(process.argv[2] ?? '.video-studio-assets');
 const bucket = process.argv[3];
@@ -13,7 +15,7 @@ const wrangler = path.join(
   path.dirname(require.resolve('wrangler/package.json')),
   'bin/wrangler.js',
 );
-const upload = (key, mime) =>
+const uploadWithCli = (key, mime) =>
   new Promise((resolve, reject) => {
     const child = spawn(
       process.execPath,
@@ -38,16 +40,41 @@ const upload = (key, mime) =>
       code === 0 ? resolve() : reject(new Error(`Asset publication failed (${key.slice(0, 18)}).`)),
     );
   });
+const put = process.env.CLOUDFLARE_API_TOKEN
+  ? await assetStorage({
+      account: process.env.CLOUDFLARE_ACCOUNT_ID,
+      bucket,
+      token: process.env.CLOUDFLARE_API_TOKEN,
+    })
+  : null;
+let changed = 0;
+const upload = async (key, mime) => {
+  if (put) changed += Number(await put(key, mime, await fs.readFile(path.join(directory, key))));
+  else {
+    await uploadWithCli(key, mime);
+    changed++;
+  }
+};
 const items = [...new Map(Object.values(manifest.files).map((item) => [item.key, item])).values()];
 let cursor = 0;
+let completed = 0;
 await Promise.all(
   Array.from({ length: 4 }, async () => {
     while (cursor < items.length) {
       const item = items[cursor++];
       await upload(item.key, item.mime);
+      completed++;
+      if (completed % 100 === 0)
+        console.log(JSON.stringify({ checked: completed, total: items.length, uploaded: changed }));
     }
   }),
 );
 // Publish the index last; a failed partial upload can never advertise incomplete assets.
 await upload('manifest.json', 'application/json');
-console.log(JSON.stringify({ published: items.length, assetVersion: manifest.assetVersion }));
+console.log(
+  JSON.stringify({
+    published: items.length,
+    uploaded: changed,
+    assetVersion: manifest.assetVersion,
+  }),
+);

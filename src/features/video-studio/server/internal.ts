@@ -82,10 +82,11 @@ export const internalRequest = async (
   );
   if (row.status === 'cancel_requested') {
     await env.VIDEO_STUDIO_DB.prepare(
-      "UPDATE studio_jobs SET status='cancelled',lease_until=0,finished_at=? WHERE id=? AND attempt=? AND status='cancel_requested'",
+      "UPDATE studio_jobs SET status='cancelled',lease_until=0,finished_at=?,output_key=NULL,output_size=0 WHERE id=? AND attempt=? AND status='cancel_requested'",
     )
       .bind(now, id, attempt)
       .run();
+    if (row.output_key) await env.VIDEO_STUDIO_PRIVATE.delete(row.output_key);
     return json({ cancel: true });
   }
   if (path[0] === 'progress') {

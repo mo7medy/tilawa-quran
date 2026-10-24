@@ -16,6 +16,12 @@ checkout, creates a SHA-256 asset index, uploads all blobs before publishing its
 the website. Never publish an index generated from an incomplete sparse checkout. D1 migrations are
 additive and must be applied before deploying code using them.
 
+The asset publisher uses the CI-provided `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` with
+Cloudflare's R2 object API. It bounds concurrency and request rate, retries temporary errors, checks
+content digests and reuses identical stored blobs. Local OAuth workflows use the official Wrangler
+CLI fallback; the publisher never reads local OAuth credentials. The manifest is always published
+last. Token permissions must cover only the intended account/resources.
+
 Worker secrets: `QURAN_CLIENT_ID`, `QURAN_CLIENT_SECRET`, `NEXT_PUBLIC_SUPABASE_URL`,
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `STUDIO_SIGNING_SECRET`, `STUDIO_MODAL_KEY`,
 `STUDIO_MODAL_SECRET`, `STUDIO_MODAL_URL`, `STUDIO_TURNSTILE_SECRET`, `STUDIO_TURNSTILE_SITE_KEY`.

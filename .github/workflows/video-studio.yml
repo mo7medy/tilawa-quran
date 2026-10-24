@@ -33,6 +33,7 @@ jobs:
       - run: yarn install --frozen-lockfile --ignore-scripts
       - run: yarn test
       - run: python services/video-renderer/test_database.py
+      - run: node --test services/video-renderer/test-publish-assets.mjs
       - run: yarn tsc --project tsconfig.build.json --noEmit
       - run: yarn eslint src/features/video-studio src/pages/video-studio --ext .ts,.tsx
       - run: yarn playwright install --with-deps chromium

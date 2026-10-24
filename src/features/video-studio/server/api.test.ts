@@ -219,6 +219,11 @@ describe('studio ownership and durable jobs', () => {
     const { id } = await (await job(await project())).json();
     await internal('claim', { jobId: id, attempt: 1 });
     await internal('progress', { jobId: id, attempt: 1, status: 'rendering', progress: 10 });
+    sqlite
+      .prepare(
+        "UPDATE studio_jobs SET status='uploading',output_key='outputs/cancelled.mp4',output_size=100 WHERE id=?",
+      )
+      .run(id);
     await request(`jobs/${id}/cancel`, {});
     expect(
       await (await internal('finish', { jobId: id, attempt: 1, success: true })).json(),
@@ -226,6 +231,7 @@ describe('studio ownership and durable jobs', () => {
     expect(
       sqlite.prepare('SELECT status,charged FROM studio_jobs WHERE id=?').get(id),
     ).toMatchObject({ status: 'cancelled', charged: 1 });
+    expect(env.VIDEO_STUDIO_PRIVATE.delete).toHaveBeenCalledWith('outputs/cancelled.mp4');
     expect((await internal('finish', { jobId: id, attempt: 1, success: true })).status).toBe(409);
   });
   it('does not serve expired uploads even with a still-valid signed URL', async () => {

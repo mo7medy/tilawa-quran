@@ -18,6 +18,7 @@ import { StudioEnv } from './runtime';
 import { MushafLines } from '@/types/QuranReader';
 import { getDefaultWordFields, getMushafId } from '@/utils/api';
 import { getAllChaptersData } from '@/utils/chapter';
+import { stripHtml } from '@/utils/string';
 
 export { catalog, assetIndex } from './contentSources';
 export const resolveManifest = async (
@@ -90,11 +91,7 @@ export const resolveManifest = async (
     return {
       key,
       words,
-      translation: (translation ?? '')
-        .replace(/<sup[^>]*>[\s\S]*?<\/sup>/gi, '')
-        .replace(/<[^>]*>/g, '')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&amp;/g, '&'),
+      translation: stripHtml((translation ?? '').replace(/<sup[^>]*>[\s\S]*?<\/sup>/gi, '')),
       startMs: from - startMs,
       endMs: to - startMs,
     };
