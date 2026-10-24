@@ -59,6 +59,24 @@ H.264/AAC, 11,712 ms and 320,901 bytes. Decoded audio SHA-256 matched the first 
 exactly, confirming that the uploaded video's audio did not enter the rendered soundtrack. Reopening
 the editor restored the saved project and its completed job.
 
+After the final website deployment, an invalid PNG was rejected visibly in the editor. Replacing its
+contents with valid PNG bytes and selecting the same path again succeeded without reloading; the
+challenge renewed, the file input cleared, and the prior error disappeared.
+
+An administrative long-render proof used Al-Rahman 55:1–23, 171,290 ms of canonical source timing,
+QPC text, no translation and 1080 x 1920 output. Its manifest combined consecutive short canonical
+resolutions without changing source words, audio offsets or ayah boundaries. The task was inserted
+only into the isolated staging database for capacity measurement, not through a registered account.
+It completed in one attempt on the initial 2-CPU, single-frame configuration, including across the
+website and renderer redeployments. The downloaded H.264/AAC MP4 is 3,815,075 bytes, 30 fps and
+171,307 ms (17 ms difference). Request to completion took 1,179.705 seconds; rendering-start to
+verified completion took 1,140.297 seconds. This leaves little margin below the 20-minute timeout.
+
+The deployed renderer was therefore adjusted to 4 CPU and two concurrent frames inside one export;
+the global limit remains two export jobs and memory remains 4 GiB per job. The user explicitly
+declined another administrative benchmark, so no long-render speedup or new measured timing is
+claimed for the adjusted configuration.
+
 The existing `/media` page was checked on the full staging website after the Remotion upgrade: Quran
 text and fonts loaded, background video decoded, preview playback controls worked, and no browser
 error was observed. Its existing AWS/Lambda export service was not exercised or redeployed.
@@ -84,8 +102,9 @@ live infrastructure.
 - The user explicitly excluded the live registered-account sign-in test on 2026-10-25. The account
   allowance, isolation and explicit guest claim have automated coverage; do not represent them as
   having been exercised with a real signed-in account in this acceptance run.
-- Profile a longer 180-second 1080p sample and observe billing at steady traffic before public
-  launch.
+- Observe the adjusted renderer's timings and billing at steady traffic before public launch. A
+  171-second 1080p sample passed on the initial configuration; its adjusted-configuration benchmark
+  was excluded by the user.
 - Review long/complex ayahs and translation layouts visually with Arabic content review.
 
 Keep the public launch closed until these gates are resolved. The staging generation switch is
@@ -96,3 +115,6 @@ commit local proof credentials, session cookies or signed URLs.
 Cloudflare Builds cache restoration was disabled and the trigger's cache purged after a rebuild
 exhausted disk while reinstalling dependencies. Documentation-only changes to this record and the
 renderer README are excluded from the website trigger. Only the intended staging branch is allowed.
+The renderer-only `app.py` and `render.mjs` changes use the Modal pipeline without rebuilding the
+unchanged website. The complete website deployment succeeded after cache cleanup, and the public
+staging access checks were repeated successfully on it.
