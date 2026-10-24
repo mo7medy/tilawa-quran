@@ -20,6 +20,8 @@ module.exports = [
       return (
         url.hostname.endsWith('.supabase.co') ||
         path.startsWith('/api/tilawa/') ||
+        path.startsWith('/api/video-studio/') ||
+        /(?:^|\/)video-studio(?:\/|\.|$)/.test(path) ||
         /(?:^|\/)(?:profile|dashboard|admin|lessons|my-quran|notes|collections|reading-goal|sign-in|register|auth)(?:\/|\.|$)/.test(
           path,
         )

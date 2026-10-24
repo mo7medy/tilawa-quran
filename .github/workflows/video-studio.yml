@@ -1,0 +1,68 @@
+name: Video studio validation
+on:
+  pull_request:
+    paths:
+      [
+        'src/features/video-studio/**',
+        'src/pages/video-studio/**',
+        'services/video-renderer/**',
+        'locales/*/video-studio.json',
+        'cloudflare-worker.js',
+        'wrangler.video-studio.staging.jsonc',
+        '.github/workflows/video-studio.yml',
+      ]
+  workflow_dispatch:
+    inputs:
+      deploy_staging:
+        description:
+          'Publish the isolated Modal renderer after checks (website uses Cloudflare Builds)'
+        type: boolean
+        default: false
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: yarn }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13' }
+      - run: corepack enable
+      - run: yarn install --frozen-lockfile --ignore-scripts
+      - run: yarn test
+      - run: python services/video-renderer/test_database.py
+      - run: yarn tsc --project tsconfig.build.json --noEmit
+      - run: yarn eslint src/features/video-studio src/pages/video-studio --ext .ts,.tsx
+      - run: yarn playwright install --with-deps chromium
+      - run: yarn playwright test --config tests/video-studio/playwright.config.ts
+      - run: node services/video-renderer/build-assets.mjs
+      - run: npm ci --ignore-scripts --prefix services/video-renderer
+      - run: npm run bundle --prefix services/video-renderer
+      - uses: actions/upload-artifact@v4
+        with:
+          {
+            name: video-studio-assets,
+            path: .video-studio-assets,
+            include-hidden-files: true,
+            retention-days: 7,
+          }
+  deploy-staging:
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_staging
+    needs: validate
+    environment: video-studio-staging
+    runs-on: ubuntu-latest
+    env:
+      MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+      MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+      STUDIO_MODAL_APP: tilawa-video-studio-staging
+      STUDIO_MODAL_SECRET_NAME: tilawa-video-studio-staging
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24, cache: yarn }
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.13' }
+      - run: pip install modal==1.6.2
+      - run: modal deploy services/video-renderer/app.py
