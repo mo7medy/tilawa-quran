@@ -90,7 +90,8 @@ error was observed. Its existing AWS/Lambda export service was not exercised or 
   font choices, fixed font-byte verification, overflow prevention and library actions. These tests
   explicitly mock content/account APIs; they complement the real guest cycle above.
 - Whole-project TypeScript and scoped ESLint passed. Changed files are formatted.
-- GitHub validation and restricted Modal deployment both passed for code revision `ba6af56`.
+- GitHub validation and restricted Modal deployment both passed for code revisions `ba6af56` and
+  `120e8f7` (including the adjusted renderer configuration).
 
 The SQLite/API tests also exercise owner isolation, explicit guest claim, atomic quota reservation,
 duplicate requests, cancellation, stale attempts, retry/watchdog recovery, expiry and deletion
