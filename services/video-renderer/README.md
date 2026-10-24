@@ -41,9 +41,12 @@ and `STUDIO_MODAL_SECRET_NAME` to the isolated environment names, then run
 a Modal proxy token; put that token only in the Worker secrets. Temporary job directories are
 removed after execution. No GPU is needed. Default limits: 2 CPU, 4 GiB, 20 minutes, two containers.
 
-The GitHub workflow validates the implementation and can deploy Modal from the protected
-`video-studio-staging` environment when its Modal credentials are configured. Website deployment
-uses Cloudflare Builds; this avoids two pipelines overwriting the same Worker.
+The GitHub workflow validates the implementation and deploys Modal only from pushes to
+`codex/video-studio` (or an explicitly requested manual staging run on that branch). Its
+`video-studio-staging` GitHub Environment accepts only that exact branch and holds a dedicated
+90-day Modal CI token. Rotate it before expiry in the platform secret manager. This is a dedicated
+workspace credential; the GitHub environment and workflow enforce the staging deployment scope.
+Website deployment uses Cloudflare Builds; this avoids two pipelines overwriting the same Worker.
 
 ## Policy and operations
 

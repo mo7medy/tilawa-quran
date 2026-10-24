@@ -1,5 +1,17 @@
 name: Video studio validation
 on:
+  push:
+    branches: [codex/video-studio]
+    paths:
+      - 'src/features/video-studio/scene/**'
+      - 'src/features/video-studio/contracts.ts'
+      - 'src/features/video-studio/typography.ts'
+      - 'src/features/video-studio/validation.ts'
+      - 'services/video-renderer/**'
+      - 'tests/video-studio/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - '.github/workflows/video-studio.yml'
   pull_request:
     paths:
       [
@@ -20,6 +32,9 @@ on:
         default: false
 permissions:
   contents: read
+concurrency:
+  group: video-studio-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -41,16 +56,10 @@ jobs:
       - run: node services/video-renderer/build-assets.mjs
       - run: npm ci --ignore-scripts --prefix services/video-renderer
       - run: npm run bundle --prefix services/video-renderer
-      - uses: actions/upload-artifact@v4
-        with:
-          {
-            name: video-studio-assets,
-            path: .video-studio-assets,
-            include-hidden-files: true,
-            retention-days: 7,
-          }
   deploy-staging:
-    if: github.event_name == 'workflow_dispatch' && inputs.deploy_staging
+    if:
+      github.ref == 'refs/heads/codex/video-studio' && (github.event_name == 'push' ||
+      (github.event_name == 'workflow_dispatch' && inputs.deploy_staging))
     needs: validate
     environment: video-studio-staging
     runs-on: ubuntu-latest
