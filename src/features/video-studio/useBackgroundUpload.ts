@@ -20,15 +20,18 @@ const useBackgroundUpload = ({
   onError,
 }: BackgroundUploadProps) => {
   const [busy, setBusy] = useState(false);
+  const reserve = async (file: File): Promise<{ id: string }> => {
+    try {
+      return await studioRequest('uploads', { mime: file.type, size: file.size, challenge });
+    } finally {
+      // Siteverify tokens are single-use even when later file validation rejects the request.
+      onConsumed();
+    }
+  };
   const upload = async (file: File): Promise<void> => {
     setBusy(true);
     try {
-      const { id } = await studioRequest<{ id: string }>('uploads', {
-        mime: file.type,
-        size: file.size,
-        challenge,
-      });
-      onConsumed();
+      const { id } = await reserve(file);
       const response = await fetch(`/api/video-studio/uploads/${id}`, {
         method: 'PUT',
         body: file,
@@ -48,11 +51,12 @@ const useBackgroundUpload = ({
       }
       onError('UPLOAD_TIMEOUT');
     } catch (e) {
-      onError(
-        e instanceof Error && ['INVALID_FILE', 'UPLOAD_FAILED'].includes(e.message)
-          ? e.message
-          : errorCode(e),
-      );
+      const code = errorCode(e);
+      if (e instanceof Error && ['INVALID_FILE', 'UPLOAD_FAILED'].includes(e.message)) {
+        onError(e.message);
+      } else {
+        onError(code === 'NOT_FOUND' ? 'INVALID_FILE' : code);
+      }
     } finally {
       setBusy(false);
     }

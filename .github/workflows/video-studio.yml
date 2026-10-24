@@ -3,12 +3,14 @@ on:
   push:
     branches: [codex/video-studio]
     paths:
-      - 'src/features/video-studio/scene/**'
-      - 'src/features/video-studio/contracts.ts'
-      - 'src/features/video-studio/typography.ts'
-      - 'src/features/video-studio/validation.ts'
+      - 'src/features/video-studio/**'
+      - 'src/pages/video-studio/**'
       - 'services/video-renderer/**'
       - 'tests/video-studio/**'
+      - 'locales/*/video-studio.json'
+      - 'cloudflare-worker.js'
+      - 'configs/SecurityHeaders.js'
+      - 'wrangler.video-studio.*.jsonc'
       - 'package.json'
       - 'yarn.lock'
       - '.github/workflows/video-studio.yml'
@@ -21,6 +23,9 @@ on:
         'locales/*/video-studio.json',
         'cloudflare-worker.js',
         'wrangler.video-studio.staging.jsonc',
+        'wrangler.video-studio.website.staging.jsonc',
+        'package.json',
+        'yarn.lock',
         '.github/workflows/video-studio.yml',
       ]
   workflow_dispatch:

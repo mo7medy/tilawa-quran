@@ -148,6 +148,13 @@ afterEach(() => {
 });
 
 describe('studio ownership and durable jobs', () => {
+  it('renews a guest session without changing ownership of a recently saved project', async () => {
+    const id = await project();
+    const session = await request('session');
+    expect(session.headers.get('set-cookie')).toContain('Max-Age=86400');
+    const renewed = session.headers.get('set-cookie').split(';')[0];
+    expect((await request(`projects/${id}`, undefined, 'GET', renewed)).status).toBe(200);
+  });
   it('uses supported manual redirects and never forwards private Modal credentials to a redirect', async () => {
     vi.mocked(fetch).mockResolvedValueOnce(
       new Response(null, { status: 302, headers: { Location: 'https://untrusted.example.test' } }),

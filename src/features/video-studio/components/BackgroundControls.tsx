@@ -87,7 +87,10 @@ const BackgroundControls = ({
               accept="image/jpeg,image/png,image/webp,video/mp4"
               disabled={busy || !catalog?.enabled}
               onChange={(e) => {
-                if (e.target.files?.[0]) upload(e.target.files[0]);
+                const input = e.target;
+                const file = input.files?.[0];
+                input.value = '';
+                if (file) upload(file);
               }}
             />
             <small>{t(uploadLabel)}</small>

@@ -19,7 +19,7 @@ const ContentSecurityPolicy = `
   worker-src 'self' blob:;
   child-src 'self' blob:;
   img-src * data:;
-  media-src 'self' data: blob: *.quranicaudio.com *.qurancdn.com https://qurancdn.com https://images.quran.com;
+  media-src 'self' data: blob: *.quranicaudio.com *.qurancdn.com https://qurancdn.com https://images.quran.com https://verses.quran.com;
   connect-src *;
 `;
 

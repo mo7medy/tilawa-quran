@@ -49,8 +49,10 @@ const put = process.env.CLOUDFLARE_API_TOKEN
   : null;
 let changed = 0;
 const upload = async (key, mime) => {
-  if (put) changed += Number(await put(key, mime, await fs.readFile(path.join(directory, key))));
-  else {
+  if (put) {
+    const uploaded = await put(key, mime, await fs.readFile(path.join(directory, key)));
+    changed += Number(uploaded);
+  } else {
     await uploadWithCli(key, mime);
     changed++;
   }

@@ -37,7 +37,8 @@ export const validCapability = async (
   const [, expires, signature] = match;
   return (
     Number(expires) > Date.now() &&
-    Number(expires) <= Date.now() + 86400000 &&
+    // Allow small clock differences between Worker locations for freshly renewed guest cookies.
+    Number(expires) <= Date.now() + 86400000 + 60000 &&
     verify(secret, `${resource}:${expires}`, signature ?? '')
   );
 };

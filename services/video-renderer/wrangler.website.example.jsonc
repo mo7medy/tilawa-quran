@@ -23,5 +23,5 @@
   ],
   "vars": { "STUDIO_ENABLED": "0", "STUDIO_ORIGIN": "https://REPLACE_WITH_WEBSITE_ORIGIN" },
   "triggers": { "crons": ["* * * * *"] },
-  "observability": { "enabled": true }
+  "observability": { "enabled": true, "redact_query_string": true }
 }

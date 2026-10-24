@@ -29,7 +29,8 @@ export const ownerFor = async (
   );
   const cookies = req.headers.get('cookie') ?? '';
   const config = getSupabaseConfiguration();
-  if (config && /(?:^|;\s*)sb-[^=]+auth-token/.test(cookies)) {
+  if (/(?:^|;\s*)sb-[^=]+auth-token/.test(cookies)) {
+    assert(config, 'AUTH_REQUIRED', 401);
     const client = createServerClient(config.url, config.publishableKey, {
       cookies: {
         getAll: () => Object.entries(parse(cookies)).map(([name, value]) => ({ name, value })),
@@ -44,8 +45,8 @@ export const ownerFor = async (
     return { id: `user:${data.user.id}`, registered: true, network };
   }
   const existing = await guestFromCookie(req, env);
-  if (existing) return { id: existing, registered: false, network };
-  const id = crypto.randomUUID();
+  // A recently saved guest project must remain reachable for its full retention period.
+  const id = existing ? existing.slice('guest:'.length) : crypto.randomUUID();
   const value = `${id}~${await capability(
     env.STUDIO_SIGNING_SECRET,
     `guest:${id}`,
