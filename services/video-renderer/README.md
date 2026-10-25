@@ -52,6 +52,15 @@ Website deployment uses Cloudflare Builds; this avoids two pipelines overwriting
 
 ## Policy and operations
 
+The optional `VIDEO_STUDIO_BACKGROUNDS` binding reads the existing `tilawa-video-backgrounds`
+bucket's `manifest.json`. It lists its curated portrait/landscape JPEG, PNG and WebP images
+alongside the six legacy videos. Only manifest-listed image keys are served through the site's
+streaming `/api/video-studio/backgrounds/:id` route; browser and Modal use this same route.
+Selection is stored as a stable `r2-` identifier. Resolution freezes the object's ETag and
+conditional reads reject a changed image rather than silently altering an already prepared or queued
+video. The source bucket is read only by the studio. No R2 credentials or new external host
+permissions are sent to Modal.
+
 Guest: 2 videos/day, 60 seconds each, 100 MiB active storage, projects/files retained 24 hours.
 Account: 10/day, 180 seconds each, 1 GiB active storage, projects 30 days after save, files 7 days.
 Days reset in Africa/Cairo including DST. Global output is capped at 60 minutes/day; one active job

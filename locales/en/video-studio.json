@@ -51,6 +51,8 @@
   "background-type": "Background source",
   "solid": "Solid color",
   "site-backgrounds": "Tilawa backgrounds",
+  "library-image": "{{collection}} · {{orientation}} · {{number}}",
+  "background-collections": { "nature": "Nature", "sakina": "Sakina" },
   "upload": "Upload my background",
   "background-color": "Background color",
   "backgrounds": {
@@ -148,6 +150,7 @@
     "PREVIEW_CHANGED": "Source data changed. Prepare a fresh preview before generating.",
     "BACKGROUND_EXPIRED": "This uploaded background expired or belongs to another session. Upload it again.",
     "BACKGROUND_UNAVAILABLE": "The selected background is unavailable.",
+    "BACKGROUND_CHANGED": "The background file changed. Prepare the preview again before exporting.",
     "FILE_TOO_LARGE": "The file exceeds the upload limit.",
     "INVALID_FILE": "The file is invalid or uses an unsupported codec, type or dimensions.",
     "UPLOAD_FAILED": "The upload failed. Select the file and try again.",

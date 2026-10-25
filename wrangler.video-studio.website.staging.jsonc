@@ -16,6 +16,7 @@
     }
   ],
   "r2_buckets": [
+    { "binding": "VIDEO_STUDIO_BACKGROUNDS", "bucket_name": "tilawa-video-backgrounds" },
     { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "tilawa-video-studio-cache-staging" },
     { "binding": "VIDEO_STUDIO_ASSETS", "bucket_name": "tilawa-video-studio-assets-staging" },
     { "binding": "VIDEO_STUDIO_PRIVATE", "bucket_name": "tilawa-video-studio-private-staging" }

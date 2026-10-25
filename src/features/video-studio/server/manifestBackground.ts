@@ -2,6 +2,7 @@
 import { ResolvedVideoManifest, StudioOwner, VideoProjectSpec } from '../contracts';
 import { assert } from '../validation';
 
+import { resolveLibraryImage } from './backgroundLibrary';
 import { AssetIndex } from './contentSources';
 import { capability } from './crypto';
 import { StudioEnv } from './runtime';
@@ -13,6 +14,9 @@ export const resolveBackground = async (
   index: AssetIndex,
 ): Promise<ResolvedVideoManifest['background']> => {
   let background: ResolvedVideoManifest['background'] = { type: 'color', url: '' };
+  if (spec.background.type === 'library' && spec.background.value.startsWith('r2-')) {
+    return resolveLibraryImage(env, spec.background.value);
+  }
   if (spec.background.type === 'library') {
     const item = index.files[`background-${spec.background.value}`];
     assert(item, 'BACKGROUND_UNAVAILABLE');

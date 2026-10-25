@@ -9,6 +9,7 @@
     { "binding": "WORKER_SELF_REFERENCE", "service": "tilawa-video-studio-website-staging" }
   ],
   "r2_buckets": [
+    { "binding": "VIDEO_STUDIO_BACKGROUNDS", "bucket_name": "tilawa-video-backgrounds" },
     { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "REPLACE_WITH_ISOLATED_NEXT_CACHE" },
     { "binding": "VIDEO_STUDIO_ASSETS", "bucket_name": "REPLACE_WITH_ENV_ASSET_BUCKET" },
     { "binding": "VIDEO_STUDIO_PRIVATE", "bucket_name": "REPLACE_WITH_ENV_PRIVATE_BUCKET" }

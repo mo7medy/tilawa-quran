@@ -32,7 +32,7 @@ export const handleStudio = async (req: Request, bindings: StudioEnv): Promise<R
         req,
         path[1] === 'output' ? '' : await readBody(req),
       );
-    } else if (['assets', 'file', 'download'].includes(path[0])) {
+    } else if (['assets', 'backgrounds', 'file', 'download'].includes(path[0])) {
       response = await fileRequest(env, req, path[0], path[1]);
     } else {
       protectOrigin(req, env);

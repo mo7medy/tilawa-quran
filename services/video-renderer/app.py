@@ -24,6 +24,7 @@ image = (
     .run_commands("cd /opt/studio/services/video-renderer && npm ci --ignore-scripts")
     .add_local_dir(ROOT / "src/features/video-studio/scene", "/opt/studio/src/features/video-studio/scene", copy=True)
     .add_local_file(ROOT / "src/features/video-studio/contracts.ts", "/opt/studio/src/features/video-studio/contracts.ts", copy=True)
+    .add_local_file(ROOT / "src/features/video-studio/backgrounds.ts", "/opt/studio/src/features/video-studio/backgrounds.ts", copy=True)
     .add_local_file(ROOT / "src/features/video-studio/typography.ts", "/opt/studio/src/features/video-studio/typography.ts", copy=True)
     .add_local_file(ROOT / "src/features/video-studio/validation.ts", "/opt/studio/src/features/video-studio/validation.ts", copy=True)
     .add_local_file(ROOT / "types/QuranReader.ts", "/opt/studio/types/QuranReader.ts", copy=True)

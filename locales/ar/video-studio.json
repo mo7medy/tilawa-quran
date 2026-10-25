@@ -47,6 +47,8 @@
   "background-type": "مصدر الخلفية",
   "solid": "لون ثابت",
   "site-backgrounds": "خلفيات تلاوة",
+  "library-image": "{{collection}} · {{orientation}} · {{number}}",
+  "background-collections": { "nature": "الطبيعة", "sakina": "سكينة" },
   "upload": "رفع خلفية خاصة",
   "background-color": "لون الخلفية",
   "backgrounds": {
@@ -144,6 +146,7 @@
     "PREVIEW_CHANGED": "تغيرت بيانات المصدر. حضّر معاينة جديدة قبل التوليد.",
     "BACKGROUND_EXPIRED": "انتهت الخلفية المرفوعة أو تتبع جلسة أخرى. ارفعها مجددًا.",
     "BACKGROUND_UNAVAILABLE": "الخلفية المختارة غير متاحة.",
+    "BACKGROUND_CHANGED": "تغير ملف الخلفية. حضّر المعاينة مجددًا قبل التصدير.",
     "FILE_TOO_LARGE": "يتجاوز الملف الحد المسموح للرفع.",
     "INVALID_FILE": "الملف غير صالح أو نوعه أو ترميزه أو أبعاده غير مدعومة.",
     "UPLOAD_FAILED": "لم ينجح رفع الملف. اختره وحاول مجددًا.",

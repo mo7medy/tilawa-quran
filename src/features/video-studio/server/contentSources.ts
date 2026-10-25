@@ -2,6 +2,7 @@
 import { RENDER_VERSION, StudioCatalog } from '../contracts';
 import { assert } from '../validation';
 
+import { backgroundCatalog } from './backgroundLibrary';
 import { StudioEnv } from './runtime';
 
 import { fetchQuranFoundation } from '@/lib/quranFoundation/client';
@@ -23,9 +24,10 @@ export const list = <T>(value: unknown): T[] => {
   return value as T[];
 };
 export const catalog = async (env: StudioEnv, lang: string): Promise<StudioCatalog> => {
-  const [readers, translations] = await Promise.all([
+  const [readers, translations, backgrounds] = await Promise.all([
     content(`audio/reciters?locale=${lang}`),
     content(`resources/translations?language=${lang}`),
+    backgroundCatalog(env),
   ]);
   const chapters = await getAllChaptersData(lang);
   return {
@@ -43,10 +45,7 @@ export const catalog = async (env: StudioEnv, lang: string): Promise<StudioCatal
       name: r.name,
       language: r.language_name ?? '',
     })),
-    backgrounds: ['sea', 'abstract', 'windmill', 'stars', 'nature', 'snow'].map((id) => ({
-      id,
-      url: `${env.STUDIO_ORIGIN}/api/video-studio/assets/background-${id}`,
-    })),
+    backgrounds,
     enabled: env.STUDIO_ENABLED === '1',
     turnstileSiteKey: env.STUDIO_TURNSTILE_SITE_KEY ?? '',
   };

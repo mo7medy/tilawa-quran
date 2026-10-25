@@ -7,6 +7,7 @@ export interface StudioEnv {
   VIDEO_STUDIO_DB: D1Database;
   VIDEO_STUDIO_PRIVATE: R2Bucket;
   VIDEO_STUDIO_ASSETS: R2Bucket;
+  VIDEO_STUDIO_BACKGROUNDS?: R2Bucket;
   STUDIO_ENABLED?: string;
   STUDIO_ORIGIN: string;
   STUDIO_SIGNING_SECRET: string;

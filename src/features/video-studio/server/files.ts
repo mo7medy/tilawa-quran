@@ -5,6 +5,7 @@ import type { R2Bucket } from '@cloudflare/workers-types';
 
 import { assert } from '../validation';
 
+import { backgroundLibrary } from './backgroundLibrary';
 import { assetIndex } from './content';
 import { validCapability } from './crypto';
 import { JobRow } from './jobs';
@@ -15,18 +16,19 @@ const streamFile = async (
   bucket: R2Bucket,
   key: string,
   req: Request,
-  download = false,
+  options: { download?: boolean; etag?: string; mime?: string } = {},
 ): Promise<Response> => {
   const head = await bucket.head(key);
   assert(head, 'NOT_FOUND', 404);
+  assert(!options.etag || head.etag === options.etag, 'BACKGROUND_CHANGED', 409);
   const headers = new Headers({
-    'Content-Type': head.httpMetadata?.contentType ?? 'application/octet-stream',
+    'Content-Type': options.mime ?? head.httpMetadata?.contentType ?? 'application/octet-stream',
     'Cache-Control': 'private, no-store',
     'Accept-Ranges': 'bytes',
     'X-Content-Type-Options': 'nosniff',
     'Referrer-Policy': 'no-referrer',
   });
-  if (download) headers.set('Content-Disposition', 'attachment; filename="tilawa.mp4"');
+  if (options.download) headers.set('Content-Disposition', 'attachment; filename="tilawa.mp4"');
   const range = req.headers.get('range');
   let offset = 0;
   let length = head.size;
@@ -41,8 +43,12 @@ const streamFile = async (
   }
   headers.set('Content-Length', String(length));
   if (req.method === 'HEAD') return new Response(null, { headers, status: range ? 206 : 200 });
-  const object = await bucket.get(key, { range: { offset, length } });
+  const object = await bucket.get(key, {
+    range: { offset, length },
+    ...(options.etag ? { onlyIf: { etagMatches: options.etag } } : {}),
+  });
   assert(object, 'NOT_FOUND', 404);
+  assert('body' in object, 'BACKGROUND_CHANGED', 409);
   return new Response(object.body as unknown as ReadableStream, {
     headers,
     status: range ? 206 : 200,
@@ -55,6 +61,18 @@ export const fileRequest = async (
   id: string,
 ): Promise<Response> => {
   assert(['GET', 'HEAD'].includes(req.method), 'METHOD_NOT_ALLOWED', 405);
+  if (group === 'backgrounds') {
+    const images = await backgroundLibrary(env);
+    const image = images.find((entry) => entry.id === id);
+    assert(image, 'NOT_FOUND', 404);
+    const head = await env.VIDEO_STUDIO_BACKGROUNDS.head(image.key);
+    assert(head && head.size > 0 && head.size <= 10 * 1024 * 1024, 'NOT_FOUND', 404);
+    const version = new URL(req.url).searchParams.get('v');
+    return streamFile(env.VIDEO_STUDIO_BACKGROUNDS, image.key, req, {
+      etag: version ?? head.etag,
+      mime: image.mime,
+    });
+  }
   if (group === 'assets') {
     const index = await assetIndex(env);
     const item = index.files[id] ?? Object.values(index.files).find((f) => f.sha256 === id);
@@ -78,7 +96,7 @@ export const fileRequest = async (
       .bind(id, Date.now())
       .first<JobRow>();
     assert(job?.output_key, 'NOT_FOUND', 404);
-    return streamFile(env.VIDEO_STUDIO_PRIVATE, job.output_key, req, true);
+    return streamFile(env.VIDEO_STUDIO_PRIVATE, job.output_key, req, { download: true });
   }
   const asset = await env.VIDEO_STUDIO_DB.prepare(
     "SELECT * FROM studio_assets WHERE id=? AND status IN ('uploaded','ready') AND expires_at>?",

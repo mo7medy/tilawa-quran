@@ -1,3 +1,5 @@
+import { StudioLibraryBackground } from './backgrounds';
+
 import { MushafLines, QuranFont } from '@/types/QuranReader';
 
 export const STUDIO_VERSION = '1';
@@ -113,7 +115,7 @@ export interface StudioCatalog {
   chapters: { id: number; name: string; count: number }[];
   reciters: { id: number; name: string }[];
   translations: { id: number; name: string; language: string }[];
-  backgrounds: { id: string; url: string }[];
+  backgrounds: StudioLibraryBackground[];
   enabled: boolean;
   turnstileSiteKey: string;
 }

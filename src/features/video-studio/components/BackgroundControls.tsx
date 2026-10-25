@@ -4,6 +4,7 @@ import { StudioCatalog } from '../contracts';
 import useBackgroundUpload from '../useBackgroundUpload';
 
 import { ControlProps } from './ContentControls';
+import LibraryBackgroundPicker from './LibraryBackgroundPicker';
 import styles from './Studio.module.scss';
 
 const BackgroundControls = ({
@@ -37,7 +38,12 @@ const BackgroundControls = ({
                 background: {
                   ...spec.background,
                   type: e.target.value as 'color' | 'library' | 'upload',
-                  value: { color: '#102b30', library: 'sea', upload: '' }[e.target.value],
+                  value: {
+                    color: '#102b30',
+                    library:
+                      catalog?.backgrounds.find((b) => b.orientation === spec.ratio)?.id ?? 'sea',
+                    upload: '',
+                  }[e.target.value],
                 },
               })
             }
@@ -61,22 +67,7 @@ const BackgroundControls = ({
           </label>
         )}
         {spec.background.type === 'library' && (
-          <label htmlFor="studio-backgroundcontrols-3">
-            {t('site-backgrounds')}
-            <select
-              id="studio-backgroundcontrols-3"
-              value={spec.background.value}
-              onChange={(e) =>
-                change({ background: { ...spec.background, value: e.target.value } })
-              }
-            >
-              {catalog?.backgrounds.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {t(`backgrounds.${b.id}`)}
-                </option>
-              ))}
-            </select>
-          </label>
+          <LibraryBackgroundPicker spec={spec} change={change} catalog={catalog} />
         )}
         {spec.background.type === 'upload' && (
           <label htmlFor="studio-backgroundcontrols-4">

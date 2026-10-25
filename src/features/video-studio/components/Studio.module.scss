@@ -195,6 +195,12 @@
   background: var(--tilawa-card);
   overflow-wrap: anywhere;
 }
+.backgroundThumbnail {
+  inline-size: 100%;
+  block-size: 180px;
+  object-fit: cover;
+  border-radius: 12px;
+}
 .library {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
