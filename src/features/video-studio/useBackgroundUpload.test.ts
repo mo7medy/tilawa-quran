@@ -1,4 +1,4 @@
-/* eslint-disable react-func/max-lines-per-function -- Upload retry scenarios keep visible errors and the single-use challenge lifecycle together. */
+/* eslint-disable react-func/max-lines-per-function -- Upload retry scenarios keep visible errors and recovery assertions together. */
 import { act, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -18,16 +18,13 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe('background upload recovery', () => {
-  it('resets the consumed challenge after a size rejection so another upload can succeed', async () => {
-    const consumed = vi.fn();
+  it('allows another upload after a size rejection', async () => {
     const changed = vi.fn();
     const error = vi.fn();
     const { result } = renderHook(() =>
       useBackgroundUpload({
         spec: defaultSpec,
         change: changed,
-        challenge: 'single-use',
-        onConsumed: consumed,
         onError: error,
       }),
     );
@@ -35,12 +32,10 @@ describe('background upload recovery', () => {
     request.mockRejectedValueOnce(new StudioClientError('FILE_TOO_LARGE'));
     await act(async () => result.current.upload(file));
     expect(error).toHaveBeenCalledWith('FILE_TOO_LARGE');
-    expect(consumed).toHaveBeenCalledTimes(1);
     request
       .mockResolvedValueOnce({ id: 'accepted-background' })
       .mockResolvedValueOnce({ status: 'ready' });
     await act(async () => result.current.upload(file));
-    expect(consumed).toHaveBeenCalledTimes(2);
     expect(changed).toHaveBeenCalledWith({
       background: expect.objectContaining({ type: 'upload', value: 'accepted-background' }),
     });
@@ -52,8 +47,6 @@ describe('background upload recovery', () => {
       useBackgroundUpload({
         spec: defaultSpec,
         change: vi.fn(),
-        challenge: 'single-use',
-        onConsumed: vi.fn(),
         onError: error,
       }),
     );

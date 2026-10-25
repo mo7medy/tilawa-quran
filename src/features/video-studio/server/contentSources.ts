@@ -47,7 +47,6 @@ export const catalog = async (env: StudioEnv, lang: string): Promise<StudioCatal
     })),
     backgrounds,
     enabled: env.STUDIO_ENABLED === '1',
-    turnstileSiteKey: env.STUDIO_TURNSTILE_SITE_KEY ?? '',
   };
 };
 export interface AssetIndex {

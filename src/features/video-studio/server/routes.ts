@@ -4,7 +4,7 @@ import { StudioOwner } from '../contracts';
 import { assert, record, StudioError, validateSpec } from '../validation';
 
 import { catalog, resolveManifest } from './content';
-import { checkRate, checkTurnstile, guestFromCookie } from './identity';
+import { checkRate, guestFromCookie } from './identity';
 import { cancelJob, createJob, downloadUrl, getJob, jobView, manifestHash, quota } from './jobs';
 import { deleteProject, getProject, listProjects, saveProject } from './projects';
 import { readBody } from './requestBody';
@@ -64,7 +64,6 @@ export const authenticated = async (
     }
     if (method === 'POST' && !id) {
       await checkRate(env, `upload:${owner.network}`, 10);
-      if (!owner.registered) await checkTurnstile(env, body.challenge);
       return json(await initUpload(env, owner, String(body.mime), Number(body.size)), 201);
     }
   }
@@ -94,13 +93,6 @@ export const authenticated = async (
     }
     if (method === 'POST' && !id) {
       await checkRate(env, `render:${owner.network}`, 10);
-      // Idempotent retries reuse the existing request, without consuming another single-use challenge.
-      const existing = await env.VIDEO_STUDIO_DB.prepare(
-        'SELECT id FROM studio_jobs WHERE owner=? AND idempotency=?',
-      )
-        .bind(owner.id, String(body.idempotency))
-        .first();
-      if (!owner.registered && !existing) await checkTurnstile(env, body.challenge);
       return json(
         await createJob(
           env,
@@ -119,7 +111,6 @@ export const authenticated = async (
     if (method === 'POST' && id && action === 'retry') {
       const old = await getJob(env, owner, id);
       assert(old.status === 'failed', 'INVALID_STATE', 409);
-      if (!owner.registered) await checkTurnstile(env, body.challenge);
       return json(
         await createJob(env, owner, old.project_id, String(body.idempotency), String(body.hash)),
         202,

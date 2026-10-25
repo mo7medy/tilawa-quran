@@ -26,8 +26,6 @@ const StudioEditor = (props: EditorProps): JSX.Element => {
     setGuestProject,
     spec,
     change,
-    challenge,
-    consume,
     setError,
     busy,
   } = state;
@@ -74,14 +72,7 @@ const StudioEditor = (props: EditorProps): JSX.Element => {
         <div className={styles.settings} aria-busy={busy}>
           <ContentControls spec={spec} change={change} catalog={catalog} />
           <StyleControls spec={spec} change={change} />
-          <BackgroundControls
-            spec={spec}
-            change={change}
-            catalog={catalog}
-            challenge={challenge}
-            onConsumed={consume}
-            onError={setError}
-          />
+          <BackgroundControls spec={spec} change={change} catalog={catalog} onError={setError} />
           <StudioExport state={state} session={session} />
         </div>
       </div>

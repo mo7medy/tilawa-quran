@@ -145,8 +145,6 @@
     "GLOBAL_LIMIT": "The studio has reached today's output limit. Please return after the reset.",
     "RATE_LIMIT": "Too many requests. Please wait a minute.",
     "STORAGE_LIMIT": "Your storage is full. Delete older projects or wait for files to expire.",
-    "CHALLENGE_REQUIRED": "Complete the verification before uploading or generating.",
-    "CHALLENGE_FAILED": "Verification expired or failed. Please complete it again.",
     "PREVIEW_CHANGED": "Source data changed. Prepare a fresh preview before generating.",
     "BACKGROUND_EXPIRED": "This uploaded background expired or belongs to another session. Upload it again.",
     "BACKGROUND_UNAVAILABLE": "The selected background is unavailable.",

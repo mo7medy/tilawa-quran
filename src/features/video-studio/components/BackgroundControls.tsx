@@ -11,17 +11,13 @@ const BackgroundControls = ({
   spec,
   change,
   catalog,
-  challenge,
-  onConsumed,
   onError,
 }: ControlProps & {
   catalog: StudioCatalog | null;
-  challenge: string;
-  onConsumed: () => void;
   onError: (code: string) => void;
 }): JSX.Element => {
   const { t } = useTranslation('video-studio');
-  const { busy, upload } = useBackgroundUpload({ spec, change, challenge, onConsumed, onError });
+  const { busy, upload } = useBackgroundUpload({ spec, change, onError });
   let uploadLabel = spec.background.value ? 'file-ready' : 'upload-help';
   if (busy) uploadLabel = 'checking-file';
   return (

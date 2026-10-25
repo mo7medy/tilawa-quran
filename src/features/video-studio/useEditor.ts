@@ -37,13 +37,7 @@ const useEditor = ({ session, projectId, refresh }: EditorProps) => {
   const [ready, setReady] = useState(false);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [challenge, setChallenge] = useState('');
-  const [challengeKey, setChallengeKey] = useState(0);
   const [guestProject, setGuestProject] = useState('');
-  const consume = (): void => {
-    setChallenge('');
-    setChallengeKey((k) => k + 1);
-  };
   const change = (patch: Partial<VideoProjectSpec>): void => {
     setSpec((s) => ({ ...s, ...patch }));
     setResolved(null);
@@ -103,22 +97,16 @@ const useEditor = ({ session, projectId, refresh }: EditorProps) => {
   const generate = async (): Promise<void> => {
     const p = await save();
     idempotency.current ??= crypto.randomUUID();
-    try {
-      setJob(
-        await studioRequest<VideoRenderJob>('jobs', {
-          projectId: p.id,
-          hash: resolved.hash,
-          idempotency: idempotency.current,
-          challenge,
-        }),
-      );
-      await refresh();
-    } finally {
-      consume();
-    }
+    setJob(
+      await studioRequest<VideoRenderJob>('jobs', {
+        projectId: p.id,
+        hash: resolved.hash,
+        idempotency: idempotency.current,
+      }),
+    );
+    await refresh();
   };
   return {
-    setChallenge,
     spec,
     catalog,
     project,
@@ -128,10 +116,7 @@ const useEditor = ({ session, projectId, refresh }: EditorProps) => {
     ready,
     busy,
     saved,
-    challenge,
-    challengeKey,
     guestProject,
-    consume,
     change,
     onReady,
     run,

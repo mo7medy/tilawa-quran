@@ -17,7 +17,6 @@ const catalog: StudioCatalog = {
   reciters: [],
   translations: [],
   enabled: true,
-  turnstileSiteKey: '',
   backgrounds: [
     {
       id: 'r2-portrait_01',

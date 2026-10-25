@@ -68,7 +68,6 @@ const setup = async (page: Page, registered = true): Promise<void> => {
     else if (endpoint.startsWith('catalog'))
       body = {
         enabled: true,
-        turnstileSiteKey: '',
         chapters: [
           { id: 1, name: 'Al-Fatihah', count: 7 },
           { id: 2, name: 'Al-Baqarah', count: 286 },
@@ -157,13 +156,17 @@ test('the actual QPC scene loads its verified font bytes and invalidates on edit
   await expect(page.getByRole('button', { name: 'Generate video', exact: true })).toBeDisabled();
 });
 
-test('guest exports stay gated without a valid challenge and library links preserve Arabic', async ({
+test('guest exports require a ready preview and library links preserve Arabic', async ({
   page,
 }) => {
   await setup(page, false);
   await page.goto('/ar/video-studio');
   await expect(page.getByText('متبقٍ 2 من 2 فيديوهات يومية')).toBeVisible();
   await expect(page.getByRole('button', { name: 'توليد الفيديو', exact: true })).toBeDisabled();
+  await page.getByLabel('إلى الآية', { exact: true }).fill('2');
+  await page.getByRole('button', { name: 'تحضير المعاينة', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'توليد الفيديو', exact: true })).toBeEnabled();
+  await expect(page.locator('script[src*="challenges.cloudflare.com/turnstile"]')).toHaveCount(0);
   await page.getByRole('link', { name: 'مكتبة الفيديو الخاصة بي', exact: true }).click();
   await expect(page).toHaveURL(/\/ar\/video-studio\/library/);
 });

@@ -117,7 +117,6 @@ export interface StudioCatalog {
   translations: { id: number; name: string; language: string }[];
   backgrounds: StudioLibraryBackground[];
   enabled: boolean;
-  turnstileSiteKey: string;
 }
 export const defaultSpec: VideoProjectSpec = {
   version: '1',

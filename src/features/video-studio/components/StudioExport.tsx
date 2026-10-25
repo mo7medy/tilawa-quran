@@ -1,7 +1,6 @@
 import { studioRequest } from '../client';
 import type { EditorState, EditorProps } from '../useEditor';
 
-import Challenge from './Challenge';
 import styles from './Studio.module.scss';
 
 import AcademyLink from '@/components/Academy/AcademyLink';
@@ -13,8 +12,7 @@ const StudioExport = ({
   state: EditorState;
   session: EditorProps['session'];
 }): JSX.Element => {
-  const { t, catalog, challengeKey, challenge, job, busy, ready, resolved, run, generate, setJob } =
-    state;
+  const { t, job, busy, ready, resolved, run, generate, setJob } = state;
   const date = (ms: number): string =>
     new Date(ms).toLocaleString(state.lang, { timeZone: 'Africa/Cairo' });
   const active = job && !['completed', 'failed', 'cancelled', 'expired'].includes(job.status);
@@ -22,7 +20,6 @@ const StudioExport = ({
     const result = await studioRequest<{ url: string }>(`jobs/${job.id}/download`);
     window.location.assign(result.url);
   };
-  const handleToken = state.setChallenge;
   return (
     <section className={styles.section}>
       <h2>{t('export')}</h2>
@@ -37,9 +34,6 @@ const StudioExport = ({
           })}
         </small>
         <p>{t('output-format')}</p>
-        {!session.registered && catalog?.turnstileSiteKey && (
-          <Challenge key={challengeKey} siteKey={catalog.turnstileSiteKey} onToken={handleToken} />
-        )}
         <button
           type="button"
           className={styles.primary}
@@ -49,8 +43,7 @@ const StudioExport = ({
             !ready ||
             !resolved ||
             !session.quota.available ||
-            !session.quota.remaining ||
-            (!session.registered && !challenge)
+            !session.quota.remaining
           }
           onClick={() => run(generate)}
         >

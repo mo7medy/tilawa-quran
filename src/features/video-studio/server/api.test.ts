@@ -90,7 +90,6 @@ const job = async (projectId: string, key = crypto.randomUUID()): Promise<Respon
     projectId,
     hash: await manifestHash(fixture),
     idempotency: key,
-    challenge: 'valid-challenge',
   });
 
 beforeEach(async () => {
@@ -126,16 +125,10 @@ beforeEach(async () => {
     STUDIO_MODAL_URL: 'https://private.modal.run',
     STUDIO_MODAL_KEY: 'test-key',
     STUDIO_MODAL_SECRET: 'test-secret',
-    STUDIO_TURNSTILE_SECRET: 'test-challenge-secret',
-    STUDIO_TURNSTILE_SITE_KEY: 'test-public-key',
   } as unknown as StudioEnv;
   vi.stubGlobal(
     'fetch',
-    vi.fn(async (url: string) =>
-      url.includes('siteverify')
-        ? Response.json({ success: true, hostname: 'studio.example.test', action: 'video-studio' })
-        : Response.json({ callId: 'fc-test123' }),
-    ),
+    vi.fn(async () => Response.json({ callId: 'fc-test123' })),
   );
   resolved.mockResolvedValue(fixture);
   verifiedUser.mockResolvedValue({ data: { user: null }, error: new Error('Expired session') });
@@ -251,17 +244,18 @@ describe('studio ownership and durable jobs', () => {
     expect((await request(`file/asset?token=${token}`)).status).toBe(404);
     expect(env.VIDEO_STUDIO_PRIVATE.get).not.toHaveBeenCalled();
   });
-  it('fails closed for absent Turnstile and paused generation', async () => {
+  it('accepts guest generation without a challenge and still respects the pause switch', async () => {
     const id = await project();
-    const noToken = await request('jobs', {
+    const generated = await request('jobs', {
       projectId: id,
       idempotency: crypto.randomUUID(),
       hash: await manifestHash(fixture),
     });
-    expect(noToken.status).toBe(403);
+    expect(generated.status).toBe(202);
+    expect((await (await request('session')).json()).quota.remaining).toBe(1);
     env.STUDIO_ENABLED = '0';
     expect((await job(id)).status).toBe(503);
-    expect(sqlite.prepare('SELECT COUNT(*) AS n FROM studio_jobs').get().n).toBe(0);
+    expect(sqlite.prepare('SELECT COUNT(*) AS n FROM studio_jobs').get().n).toBe(1);
   });
   it('verifies account identity, keeps rotated cookies separate and isolates account switches', async () => {
     verifiedUser.mockImplementation(async (options) => {
@@ -332,17 +326,11 @@ describe('studio ownership and durable jobs', () => {
         await request('uploads', {
           mime: 'image/png',
           size: 10 * 1048576 + 1,
-          challenge: 'valid-challenge',
         })
       ).status,
     ).toBe(413);
-    expect(
-      (await request('uploads', { mime: 'image/svg+xml', size: 100, challenge: 'valid-challenge' }))
-        .status,
-    ).toBe(422);
-    const upload = await (
-      await request('uploads', { mime: 'image/png', size: 100, challenge: 'valid-challenge' })
-    ).json();
+    expect((await request('uploads', { mime: 'image/svg+xml', size: 100 })).status).toBe(422);
+    const upload = await (await request('uploads', { mime: 'image/png', size: 100 })).json();
     await internal('asset', {
       assetId: upload.id,
       valid: true,

@@ -14,8 +14,6 @@ export interface StudioEnv {
   STUDIO_MODAL_URL: string;
   STUDIO_MODAL_KEY: string;
   STUDIO_MODAL_SECRET: string;
-  STUDIO_TURNSTILE_SECRET: string;
-  STUDIO_TURNSTILE_SITE_KEY: string;
 }
 export const studioEnv = (env: StudioEnv): StudioEnv => {
   if (

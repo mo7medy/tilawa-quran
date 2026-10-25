@@ -2,6 +2,13 @@
 
 Updated 2026-10-25 (Africa/Cairo).
 
+## Current verification policy
+
+At the user's request, Cloudflare Turnstile was removed from the studio UI and from guest upload,
+generation and retry endpoints. The normal guest identity, origin checks, request limits, daily
+allowances, storage limits and execution leases remain enforced. The historical acceptance below
+records the earlier challenge-backed flow; it is not a requirement for the current editor.
+
 ## Production activation
 
 The studio is enabled in the existing `tilawa-quran` Worker at
@@ -65,7 +72,7 @@ focused Playwright font-loading checks passed with those updated fixtures on Nod
 Documentation/fixture formatting and `git diff --check` passed as well.
 
 Subsequent live checks must use this production installation and ordinary guest/account ownership,
-challenge and quota rules. Do not create another staging deployment or seed production jobs.
+quota rules. Do not create another staging deployment or seed production jobs.
 
 ## Historical staging acceptance
 

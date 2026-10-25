@@ -26,17 +26,17 @@ last. Token permissions must cover only the intended account/resources.
 
 Worker secrets: `QURAN_CLIENT_ID`, `QURAN_CLIENT_SECRET`, `NEXT_PUBLIC_SUPABASE_URL`,
 `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `STUDIO_SIGNING_SECRET`, `STUDIO_MODAL_KEY`,
-`STUDIO_MODAL_SECRET`, `STUDIO_MODAL_URL`, `STUDIO_TURNSTILE_SECRET`. The four content/account
-settings are also required at website build time, because the existing website content client and
-public account configuration use them. Store private settings as secret build variables. Never send
-provider/account credentials to Modal.
+`STUDIO_MODAL_SECRET`, `STUDIO_MODAL_URL`. The four content/account settings are also required at
+website build time, because the existing website content client and public account configuration use
+them. Store private settings as secret build variables. Never send provider/account credentials to
+Modal.
 
-Worker variables: `STUDIO_ORIGIN` (exact HTTPS website origin), `STUDIO_ENABLED`,
-`STUDIO_TURNSTILE_SITE_KEY` (public widget identifier), `QURAN_API_ENV`. Bind `VIDEO_STUDIO_DB`,
-`VIDEO_STUDIO_ASSETS`, `VIDEO_STUDIO_PRIVATE`, the existing OpenNext cache and self-reference
-service. A minute cron reconciles dispatch, leases, expiry and cleanup. Turnstile's managed widget
-must allow the exact hostname; verification requires the `video-studio` action and a single-use
-token.
+Worker variables: `STUDIO_ORIGIN` (exact HTTPS website origin), `STUDIO_ENABLED`, `QURAN_API_ENV`.
+Bind `VIDEO_STUDIO_DB`, `VIDEO_STUDIO_ASSETS`, `VIDEO_STUDIO_PRIVATE`, the existing OpenNext cache
+and self-reference service. A minute cron reconciles dispatch, leases, expiry and cleanup. Turnstile
+was removed from the studio at the user's request. Guest uploads and generation require no challenge
+token; owner isolation, origin checks, request limits, quotas, storage limits and execution leases
+remain enforced.
 
 Modal secret: only `STUDIO_ORIGIN` and the matching `STUDIO_SIGNING_SECRET`. Set `STUDIO_MODAL_APP`
 and `STUDIO_MODAL_SECRET_NAME` to `tilawa-video-studio`, then run
@@ -90,18 +90,18 @@ browser checks start `yarn dev --port 3001`, then run
 `yarn playwright test --config tests/video-studio/playwright.config.ts` (CI starts its own dev
 server). The browser fixtures mock API responses explicitly; they use real verified font bytes.
 
-Live acceptance runs through the production editor, real Turnstile, normal ownership and quota
-checks. Do not seed administrative render jobs into production or create another test project.
-Temporary check state stays in ignored `.local-runtime/` files. Unit and fixture-based browser tests
-still run locally/in CI against this same code without provisioning Cloudflare resources.
+Live acceptance runs through the production editor, normal ownership and quota checks. Do not seed
+administrative render jobs into production or create another test project. Temporary check state
+stays in ignored `.local-runtime/` files. Unit and fixture-based browser tests still run locally/in
+CI against this same code without provisioning Cloudflare resources.
 
 Release acceptance covers all five Quran font choices, IndoPak line variants, page transitions,
 long-translation overflow rejection, audio boundaries within one frame, 720p/1080p and all ratios,
-valid/invalid uploads, real challenge verification and replay rejection, owner/account isolation,
-quota races, cancellation/retry/watchdog/expiry, and the existing `/media` regression checks. Record
-actual render speed and billing when adjusting the public budget. See `ACCEPTANCE.md` for the live
-production proof, the earlier font/format samples, and remaining verification limits. Live account
-sign-in and another administrative long-render benchmark were explicitly excluded by the user.
+valid/invalid uploads, owner/account isolation, quota races, cancellation/retry/watchdog/expiry, and
+the existing `/media` regression checks. Record actual render speed and billing when adjusting the
+public budget. See `ACCEPTANCE.md` for the live production proof, the earlier font/format samples,
+and remaining verification limits. Live account sign-in and another administrative long-render
+benchmark were explicitly excluded by the user.
 
 Remotion packages are pinned together at 4.0.538 with the user's approval to replace vulnerable
 4.0.266. Chromium is installed by the matching renderer. The service dependency audit still reports

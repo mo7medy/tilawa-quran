@@ -78,24 +78,3 @@ export const checkRate = async (env: StudioEnv, key: string, limit = 60): Promis
     .first<{ count: number }>();
   assert(r.count <= limit, 'RATE_LIMIT', 429);
 };
-export const checkTurnstile = async (env: StudioEnv, token: unknown): Promise<void> => {
-  assert(
-    env.STUDIO_TURNSTILE_SECRET && typeof token === 'string' && token.length <= 2048,
-    'CHALLENGE_REQUIRED',
-    403,
-  );
-  const response = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST',
-    body: new URLSearchParams({ secret: env.STUDIO_TURNSTILE_SECRET, response: token as string }),
-    signal: AbortSignal.timeout(10000),
-  });
-  const data = (await response.json()) as { success?: boolean; hostname?: string; action?: string };
-  assert(
-    response.ok &&
-      data.success &&
-      data.hostname === new URL(env.STUDIO_ORIGIN).hostname &&
-      data.action === 'video-studio',
-    'CHALLENGE_FAILED',
-    403,
-  );
-};

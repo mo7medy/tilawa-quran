@@ -8,30 +8,17 @@ import { VideoProjectSpec } from './contracts';
 export interface BackgroundUploadProps {
   spec: VideoProjectSpec;
   change: (patch: Partial<VideoProjectSpec>) => void;
-  challenge: string;
-  onConsumed: () => void;
   onError: (code: string) => void;
 }
-const useBackgroundUpload = ({
-  spec,
-  change,
-  challenge,
-  onConsumed,
-  onError,
-}: BackgroundUploadProps) => {
+const useBackgroundUpload = ({ spec, change, onError }: BackgroundUploadProps) => {
   const [busy, setBusy] = useState(false);
-  const reserve = async (file: File): Promise<{ id: string }> => {
-    try {
-      return await studioRequest('uploads', { mime: file.type, size: file.size, challenge });
-    } finally {
-      // Siteverify tokens are single-use even when later file validation rejects the request.
-      onConsumed();
-    }
-  };
   const upload = async (file: File): Promise<void> => {
     setBusy(true);
     try {
-      const { id } = await reserve(file);
+      const { id } = await studioRequest<{ id: string }>('uploads', {
+        mime: file.type,
+        size: file.size,
+      });
       const response = await fetch(`/api/video-studio/uploads/${id}`, {
         method: 'PUT',
         body: file,
