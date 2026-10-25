@@ -1,6 +1,75 @@
-# Staging acceptance record
+# Production acceptance and historical test record
 
-Updated 2026-10-25 (Africa/Cairo). This is a staging record, not a public production release.
+Updated 2026-10-25 (Africa/Cairo).
+
+## Production activation
+
+The studio is enabled in the existing `tilawa-quran` Worker at
+https://tilawa-quran.muhammad5mdk.workers.dev/ar/video-studio. No additional website was created.
+Production code revision `7b593a290c087107ec262eb3b0d7cb2b428d00f4` passed both GitHub workflows;
+the restricted `video-studio-production` environment deployed Modal successfully. Cloudflare Build
+`e4b875e9-a9d2-42fe-9243-dfe5d45f2bb0` completed successfully after publishing the complete asset
+index. Quran build credentials were converted to secret variables in the same existing build trigger
+with explicit user approval. They remain outside Modal.
+
+The production editor completed a real guest cycle: preview with canonical text and Saheeh
+International translation, managed Turnstile verification, PNG upload and remote decoder validation,
+save, generation, library reopen, resumed job status and owner-authorized MP4 download. The render
+used `r2-sakina_portrait_01` from the existing shared background bucket. The catalog exposes its 54
+curated images and the six existing videos. No challenge bypass, seeded job or account quota
+override was used. An initial upload attempt before the challenge was ready failed closed; repeating
+the normal file selection after automatic verification succeeded.
+
+The downloaded output is 3,044,849 bytes, H.264/AAC, 1080 x 1920 and 30 fps. Source timing is 11,680
+ms and the MP4 container is 11,712 ms: 32 ms difference, within one frame. D1 confirms one attempt
+and no error. The local proof video and screenshot are ignored files, not repository assets.
+
+| Production measurement                 | Observed |
+| -------------------------------------- | -------: |
+| Queue to execution claim               |  3.586 s |
+| Claim to rendering start               | 10.457 s |
+| Rendering start to verified completion | 50.857 s |
+| Total request to completion            | 64.900 s |
+
+This short render includes cold-start/network overhead and does not establish a long-render speedup
+or production per-video price. The current 4-CPU/two-frame renderer remains capped at two jobs.
+
+A separate production guest received 404 for the actual saved project, job and download endpoint.
+Untrusted origins and unsigned internal callbacks returned 403, a forged account cookie returned
+401, and a forged challenge returned 403. The real guest allowance was reduced from two videos to
+one; the UI displayed the Cairo reset time and 24-hour expiry. Live signed-in-account testing and a
+second administrative long benchmark remain excluded by the user's explicit choice.
+
+The `/media` regression probe on this production deployment returned 404, while all four legacy
+content endpoints used by its static props returned 200. Its static-props catch converts content
+resolution failures into `notFound`; the exact build-time failure was not observed. Do not claim
+that the legacy `/media` production preview or its AWS export was verified in this run. The earlier
+full website preview check below and automated media checks remain historical evidence only.
+
+## Staging retirement
+
+Retirement started only after the production MP4 had been downloaded and probed successfully. The
+old staging database had no active jobs or registered projects. Deleted resources:
+
+- Cloudflare Worker `tilawa-video-studio-staging`, its build trigger and D1 database.
+- R2 `tilawa-video-studio-assets-staging` (1,828 objects), `tilawa-video-studio-private-staging` (14
+  objects), and `tilawa-video-studio-cache-staging` (1,948 objects).
+- GitHub Environment `video-studio-staging`, including its stored secrets.
+- Modal staging application secret and proxy token; `tilawa-video-studio-staging` was stopped.
+
+The production Worker/cache, production D1, production asset/private buckets, shared background
+bucket and production GitHub environment were preserved. Turnstile now allows only the production
+hostname. Staging deployment/configuration/proof scripts were removed from the source, and browser
+fixtures now refer to the production origin while continuing to mock all service calls. All five
+focused Playwright font-loading checks passed with those updated fixtures on Node 22.
+Documentation/fixture formatting and `git diff --check` passed as well.
+
+Subsequent live checks must use this production installation and ordinary guest/account ownership,
+challenge and quota rules. Do not create another staging deployment or seed production jobs.
+
+## Historical staging acceptance
+
+The following records describe the retired deployment and are retained as test evidence.
 
 ## Deployed scope
 
@@ -9,7 +78,7 @@ Updated 2026-10-25 (Africa/Cairo). This is a staging record, not a public produc
 - Modal app: `mu7medy / main / tilawa-video-studio-staging`.
 - Separate staging D1 database and asset, private-file and cache R2 buckets.
 - Website deployment uses Cloudflare Builds; the restricted GitHub environment deploys Modal after
-  validation. Production's Worker and deployment configuration are unchanged.
+  validation. Production was not changed during those historical staging checks.
 - Remotion and the matching Chromium are pinned at 4.0.538.
 
 ## Executed against real services
@@ -108,10 +177,10 @@ live infrastructure.
   was excluded by the user.
 - Review long/complex ayahs and translation layouts visually with Arabic content review.
 
-Keep the public launch closed until these gates are resolved. The staging generation switch is
-enabled only for acceptance testing; deployment configuration defaults to disabled. Private links
-expire even before physical cleanup. Query strings are redacted in Worker observability. Never
-commit local proof credentials, session cookies or signed URLs.
+These were historical launch gates. The user subsequently authorized production activation, excluded
+live account sign-in and another administrative long benchmark, and requested retirement of staging.
+Private links expire even before physical cleanup. Query strings are redacted in Worker
+observability. Never commit local proof credentials, session cookies or signed URLs.
 
 Cloudflare Builds cache restoration was disabled and the trigger's cache purged after a rebuild
 exhausted disk while reinstalling dependencies. Documentation-only changes to this record and the

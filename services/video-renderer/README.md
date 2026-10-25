@@ -8,8 +8,10 @@ D1 reservations and private R2 access. Modal runs the shared Remotion scene with
 
 The studio runs inside the existing `tilawa-quran` Worker configured by `wrangler.jsonc`. Live
 acceptance and subsequent live checks use this production website. Do not provision another staging
-website or renderer. The former staging resources are retired only after production generation and
-download have been verified.
+website or renderer. Production generation and download were verified on 2026-10-25; the former
+staging Worker, build trigger, D1 database, three R2 buckets and GitHub environment were deleted.
+Its Modal application was stopped and its application secret and proxy token were removed.
+Historical Modal execution records may remain in the workspace; they are not an active deployment.
 
 The production Cloudflare Builds trigger tracks only `production`. It builds the full source
 checkout, creates a SHA-256 asset index, uploads all blobs before publishing its index, and deploys
@@ -93,11 +95,13 @@ checks. Do not seed administrative render jobs into production or create another
 Temporary check state stays in ignored `.local-runtime/` files. Unit and fixture-based browser tests
 still run locally/in CI against this same code without provisioning Cloudflare resources.
 
-Release acceptance requires all five Quran font choices, IndoPak line variants, page transitions,
+Release acceptance covers all five Quran font choices, IndoPak line variants, page transitions,
 long-translation overflow rejection, audio boundaries within one frame, 720p/1080p and all ratios,
 valid/invalid uploads, real challenge verification and replay rejection, owner/account isolation,
 quota races, cancellation/retry/watchdog/expiry, and the existing `/media` regression checks. Record
-actual render speed and billing before choosing a public budget.
+actual render speed and billing when adjusting the public budget. See `ACCEPTANCE.md` for the live
+production proof, the earlier font/format samples, and remaining verification limits. Live account
+sign-in and another administrative long-render benchmark were explicitly excluded by the user.
 
 Remotion packages are pinned together at 4.0.538 with the user's approval to replace vulnerable
 4.0.266. Chromium is installed by the matching renderer. The service dependency audit still reports

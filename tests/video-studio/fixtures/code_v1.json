@@ -96,17 +96,17 @@
   ],
   "fonts": [
     {
-      "url": "https://tilawa-video-studio-staging.muhammad5mdk.workers.dev/api/video-studio/assets/91faba4f7310f562a607603326b2ac2a94d3adb7d2c01cab0c213a0a557ac747",
+      "url": "https://tilawa-quran.muhammad5mdk.workers.dev/api/video-studio/assets/91faba4f7310f562a607603326b2ac2a94d3adb7d2c01cab0c213a0a557ac747",
       "sha256": "91faba4f7310f562a607603326b2ac2a94d3adb7d2c01cab0c213a0a557ac747",
       "family": "Studio-code_v1-1"
     },
     {
-      "url": "https://tilawa-video-studio-staging.muhammad5mdk.workers.dev/api/video-studio/assets/8055c0ac299fcca57361e39e62dd0b73bd512e9d485ffee0059c38f3d60de2a2",
+      "url": "https://tilawa-quran.muhammad5mdk.workers.dev/api/video-studio/assets/8055c0ac299fcca57361e39e62dd0b73bd512e9d485ffee0059c38f3d60de2a2",
       "sha256": "8055c0ac299fcca57361e39e62dd0b73bd512e9d485ffee0059c38f3d60de2a2",
       "family": "StudioTranslation"
     },
     {
-      "url": "https://tilawa-video-studio-staging.muhammad5mdk.workers.dev/api/video-studio/assets/463729634584701ed92aaffc86122a4a1266a494a46cbd67497c3a81ca45bd59",
+      "url": "https://tilawa-quran.muhammad5mdk.workers.dev/api/video-studio/assets/463729634584701ed92aaffc86122a4a1266a494a46cbd67497c3a81ca45bd59",
       "sha256": "463729634584701ed92aaffc86122a4a1266a494a46cbd67497c3a81ca45bd59",
       "family": "StudioTranslationFallback"
     }
