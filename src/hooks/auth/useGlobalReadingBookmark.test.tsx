@@ -1,6 +1,9 @@
 /* eslint-disable react-func/max-lines-per-function */
-import { renderHook, waitFor } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { ReactNode } from 'react';
+
+import { cleanup, renderHook, waitFor } from '@testing-library/react';
+import { SWRConfig } from 'swr';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 
 import useGlobalReadingBookmark, { READING_BOOKMARK_KEY } from './useGlobalReadingBookmark';
 
@@ -23,6 +26,10 @@ vi.mock('@/contexts/AuthContext', () => ({
   useAuthContext: vi.fn(),
 }));
 
+const BookmarkTestProvider = ({ children }: { children: ReactNode }): JSX.Element => (
+  <SWRConfig value={{ provider: () => new Map() }}>{children}</SWRConfig>
+);
+
 describe('useGlobalReadingBookmark', () => {
   const mockGetReadingBookmark = vi.mocked(authApi.getReadingBookmark);
   const mockIsLoggedIn = vi.mocked(loginUtils.isLoggedIn);
@@ -40,6 +47,12 @@ describe('useGlobalReadingBookmark', () => {
     } as unknown as ReturnType<typeof useAuthContext>);
   });
 
+  afterEach(() => {
+    // Vitest does not install RTL's automatic cleanup without global afterEach.
+    // Unsubscribe from SWR before the auth mock is torn down by the runner.
+    cleanup();
+  });
+
   it('generates consistent cache keys', () => {
     expect(READING_BOOKMARK_KEY(1)).toBe('reading-bookmark-1');
     expect(READING_BOOKMARK_KEY(2)).toBe('reading-bookmark-2');
@@ -50,7 +63,9 @@ describe('useGlobalReadingBookmark', () => {
   it('returns null bookmark when not logged in', () => {
     mockIsLoggedIn.mockReturnValue(false);
 
-    const { result } = renderHook(() => useGlobalReadingBookmark(1));
+    const { result } = renderHook(() => useGlobalReadingBookmark(1), {
+      wrapper: BookmarkTestProvider,
+    });
 
     expect(result.current.readingBookmark).toBeNull();
     expect(mockGetReadingBookmark).not.toHaveBeenCalled();
@@ -67,7 +82,9 @@ describe('useGlobalReadingBookmark', () => {
     } as unknown as ReturnType<typeof useAuthContext>);
     mockIsLoggedIn.mockReturnValue(true);
 
-    const { result } = renderHook(() => useGlobalReadingBookmark(1));
+    const { result } = renderHook(() => useGlobalReadingBookmark(1), {
+      wrapper: BookmarkTestProvider,
+    });
 
     expect(result.current.readingBookmark).toBeNull();
     expect(mockGetReadingBookmark).not.toHaveBeenCalled();
@@ -83,7 +100,9 @@ describe('useGlobalReadingBookmark', () => {
       isReading: true,
     } as Bookmark);
 
-    const { result } = renderHook(() => useGlobalReadingBookmark(1));
+    const { result } = renderHook(() => useGlobalReadingBookmark(1), {
+      wrapper: BookmarkTestProvider,
+    });
 
     await waitFor(() => {
       expect(result.current.readingBookmark).not.toBeNull();
@@ -102,7 +121,9 @@ describe('useGlobalReadingBookmark', () => {
     mockIsLoggedIn.mockReturnValue(true);
     mockGetReadingBookmark.mockResolvedValue(null);
 
-    const { result } = renderHook(() => useGlobalReadingBookmark(1));
+    const { result } = renderHook(() => useGlobalReadingBookmark(1), {
+      wrapper: BookmarkTestProvider,
+    });
 
     expect(typeof result.current.mutate).toBe('function');
   });
