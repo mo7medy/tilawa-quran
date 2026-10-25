@@ -13,8 +13,8 @@ import modal
 
 ROOT = Path(__file__).resolve().parents[2]
 SERVICE = ROOT / "services/video-renderer"
-APP_NAME = os.environ.get("STUDIO_MODAL_APP", "tilawa-video-studio-staging")
-SECRET_NAME = os.environ.get("STUDIO_MODAL_SECRET_NAME", "tilawa-video-studio-staging")
+APP_NAME = os.environ.get("STUDIO_MODAL_APP", "tilawa-video-studio")
+SECRET_NAME = os.environ.get("STUDIO_MODAL_SECRET_NAME", "tilawa-video-studio")
 image = (
     modal.Image.from_registry("node:24-bookworm-slim", add_python="3.13")
     .apt_install("ffmpeg", "libnss3", "libatk1.0-0", "libatk-bridge2.0-0", "libcups2", "libdrm2", "libxkbcommon0", "libxcomposite1", "libxdamage1", "libxrandr2", "libgbm1", "libasound2", "fonts-noto-cjk")
