@@ -9,6 +9,13 @@ generation and retry endpoints. The normal guest identity, origin checks, reques
 allowances, storage limits and execution leases remain enforced. The historical acceptance below
 records the earlier challenge-backed flow; it is not a requirement for the current editor.
 
+Session lifecycle regression checks cover repeated `SIGNED_IN`, `TOKEN_REFRESHED` and `USER_UPDATED`
+events for the same owner, focus refresh, temporary network failure/recovery, immediate invalidation
+on account switch/sign-out, rejected authentication and stale responses after a switch. All nine
+hook tests passed. A Playwright check also preserved the unsaved title, ayah range and prepared
+preview through a failed focus refresh and recovery. These are controlled browser/unit tests, not a
+claim of a new live signed-in-account test.
+
 ## Production activation
 
 The studio is enabled in the existing `tilawa-quran` Worker at

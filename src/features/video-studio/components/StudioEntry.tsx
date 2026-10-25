@@ -23,12 +23,19 @@ const StudioEntry = (): JSX.Element => {
     );
   }
   return (
-    <StudioEditor
-      key={session.scope}
-      session={session}
-      refresh={refresh}
-      projectId={typeof router.query.project === 'string' ? router.query.project : undefined}
-    />
+    <>
+      {error && (
+        <p role="alert" className={styles.error}>
+          {t(`errors.${error}`, undefined, { fallback: t('errors.STUDIO_ERROR') })}
+        </p>
+      )}
+      <StudioEditor
+        key={session.scope}
+        session={session}
+        refresh={refresh}
+        projectId={typeof router.query.project === 'string' ? router.query.project : undefined}
+      />
+    </>
   );
 };
 export default StudioEntry;

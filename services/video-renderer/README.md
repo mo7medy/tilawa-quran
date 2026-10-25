@@ -38,6 +38,11 @@ was removed from the studio at the user's request. Guest uploads and generation 
 token; owner isolation, origin checks, request limits, quotas, storage limits and execution leases
 remain enforced.
 
+Repeated Supabase sign-in and token-refresh confirmations for the same owner refresh quota without
+unmounting the editor. A temporary session refresh failure keeps unsaved settings and the prepared
+preview visible with a retryable error. Account switches, sign-out and rejected authentication still
+invalidate the previous owner immediately, and aborted responses cannot restore that owner's state.
+
 Modal secret: only `STUDIO_ORIGIN` and the matching `STUDIO_SIGNING_SECRET`. Set `STUDIO_MODAL_APP`
 and `STUDIO_MODAL_SECRET_NAME` to `tilawa-video-studio`, then run
 `modal deploy services/video-renderer/app.py` with Modal SDK 1.6.2. Its private dispatcher requires

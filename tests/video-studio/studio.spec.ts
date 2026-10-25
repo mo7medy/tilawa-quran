@@ -1,6 +1,6 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { expect, Page, test } from '@playwright/test';
+import { expect, Page, Route, test } from '@playwright/test';
 import baseline from './fixtures/qpc_uthmani_hafs.json';
 import assetPaths from './fixtures/asset-paths.json';
 
@@ -169,6 +169,36 @@ test('guest exports require a ready preview and library links preserve Arabic', 
   await expect(page.locator('script[src*="challenges.cloudflare.com/turnstile"]')).toHaveCount(0);
   await page.getByRole('link', { name: 'مكتبة الفيديو الخاصة بي', exact: true }).click();
   await expect(page).toHaveURL(/\/ar\/video-studio\/library/);
+});
+
+test('focus refresh failures preserve unsaved settings and the prepared preview', async ({
+  page,
+}) => {
+  await setup(page);
+  await page.goto('/video-studio');
+  await page.getByLabel('Project title', { exact: true }).fill('Keep my video settings');
+  await page.getByLabel('Last ayah', { exact: true }).fill('2');
+  await page.getByRole('button', { name: 'Prepare preview', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Generate video', exact: true })).toBeEnabled();
+  const failRefresh = async (route: Route): Promise<void> => {
+    await route.fulfill({ status: 503, json: { error: { code: 'NETWORK_ERROR' } } });
+  };
+  await page.route('**/api/video-studio/session', failRefresh);
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  const refreshError = page.getByRole('alert').filter({ hasText: 'Connection interrupted.' });
+  await expect(refreshError).toBeVisible();
+  await expect(page.getByLabel('Project title', { exact: true })).toHaveValue(
+    'Keep my video settings',
+  );
+  await expect(page.getByLabel('Last ayah', { exact: true })).toHaveValue('2');
+  await expect(page.getByRole('button', { name: 'Generate video', exact: true })).toBeEnabled();
+  await page.unroute('**/api/video-studio/session', failRefresh);
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await expect(refreshError).toHaveCount(0);
+  await expect(page.getByLabel('Project title', { exact: true })).toHaveValue(
+    'Keep my video settings',
+  );
+  await expect(page.getByRole('button', { name: 'Generate video', exact: true })).toBeEnabled();
 });
 
 test('200 percent zoom keeps the content controls operable', async ({ page }) => {
