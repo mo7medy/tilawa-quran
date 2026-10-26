@@ -74,8 +74,21 @@ def render(job_id: str, attempt: int):
             background = manifest["background"]
             if background["type"] != "color":
                 name = "background.mp4" if background["type"] == "video" else "background.png"
-                download(background["url"], folder / name, 50 * 1024 * 1024, origin)
+                source = background["url"]
+                download(source, folder / name, 50 * 1024 * 1024, origin)
                 background["url"] = name
+                slides = background.get("slides", [])
+                if len(slides) > 5:
+                    raise ValueError("BACKGROUND_UNAVAILABLE")
+                for index, slide in enumerate(slides):
+                    if slide["url"] == source:
+                        slide["url"] = name
+                        continue
+                    filename = f"background-{index}.png"
+                    download(slide["url"], folder / filename, 10 * 1024 * 1024, origin)
+                    slide["url"] = filename
+                    if callback("progress", {**payload, "status": "preparing", "progress": 0}).get("cancel"):
+                        return
             (folder / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
             if callback("progress", {**payload, "status": "rendering", "progress": 0}).get("cancel"):
                 return

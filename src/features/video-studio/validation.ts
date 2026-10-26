@@ -41,6 +41,18 @@ export const validateSpec = (input: unknown): VideoProjectSpec => {
     return v as string;
   };
   const backgroundType = choice(bg.type, ['color', 'library', 'upload'] as const);
+  assert(bg.animate === undefined || typeof bg.animate === 'boolean', 'INVALID_BACKGROUND');
+  const slides = (bg.slides ?? []) as unknown[];
+  assert(
+    Array.isArray(slides) &&
+      slides.length <= 5 &&
+      slides.every((id) => typeof id === 'string' && /^r2-[a-zA-Z0-9_-]{1,55}$/.test(id)),
+    'INVALID_BACKGROUND',
+  );
+  assert(
+    !slides.length || (backgroundType === 'library' && String(bg.value).startsWith('r2-')),
+    'INVALID_BACKGROUND',
+  );
   assert(typeof bg.value === 'string' && bg.value.length <= 64, 'INVALID_BACKGROUND');
   if (backgroundType === 'color') color(bg.value);
   else assert(/^[a-zA-Z0-9_-]+$/.test(bg.value as string), 'INVALID_BACKGROUND');
@@ -74,6 +86,8 @@ export const validateSpec = (input: unknown): VideoProjectSpec => {
       value: bg.value as string,
       opacity: decimal(bg.opacity, 0, 0.85),
       position: integer(bg.position, 0, 100),
+      ...(bg.animate !== undefined ? { animate: Boolean(bg.animate) } : {}),
+      ...(bg.slides !== undefined ? { slides: Array.from(new Set(slides as string[])) } : {}),
     },
   };
 };

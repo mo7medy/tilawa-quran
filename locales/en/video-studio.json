@@ -37,7 +37,7 @@
   "templates": {
     "center": "Centered recitation",
     "card": "Card over background",
-    "translation": "Translation below recitation"
+    "translation": "Translation below the ayah"
   },
   "ratio": "Aspect ratio",
   "ratios": {
@@ -242,5 +242,8 @@
       "unknown": "Check Buffer before sending again; the outcome is uncertain",
       "cancelled": "Publishing cancelled"
     }
-  }
+  },
+  "background-motion": "Gentle image zoom",
+  "background-slideshow": "Change images with a soft crossfade",
+  "background-animation-help": "Matching images change every 6–12 seconds with a 1.2-second crossfade. You can disable motion or keep a single image."
 }

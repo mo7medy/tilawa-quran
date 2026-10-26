@@ -148,6 +148,31 @@ afterEach(() => {
 });
 
 describe('automatic video generation', () => {
+  it('validates model-selected image sequences and enables gentle animation', () => {
+    const images = [
+      catalogue.backgrounds[0],
+      { ...catalogue.backgrounds[0], id: 'r2-second' },
+      { ...catalogue.backgrounds[0], id: 'r2-third' },
+    ];
+    const selected = validateAutomationDecision(
+      { ...decision(), backgroundIds: images.map((image) => image.id) },
+      [candidate],
+      { ...catalogue, backgrounds: images },
+      false,
+    );
+    expect(selected.spec.background).toMatchObject({
+      animate: true,
+      slides: ['r2-calm', 'r2-second', 'r2-third'],
+    });
+    expect(() =>
+      validateAutomationDecision(
+        { ...decision(), backgroundIds: ['r2-calm', 'r2-unknown'] },
+        [candidate],
+        catalogue,
+        false,
+      ),
+    ).toThrow('AUTOMATION_INVALID_DECISION');
+  });
   it.each([
     ['2026-10-26T06:00:00Z', 9, 0],
     ['2026-10-26T11:00:00Z', 14, 1],

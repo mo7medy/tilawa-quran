@@ -1,9 +1,12 @@
+/* eslint-disable max-lines -- Keep the versioned editor/manifest wire contract together. */
 import { StudioLibraryBackground } from './backgrounds';
 
 import { MushafLines, QuranFont } from '@/types/QuranReader';
 
 export const STUDIO_VERSION = '1';
-export const RENDER_VERSION = 'studio-1';
+export const RENDER_VERSION = 'studio-2';
+// Font and media asset schema remains compatible; only scene layout/timing changed.
+export const ASSET_SCHEMA_VERSION = 'studio-1';
 export const STUDIO_FONTS = [
   QuranFont.MadaniV1,
   QuranFont.MadaniV2,
@@ -44,6 +47,8 @@ export interface VideoProjectSpec {
     value: string;
     opacity: number;
     position: number;
+    animate?: boolean;
+    slides?: string[];
   };
   template: StudioTemplate;
   ratio: StudioRatio;
@@ -73,7 +78,7 @@ export interface ResolvedVideoManifest {
   verses: StudioVerse[];
   fonts: StudioAsset[];
   audio: { url: string; startMs: number; endMs: number };
-  background: { type: 'color' | 'image' | 'video'; url: string };
+  background: { type: 'color' | 'image' | 'video'; url: string; slides?: { url: string }[] };
   durationMs: number;
   width: number;
   height: number;

@@ -1,5 +1,4 @@
-/* eslint-disable @next/next/no-img-element -- This shared Remotion scene also runs outside Next; source files are already decoder-verified. */
-/* eslint-disable react-func/max-lines-per-function -- Font loading, verification and cleanup form one cancellable effect. */
+/* eslint-disable react-func/max-lines-per-function -- Scene asset loading, verification and cleanup form one cancellable effect. */
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
 import {
@@ -9,11 +8,12 @@ import {
   continueRender,
   delayRender,
   useCurrentFrame,
-  Video,
 } from 'remotion';
 
 import { ResolvedVideoManifest } from '../contracts';
 
+import preloadBackgrounds from './preloadBackgrounds';
+import SceneBackground from './SceneBackground';
 import VerseText from './VerseText';
 
 export interface SceneProps extends Record<string, unknown> {
@@ -50,12 +50,17 @@ const VideoScene = ({ manifest: m, onReady }: SceneProps): JSX.Element => {
         }),
       );
       await document.fonts.ready;
+      await preloadBackgrounds(m);
       if (!disposed) setFontsReady(true);
     };
-    load().catch(() => {
+    load().catch((error: unknown) => {
       if (!disposed) {
-        onReady?.(false, 'FONT_UNAVAILABLE');
-        if (!onReady) cancelRender(new Error('FONT_UNAVAILABLE'));
+        const code =
+          error instanceof Error && error.message === 'BACKGROUND_UNAVAILABLE'
+            ? 'BACKGROUND_UNAVAILABLE'
+            : 'FONT_UNAVAILABLE';
+        onReady?.(false, code);
+        if (!onReady) cancelRender(new Error(code));
         continueRender(handle);
       }
     });
@@ -78,37 +83,14 @@ const VideoScene = ({ manifest: m, onReady }: SceneProps): JSX.Element => {
   const s = m.spec;
   return (
     <AbsoluteFill
+      data-studio-scene
       style={{
         background: s.background.type === 'color' ? s.background.value : '#102b30',
         color: s.color,
         overflow: 'hidden',
       }}
     >
-      {m.background.type === 'image' && (
-        <img
-          alt=""
-          src={m.background.url}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: `${s.background.position}% center`,
-          }}
-        />
-      )}
-      {m.background.type === 'video' && (
-        <Video
-          muted
-          loop
-          src={m.background.url}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            objectPosition: `${s.background.position}% center`,
-          }}
-        />
-      )}
+      <SceneBackground manifest={m} />
       <style>
         {m.fonts
           .filter((f) => f.family?.includes('tajweed'))

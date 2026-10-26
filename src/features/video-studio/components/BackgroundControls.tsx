@@ -3,6 +3,7 @@ import useTranslation from 'next-translate/useTranslation';
 import { StudioCatalog } from '../contracts';
 import useBackgroundUpload from '../useBackgroundUpload';
 
+import BackgroundAnimationControls from './BackgroundAnimationControls';
 import { ControlProps } from './ContentControls';
 import LibraryBackgroundPicker from './LibraryBackgroundPicker';
 import styles from './Studio.module.scss';
@@ -33,6 +34,8 @@ const BackgroundControls = ({
               change({
                 background: {
                   ...spec.background,
+                  slides: [],
+                  animate: false,
                   type: e.target.value as 'color' | 'library' | 'upload',
                   value: {
                     color: '#102b30',
@@ -83,6 +86,7 @@ const BackgroundControls = ({
             <small>{t(uploadLabel)}</small>
           </label>
         )}
+        <BackgroundAnimationControls spec={spec} change={change} catalog={catalog} />
         <label htmlFor="studio-backgroundcontrols-5">
           {t('darken')}
           <input

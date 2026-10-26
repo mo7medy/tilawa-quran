@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/naming-convention -- Quran Foundation wire schema. */
-import { RENDER_VERSION, StudioCatalog } from '../contracts';
+import { ASSET_SCHEMA_VERSION, StudioCatalog } from '../contracts';
 import { assert } from '../validation';
 
 import { backgroundCatalog } from './backgroundLibrary';
@@ -57,6 +57,6 @@ export const assetIndex = async (env: StudioEnv): Promise<AssetIndex> => {
   const object = await env.VIDEO_STUDIO_ASSETS.get('manifest.json');
   assert(object, 'ASSETS_UNAVAILABLE', 503);
   const index = await object.json<AssetIndex>();
-  assert(index.renderVersion === RENDER_VERSION, 'ASSETS_VERSION_MISMATCH', 503);
+  assert(index.renderVersion === ASSET_SCHEMA_VERSION, 'ASSETS_VERSION_MISMATCH', 503);
   return index;
 };

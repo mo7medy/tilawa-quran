@@ -3,6 +3,7 @@
 /* eslint-disable import/prefer-default-export -- Named domain validator. */
 /* eslint-disable prefer-regex-literals -- Unicode property escapes use a constructor because the TypeScript target is ES5. */
 import { AutomationPlan } from '../automation';
+import backgroundSelection from '../backgroundSelection';
 import { defaultSpec, StudioCatalog } from '../contracts';
 import { assert, record, validateSpec } from '../validation';
 
@@ -11,6 +12,7 @@ import { AutomationCandidate } from './automationCandidates';
 interface Decision extends Record<string, unknown> {
   candidateId: string;
   backgroundId: string;
+  backgroundIds?: string[];
   translationId: number;
   font: string;
   template: string;
@@ -41,6 +43,16 @@ export const validateAutomationDecision = (
     catalog.translations.some((t) => t.id === d.translationId),
     'AUTOMATION_INVALID_DECISION',
   );
+  const slides = d.backgroundIds ?? backgroundSelection(catalog, d.backgroundId);
+  assert(
+    Array.isArray(slides) &&
+      slides.length >= 1 &&
+      slides.length <= 5 &&
+      slides[0] === d.backgroundId &&
+      new Set(slides).size === slides.length &&
+      slides.every((id) => catalog.backgrounds.some((b) => b.id === id && b.type === 'image')),
+    'AUTOMATION_INVALID_DECISION',
+  );
   assert(
     typeof d.caption === 'string' && d.caption.length > 0 && d.caption.length <= 220,
     'AUTOMATION_INVALID_DECISION',
@@ -65,7 +77,14 @@ export const validateAutomationDecision = (
     template: d.template,
     fontSize: 54,
     translationSize: 28,
-    background: { type: 'library', value: d.backgroundId, opacity: 0.65, position: 50 },
+    background: {
+      type: 'library',
+      value: d.backgroundId,
+      opacity: 0.65,
+      position: 50,
+      animate: true,
+      slides,
+    },
   });
   return {
     spec,

@@ -8,7 +8,7 @@ import { openBrowser, renderMedia, renderStill, selectComposition } from '@remot
 // Every input URL has already been downloaded by the Python wrapper into this private job directory.
 const directory = process.argv[2];
 const manifest = JSON.parse(await fs.readFile(path.join(directory, 'manifest.json'), 'utf8'));
-if (manifest.renderVersion !== 'studio-1' || manifest.fps !== 30)
+if (!['studio-1', 'studio-2'].includes(manifest.renderVersion) || manifest.fps !== 30)
   throw new Error('MANIFEST_VERSION_MISMATCH');
 const server = createServer(async (request, response) => {
   const name = new URL(request.url, 'http://localhost').pathname.slice(1);
@@ -56,6 +56,9 @@ manifest.fonts.forEach((asset) => {
 manifest.audio.url = `${base}/${manifest.audio.url}`;
 if (manifest.background.type !== 'color')
   manifest.background.url = `${base}/${manifest.background.url}`;
+manifest.background.slides?.forEach((slide) => {
+  slide.url = `${base}/${slide.url}`;
+});
 const inputProps = { manifest };
 const serveUrl = fileURLToPath(new URL('./bundle/', import.meta.url));
 const browser = await openBrowser('chrome', { chromeMode: 'headless-shell' });
@@ -103,6 +106,8 @@ try {
   // Only a small error category crosses the process boundary; URLs/text are never logged.
   const code = String(error.message).includes('TEXT_OVERFLOW')
     ? 'TEXT_OVERFLOW'
+    : String(error.message).includes('BACKGROUND_UNAVAILABLE')
+    ? 'BACKGROUND_UNAVAILABLE'
     : String(error.message).includes('FONT_')
     ? 'FONT_UNAVAILABLE'
     : 'RENDER_FAILED';

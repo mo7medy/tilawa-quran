@@ -140,6 +140,12 @@
   input[type='color'] {
     padding: 4px;
   }
+  input[type='checkbox'] {
+    inline-size: 20px;
+    min-block-size: 20px;
+    accent-color: var(--tilawa-button);
+    justify-self: start;
+  }
 }
 .row {
   display: grid;

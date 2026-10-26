@@ -45,7 +45,9 @@ it('previews the selected R2 image and preserves the legacy video selector', () 
   expect(image.getAttribute('src')).toBe('/api/video-studio/backgrounds/r2-portrait_01');
   expect(image.getAttribute('alt')).toContain('ratios.portrait');
   fireEvent.change(screen.getByRole('combobox'), { target: { value: 'sea' } });
-  expect(change).toHaveBeenCalledWith({ background: { ...spec.background, value: 'sea' } });
+  expect(change).toHaveBeenCalledWith({
+    background: { ...spec.background, value: 'sea', slides: [] },
+  });
   rerender(
     <LibraryBackgroundPicker
       spec={{ ...spec, background: { ...spec.background, value: 'sea' } }}

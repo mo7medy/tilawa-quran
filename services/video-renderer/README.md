@@ -2,11 +2,12 @@
 
 ## Automatic generation
 
-`/video-studio/automation` controls one account's automatic generation, with no social publishing.
-Bind Workers AI as `AI` and set `STUDIO_AUTOMATION_EMAIL_HASH` to the SHA-256 of the lowercase,
-trimmed account email. Only a server-verified account with that confirmed email can read or change
-the automation. The first activation binds its actual website user ID; an email or user ID supplied
-by a browser is never accepted as ownership. Apply `0003_automation.sql` before deploying this code.
+`/video-studio/automation` controls one account's automatic generation. Buffer publishing has
+separate connection and enable/pause controls on the same page (see `PUBLISHING.md`). Bind Workers
+AI as `AI` and set `STUDIO_AUTOMATION_EMAIL_HASH` to the SHA-256 of the lowercase, trimmed account
+email. Only a server-verified account with that confirmed email can read or change the automation.
+The first activation binds its actual website user ID; an email or user ID supplied by a browser is
+never accepted as ownership. Apply `0003_automation.sql` before deploying this code.
 
 The existing minute cron advances a durable D1 state machine. Slots are 09:00, 14:00 and optionally
 19:00 in `Africa/Cairo`, with IANA daylight-saving handling and a five-hour minimum between
@@ -147,3 +148,16 @@ Remotion packages are pinned together at 4.0.538 with the user's approval to rep
 transitive Zod collection denial-of-service advisories in development/bundler dependencies; there is
 no public Remotion Studio server, input JSON is bounded to 16 KiB and normalized scalar choices. Do
 not apply npm's suggested downgrade to vulnerable Remotion versions or force a Zod major change.
+
+## Scene version 2
+
+Newly resolved projects use `studio-2`: the ayah and translation form a centered group, including
+the translation template. Image backgrounds can include up to five version-pinned site images, with
+frame-driven 1.2-second crossfades every 6–12 seconds and optional gentle zoom/pan. The browser and
+renderer use the same scene and timeline. Every image is loaded before the preview becomes
+exportable; Modal downloads the bounded sequence locally and renews its preparation lease between
+images.
+
+The renderer also accepts immutable `studio-1` jobs with their original text layout. The font/media
+index schema remains `studio-1` (`ASSET_SCHEMA_VERSION`), independently of the scene version,
+because the existing font assets and hashes have not changed.

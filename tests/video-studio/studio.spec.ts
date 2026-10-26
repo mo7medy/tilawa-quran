@@ -241,3 +241,80 @@ test('overflow in any ayah prevents generation', async ({ page }) => {
   await expect(page.getByRole('alert').filter({ hasText: 'An ayah or translation' })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Generate video', exact: true })).toBeDisabled();
 });
+
+for (const [ratio, width, height] of [
+  ['portrait', 1080, 1920],
+  ['square', 1080, 1080],
+  ['landscape', 1920, 1080],
+] as const) {
+  test(`translation template keeps the text group centered for ${ratio}`, async ({ page }) => {
+    await setup(page);
+    await page.goto('/video-studio');
+    await page.route('**/api/video-studio/resolve', async (route) => {
+      const manifest = structuredClone(baseline);
+      Object.assign(manifest, { width, height });
+      Object.assign(manifest.spec, {
+        ...route.request().postDataJSON().spec,
+        template: 'translation',
+        ratio,
+      });
+      await route.fulfill({ json: { manifest, hash: `centered-${ratio}` } });
+    });
+    await page.getByRole('button', { name: 'Prepare preview', exact: true }).click();
+    await expect(page.getByRole('button', { name: 'Generate video', exact: true })).toBeEnabled();
+    const scene = await page.locator('[data-studio-scene]').boundingBox();
+    const text = await page.locator('[data-studio-text]').first().boundingBox();
+    expect(Math.abs(text.y + text.height / 2 - scene.y - scene.height / 2)).toBeLessThan(2);
+    expect(Math.abs(text.x + text.width / 2 - scene.x - scene.width / 2)).toBeLessThan(2);
+    const quran = await page.locator('[data-studio-quran]').first().boundingBox();
+    const translation = await page.locator('[data-studio-translation]').first().boundingBox();
+    expect(quran.y).toBeGreaterThan(scene.y + scene.height * 0.2);
+    expect(translation.y + translation.height).toBeLessThan(scene.y + scene.height * 0.8);
+    await page
+      .locator('[data-studio-scene]')
+      .screenshot({ path: `.local-runtime/centered-${ratio}.png` });
+  });
+}
+
+test('the preview crossfades on seek and refuses a missing future background', async ({ page }) => {
+  await setup(page);
+  await page.goto('/video-studio');
+  let missing = false;
+  const image = (color: string): string =>
+    `data:image/svg+xml,${encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="120" height="200"><rect width="120" height="200" fill="${color}"/></svg>`,
+    )}`;
+  await page.route('**/api/video-studio/resolve', async (route) => {
+    const manifest = structuredClone(baseline);
+    manifest.spec = {
+      ...route.request().postDataJSON().spec,
+      background: { ...baseline.spec.background, animate: true },
+    };
+    manifest.durationMs = 20000;
+    manifest.background = {
+      type: 'image',
+      url: image('#24504d'),
+      slides: [
+        { url: image('#24504d') },
+        { url: missing ? 'data:image/png,invalid' : image('#28446d') },
+      ],
+    };
+    await route.fulfill({ json: { manifest, hash: missing ? 'missing-image' : 'crossfade' } });
+  });
+  await page.getByRole('button', { name: 'Prepare preview', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Generate video', exact: true })).toBeEnabled();
+  const scene = page.locator('[data-studio-scene]');
+  await scene.hover();
+  const box = await scene.boundingBox();
+  await page.mouse.click(box.x + box.width * 0.53, box.y + box.height - 16);
+  await expect(page.locator('[data-studio-background]')).toHaveCount(2);
+  const incoming = page.locator('[data-studio-background="1"]');
+  const opacity = await incoming.evaluate((el) => Number(getComputedStyle(el).opacity));
+  expect(opacity).toBeGreaterThan(0);
+  expect(opacity).toBeLessThan(1);
+  await scene.screenshot({ path: '.local-runtime/soft-background-crossfade.png' });
+  missing = true;
+  await page.getByRole('button', { name: 'Prepare preview', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Generate video', exact: true })).toBeDisabled();
+  await expect(page.getByRole('alert')).toBeVisible();
+});

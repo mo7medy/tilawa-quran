@@ -9,6 +9,34 @@ import { cairoDay, nextCairoDay, policy, validateSpec } from './validation';
 import { MushafLines, QuranFont } from '@/types/QuranReader';
 
 describe('studio specifications and Cairo accounting', () => {
+  it('normalizes bounded library slides and rejects private URLs or a non-library slideshow', () => {
+    const background = {
+      ...defaultSpec.background,
+      type: 'library',
+      value: 'r2-first',
+      animate: true,
+      slides: ['r2-first', 'r2-second', 'r2-first'],
+    };
+    expect(validateSpec({ ...defaultSpec, background }).background.slides).toEqual([
+      'r2-first',
+      'r2-second',
+    ]);
+    expect(
+      validateSpec({ ...defaultSpec, background: { ...background, slides: [] } }).background.slides,
+    ).toEqual([]);
+    expect(() =>
+      validateSpec({
+        ...defaultSpec,
+        background: { ...background, slides: ['https://other.test'] },
+      }),
+    ).toThrow('INVALID_BACKGROUND');
+    expect(() =>
+      validateSpec({ ...defaultSpec, background: { ...background, type: 'upload' } }),
+    ).toThrow('INVALID_BACKGROUND');
+    expect(() =>
+      validateSpec({ ...defaultSpec, background: { ...background, animate: 'true' } }),
+    ).toThrow('INVALID_BACKGROUND');
+  });
   it('uses independent defaults and validates all five existing Quran fonts', () => {
     STUDIO_FONTS.forEach((font) => expect(validateSpec({ ...defaultSpec, font }).font).toBe(font));
     expect(

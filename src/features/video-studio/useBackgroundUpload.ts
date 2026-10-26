@@ -28,7 +28,7 @@ const useBackgroundUpload = ({ spec, change, onError }: BackgroundUploadProps) =
       for (let i = 0; i < 60; i += 1) {
         const asset = await studioRequest<{ status: string }>(`uploads/${id}`);
         if (asset.status === 'ready') {
-          change({ background: { ...spec.background, type: 'upload', value: id } });
+          change({ background: { ...spec.background, type: 'upload', value: id, slides: [] } });
           return;
         }
         if (asset.status === 'failed') throw new Error('INVALID_FILE');

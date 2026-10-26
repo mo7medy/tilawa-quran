@@ -1,4 +1,5 @@
 /* eslint-disable react-func/max-lines-per-function -- Shared native R2 fixtures exercise public streaming and immutable job inputs together. */
+/* eslint-disable max-lines -- The fixture covers both single images and the same bounded slideshow source boundary. */
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -89,6 +90,41 @@ describe('existing R2 background library', () => {
       },
     );
     expect(legacy).toEqual({ type: 'video', url: `${origin}/api/video-studio/assets/legacy-hash` });
+  });
+  it('resolves every slideshow image to a frozen site URL and fails on a missing image', async () => {
+    const second = { ...entry, name: 'portrait_02', path: 'portrait/portrait_02.jpg' };
+    get.mockImplementation(async () => ({
+      size: 500,
+      text: async () => JSON.stringify([entry, second]),
+    }));
+    const spec = {
+      ...defaultSpec,
+      background: {
+        ...defaultSpec.background,
+        type: 'library' as const,
+        value: 'r2-portrait_01',
+        animate: true,
+        slides: ['r2-portrait_01', 'r2-portrait_02'],
+      },
+    };
+    const result = await resolveBackground(
+      env,
+      { id: 'guest:test', registered: false, network: 'test' },
+      spec,
+      { renderVersion: 'studio-1', files: {} },
+    );
+    expect(result.slides?.map((slide) => slide.url)).toEqual([
+      `${origin}/api/video-studio/backgrounds/r2-portrait_01?v=original`,
+      `${origin}/api/video-studio/backgrounds/r2-portrait_02?v=original`,
+    ]);
+    await expect(
+      resolveBackground(
+        env,
+        { id: 'guest:test', registered: false, network: 'test' },
+        { ...spec, background: { ...spec.background, slides: ['r2-missing'] } },
+        { renderVersion: 'studio-1', files: {} },
+      ),
+    ).rejects.toThrow('BACKGROUND_UNAVAILABLE');
   });
   it('streams byte ranges and enforces the frozen ETag in the native R2 read', async () => {
     const response = await fileRequest(

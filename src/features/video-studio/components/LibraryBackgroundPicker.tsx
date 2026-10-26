@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import useTranslation from 'next-translate/useTranslation';
 
+import backgroundSelection from '../backgroundSelection';
 import { StudioCatalog } from '../contracts';
 
 import { ControlProps } from './ContentControls';
@@ -28,7 +29,18 @@ const LibraryBackgroundPicker = ({
         <select
           id="studio-backgroundcontrols-3"
           value={spec.background.value}
-          onChange={(e) => change({ background: { ...spec.background, value: e.target.value } })}
+          onChange={(e) =>
+            change({
+              background: {
+                ...spec.background,
+                value: e.target.value,
+                slides:
+                  spec.background.slides?.length && catalog
+                    ? backgroundSelection(catalog, e.target.value)
+                    : [],
+              },
+            })
+          }
         >
           {catalog?.backgrounds.map((entry) => (
             <option key={entry.id} value={entry.id}>

@@ -92,15 +92,26 @@ export const resolveLibraryImage = async (
   env: StudioEnv,
   id: string,
 ): Promise<ResolvedVideoManifest['background']> => {
+  const [image] = await resolveLibraryImages(env, [id]);
+  return { type: 'image', url: image.url };
+};
+
+export const resolveLibraryImages = async (
+  env: StudioEnv,
+  ids: string[],
+): Promise<{ url: string }[]> => {
   const images = await backgroundLibrary(env);
-  const image = images.find((entry) => entry.id === id);
-  assert(image, 'BACKGROUND_UNAVAILABLE');
-  const head = await env.VIDEO_STUDIO_BACKGROUNDS.head(image.key);
-  assert(head && head.size > 0 && head.size <= 10 * 1024 * 1024, 'BACKGROUND_UNAVAILABLE');
-  return {
-    type: 'image',
-    url: `${env.STUDIO_ORIGIN}/api/video-studio/backgrounds/${image.id}?v=${encodeURIComponent(
-      head.etag,
-    )}`,
-  };
+  return Promise.all(
+    ids.map(async (id) => {
+      const image = images.find((entry) => entry.id === id);
+      assert(image, 'BACKGROUND_UNAVAILABLE');
+      const head = await env.VIDEO_STUDIO_BACKGROUNDS.head(image.key);
+      assert(head && head.size > 0 && head.size <= 10 * 1024 * 1024, 'BACKGROUND_UNAVAILABLE');
+      return {
+        url: `${env.STUDIO_ORIGIN}/api/video-studio/backgrounds/${image.id}?v=${encodeURIComponent(
+          head.etag,
+        )}`,
+      };
+    }),
+  );
 };
