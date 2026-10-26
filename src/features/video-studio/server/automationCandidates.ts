@@ -31,7 +31,7 @@ const PASSAGES = [
   [39, 53, 54],
   [13, 28, 29],
   [41, 30, 32],
-  [65, 2, 3],
+  [16, 97, 97],
   [24, 35, 35],
   [89, 27, 30],
   [87, 1, 19],
@@ -92,9 +92,13 @@ export const automationCandidates = async (
     { length: Math.min(4, available.length) },
     (_, i) => available[(seed + i) % available.length],
   );
+  // Hash the rotation so catalogues whose size shares a factor with the schedule do not
+  // permanently exclude the same readers. Selection remains deterministic across retries.
+  // eslint-disable-next-line no-bitwise -- Cheap deterministic mixing, not a security primitive.
+  const readerOffset = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b) >>> 0;
   const readers = Array.from(
     { length: Math.min(3, catalog.reciters.length) },
-    (_, i) => catalog.reciters[(seed * 3 + i) % catalog.reciters.length],
+    (_, i) => catalog.reciters[(readerOffset + i) % catalog.reciters.length],
   );
   const candidates: AutomationCandidate[] = [];
   for (const [chapterId, from, to] of passages) {
