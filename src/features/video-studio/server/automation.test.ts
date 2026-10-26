@@ -227,6 +227,10 @@ describe('automatic video generation', () => {
       AUTOMATION_MODEL,
       expect.objectContaining({ max_tokens: 450 }),
     );
+    // Workers AI's live grammar rejects this keyword; uniqueness is validated on the server.
+    expect(
+      mocks.ai.mock.calls[0][1].response_format.json_schema.properties.backgroundIds,
+    ).not.toHaveProperty('uniqueItems');
     await maintainAutomation(env);
     state = await readAutomation(env, owner);
     expect(state.runs[0].status).toBe('submitted');
