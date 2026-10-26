@@ -170,7 +170,15 @@
     "AUTOMATION_INPUT_LIMIT": "The selection catalogue exceeded its safe size.",
     "AUTOMATION_MISSED": "The day's selection window expired.",
     "AUTOMATION_RETRIES_EXHAUSTED": "Automatic retries were exhausted.",
-    "OPTIONAL_SKIPPED": "The model skipped the optional third video."
+    "OPTIONAL_SKIPPED": "The model skipped the optional third video.",
+    "BUFFER_RECONNECT": "Reconnect Buffer with a valid API key.",
+    "BUFFER_RESPONSE": "Buffer returned an unexpected response. Check its dashboard.",
+    "BUFFER_UNCERTAIN": "The send outcome is uncertain. Check Buffer; automatic resending is disabled to avoid duplicates.",
+    "BUFFER_RATE_LIMIT": "Buffer request limit reached. The service will wait before retrying.",
+    "BUFFER_REJECTED": "Buffer could not publish this video. Check its dashboard.",
+    "BUFFER_CHANNEL": "This TikTok channel does not support automatic publishing with the current connection.",
+    "BUFFER_EXPIRED": "The video is expired or no longer available for publishing.",
+    "PUBLISHING_PAUSED": "Publishing is paused."
   },
   "automation": {
     "title": "Automatic Quran videos",
@@ -201,5 +209,38 @@
       "failed": "Failed"
     }
   },
-  "open-project": "Open project"
+  "open-project": "Open project",
+  "publishing": {
+    "title": "Publish to TikTok",
+    "description": "Send new automatic Quran videos to your TikTok account through Buffer after rendering.",
+    "setup": "First connect TikTok in Buffer → Channels and enable Automatic publishing. Then create an API key in Buffer Settings → API.",
+    "open-buffer": "Open Buffer",
+    "key-help": "API key instructions",
+    "key": "Buffer API key",
+    "key-security": "Enter the key here only. It is encrypted on the server, never returned to the browser, and is not sent to the video renderer or AI model.",
+    "channel": "TikTok account",
+    "choose": "Choose an account",
+    "unavailable": "Automatic publishing unavailable",
+    "no-channel": "No eligible TikTok account found. Connect TikTok in Buffer, enable automatic publishing, and check that the channel is unlocked and its queue is running.",
+    "connect": "Save connection",
+    "check": "Check accounts",
+    "active": "Automatic publishing enabled: {{name}}",
+    "paused": "Connected, publishing paused: {{name}}",
+    "consent": "Enabling sends newly generated automatic videos, their captions and hashtags to this account. Earlier videos are excluded. Buffer receives a video-only link that remains available until publication or file expiry.",
+    "enable": "Enable automatic TikTok publishing",
+    "pause": "Pause publishing",
+    "disconnect": "Disconnect Buffer",
+    "pause-help": "Pausing stops new sends. Requests already in progress or accepted by Buffer may still publish. Disconnecting does not delete posts in Buffer or TikTok.",
+    "view": "View on TikTok",
+    "status": {
+      "queued": "Waiting to send",
+      "sending": "Sending to Buffer",
+      "pending": "Buffer is publishing",
+      "published": "Published on TikTok",
+      "review": "Review in Buffer required",
+      "failed": "Publishing failed",
+      "unknown": "Check Buffer before sending again; the outcome is uncertain",
+      "cancelled": "Publishing cancelled"
+    }
+  }
 }

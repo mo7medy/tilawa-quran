@@ -8,6 +8,7 @@ import { errorCode, studioRequest } from '../client';
 import useStudioSession from '../useStudioSession';
 
 import AutomationRunCard from './AutomationRunCard';
+import PublishingControls from './PublishingControls';
 import styles from './Studio.module.scss';
 
 import AcademyLink from '@/components/Academy/AcademyLink';
@@ -115,6 +116,7 @@ const StudioAutomation = (): JSX.Element => {
             <p>{t('automation.pause-help')}</p>
             <p>{t('automation.run-help')}</p>
           </section>
+          <PublishingControls key={session.scope} scope={session.scope} />
           <h2 className={styles.automationHistory}>{t('automation.history')}</h2>
           {!current.runs.length && <p className={styles.notice}>{t('automation.empty')}</p>}
           <div className={styles.library} aria-live="polite">

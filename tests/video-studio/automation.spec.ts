@@ -47,6 +47,10 @@ test('automation controls preserve owner scope, acknowledge pause, and show erro
       });
       return;
     }
+    if (endpoint === 'publishing') {
+      await route.fulfill({ json: { connection: null, publications: [] } });
+      return;
+    }
     await route.fulfill({ status: 404, json: { error: { code: 'NOT_FOUND' } } });
   });
   await page.goto('/video-studio/automation');

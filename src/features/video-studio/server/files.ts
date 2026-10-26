@@ -61,6 +61,17 @@ export const fileRequest = async (
   id: string,
 ): Promise<Response> => {
   assert(['GET', 'HEAD'].includes(req.method), 'METHOD_NOT_ALLOWED', 405);
+  if (group === 'publication-media') {
+    assert(/^[0-9a-f-]{36}\.mp4$/.test(id ?? ''), 'NOT_FOUND', 404);
+    // Only a specifically authorized publication gets a stable, unguessable provider media URL.
+    const row = await env.VIDEO_STUDIO_DB.prepare(
+      "SELECT j.output_key FROM studio_publications p JOIN studio_jobs j ON j.id=p.job_id AND j.owner=p.owner WHERE p.id=? AND p.status IN ('sending','pending','published','review','unknown') AND p.media_until>? AND j.status='completed' AND j.expires_at>?",
+    )
+      .bind(id.slice(0, -4), Date.now(), Date.now())
+      .first<{ output_key: string }>();
+    assert(row?.output_key, 'NOT_FOUND', 404);
+    return streamFile(env.VIDEO_STUDIO_PRIVATE, row.output_key, req, { mime: 'video/mp4' });
+  }
   if (group === 'backgrounds') {
     const images = await backgroundLibrary(env);
     const image = images.find((entry) => entry.id === id);

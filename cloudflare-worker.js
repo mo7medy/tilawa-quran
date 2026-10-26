@@ -4,6 +4,7 @@ import openNext from './.open-next/worker.js';
 import { handleStudio } from './src/features/video-studio/server/api';
 import { maintainStudio } from './src/features/video-studio/server/maintenance';
 import { maintainAutomation } from './src/features/video-studio/server/automationRunner';
+import { maintainPublishing } from './src/features/video-studio/server/publishingRunner';
 import { getVisitorLocaleRedirect } from './src/tilawa/visitorLocale';
 
 // Keep generated Durable Object and other adapter exports available.
@@ -15,6 +16,7 @@ export default {
   scheduled(_event, env, ctx) {
     ctx.waitUntil(maintainStudio(env));
     ctx.waitUntil(maintainAutomation(env));
+    ctx.waitUntil(maintainPublishing(env));
   },
   fetch(request, env, ctx) {
     if (new URL(request.url).pathname.startsWith('/api/video-studio/')) {

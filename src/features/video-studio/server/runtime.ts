@@ -6,6 +6,7 @@ import { StudioError } from '../validation';
 export interface StudioEnv {
   AI?: Ai;
   STUDIO_AUTOMATION_EMAIL_HASH?: string;
+  STUDIO_BUFFER_TOKEN?: string;
   VIDEO_STUDIO_DB: D1Database;
   VIDEO_STUDIO_PRIVATE: R2Bucket;
   VIDEO_STUDIO_ASSETS: R2Bucket;

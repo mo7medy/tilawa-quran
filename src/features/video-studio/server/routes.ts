@@ -8,6 +8,7 @@ import { catalog, resolveManifest } from './content';
 import { checkRate, guestFromCookie } from './identity';
 import { cancelJob, createJob, downloadUrl, getJob, jobView, manifestHash, quota } from './jobs';
 import { deleteProject, getProject, listProjects, saveProject } from './projects';
+import { publishingRequest } from './publishingApi';
 import { readBody } from './requestBody';
 import { json, StudioEnv } from './runtime';
 import { getUpload, initUpload, receiveUpload } from './uploads';
@@ -41,6 +42,7 @@ export const authenticated = async (
     ? record(JSON.parse(await readBody(req)))
     : {};
   if (group === 'automation') return automationRequest(env, req, owner, id, body);
+  if (group === 'publishing') return publishingRequest(env, req, owner, id, body);
   if (group === 'resolve' && method === 'POST') {
     await checkRate(env, `resolve:${owner.network}`, 20);
     const manifest = await resolveManifest(env, owner, validateSpec(body.spec));
