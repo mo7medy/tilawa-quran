@@ -9,6 +9,7 @@ import { isSupabaseConfigured } from '@/lib/supabase/config';
 export interface StudioSession {
   scope: string;
   registered: boolean;
+  canAutomate?: boolean;
   quota: StudioQuota;
 }
 const useStudioSession = (): {

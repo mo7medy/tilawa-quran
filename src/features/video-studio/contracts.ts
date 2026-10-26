@@ -101,6 +101,7 @@ export interface StudioOwner {
   id: string;
   registered: boolean;
   network: string;
+  canAutomate?: boolean;
 }
 export interface StudioQuota {
   remaining: number;

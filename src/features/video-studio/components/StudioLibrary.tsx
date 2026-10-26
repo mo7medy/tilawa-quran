@@ -24,6 +24,13 @@ const StudioLibrary = (): JSX.Element => {
           {t('new-project')}
         </AcademyLink>
       </header>
+      {session?.canAutomate && (
+        <div className={styles.actions}>
+          <AcademyLink className={styles.secondary} href="/video-studio/automation">
+            {t('automation.title')}
+          </AcademyLink>
+        </div>
+      )}
       {(error || sessionError) && (
         <p role="alert" className={styles.error}>
           {t(`errors.${error || sessionError}`, undefined, { fallback: t('errors.STUDIO_ERROR') })}

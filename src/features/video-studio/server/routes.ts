@@ -3,6 +3,7 @@
 import { StudioOwner } from '../contracts';
 import { assert, record, StudioError, validateSpec } from '../validation';
 
+import { automationRequest } from './automationApi';
 import { catalog, resolveManifest } from './content';
 import { checkRate, guestFromCookie } from './identity';
 import { cancelJob, createJob, downloadUrl, getJob, jobView, manifestHash, quota } from './jobs';
@@ -25,7 +26,12 @@ export const authenticated = async (
     );
   }
   if (group === 'session' && method === 'GET') {
-    return json({ scope: owner.id, registered: owner.registered, quota: await quota(env, owner) });
+    return json({
+      scope: owner.id,
+      registered: owner.registered,
+      canAutomate: !!owner.canAutomate,
+      quota: await quota(env, owner),
+    });
   }
   if (group === 'uploads' && method === 'PUT' && id) {
     await receiveUpload(env, owner, id, req);
@@ -34,6 +40,7 @@ export const authenticated = async (
   const body = ['POST', 'PUT', 'PATCH'].includes(method)
     ? record(JSON.parse(await readBody(req)))
     : {};
+  if (group === 'automation') return automationRequest(env, req, owner, id, body);
   if (group === 'resolve' && method === 'POST') {
     await checkRate(env, `resolve:${owner.network}`, 20);
     const manifest = await resolveManifest(env, owner, validateSpec(body.spec));

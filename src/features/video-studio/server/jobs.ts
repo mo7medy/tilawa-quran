@@ -1,5 +1,6 @@
 /* eslint-disable react-func/max-lines-per-function -- The idempotent quota reservation and durable dispatch are one job creation transaction flow. */
 /* eslint-disable @typescript-eslint/naming-convention -- Preserve standard HTTP headers, provider payloads and D1 column names at the boundary. */
+import { AUTOMATION_GAP_MS } from '../automation';
 import { ResolvedVideoManifest, StudioOwner, VideoRenderJob } from '../contracts';
 import { assert, cairoDay, policy } from '../validation';
 
@@ -53,6 +54,7 @@ export const createJob = async (
   projectId: string,
   idempotency: string,
   previewHash: string,
+  automationGuard?: { id: string; lease: string },
 ): Promise<VideoRenderJob> => {
   assert(env.STUDIO_ENABLED === '1', 'STUDIO_PAUSED', 503);
   assert(/^[0-9a-f-]{36}$/.test(idempotency), 'INVALID_INPUT');
@@ -75,25 +77,41 @@ export const createJob = async (
     Math.ceil((manifest.durationMs / 1000) * 550000) + 2097152,
   );
   try {
-    await env.VIDEO_STUDIO_DB.prepare(
-      'INSERT INTO studio_jobs(id,owner,project_id,revision,day,daily_limit,duration_ms,manifest,idempotency,created_at,expires_at,storage_limit,output_reserved) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)',
-    )
-      .bind(
-        id,
-        owner.id,
-        project.id,
-        project.revision,
-        cairoDay(now),
-        policy(owner.registered).daily,
-        manifest.durationMs,
-        JSON.stringify(manifest),
-        idempotency,
-        now,
-        now + policy(owner.registered).artifactMs,
-        policy(owner.registered).storage,
-        reserve,
-      )
-      .run();
+    const insert = env.VIDEO_STUDIO_DB.prepare(
+      `INSERT INTO studio_jobs(id,owner,project_id,revision,day,daily_limit,duration_ms,manifest,idempotency,created_at,expires_at,storage_limit,output_reserved) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,? WHERE ${
+        automationGuard
+          ? "EXISTS(SELECT 1 FROM studio_automation_runs r JOIN studio_automation_settings s ON s.owner=r.owner WHERE r.id=? AND r.lease=? AND r.status='ready' AND s.enabled=1) AND NOT EXISTS(SELECT 1 FROM studio_jobs j JOIN studio_automation_runs r ON r.job_id=j.id WHERE r.owner=? AND j.created_at>?)"
+          : '1'
+      }`,
+    ).bind(
+      id,
+      owner.id,
+      project.id,
+      project.revision,
+      cairoDay(now),
+      policy(owner.registered).daily,
+      manifest.durationMs,
+      JSON.stringify(manifest),
+      idempotency,
+      now,
+      now + policy(owner.registered).artifactMs,
+      policy(owner.registered).storage,
+      reserve,
+      ...(automationGuard
+        ? [automationGuard.id, automationGuard.lease, owner.id, now - AUTOMATION_GAP_MS]
+        : []),
+    );
+    if (automationGuard) {
+      // Job reservation and automation tracking commit together, even if pause or dispatch races.
+      await env.VIDEO_STUDIO_DB.batch([
+        insert,
+        env.VIDEO_STUDIO_DB.prepare(
+          "UPDATE studio_automation_runs SET status='submitted',job_id=?,lease=NULL,lease_until=0,error=NULL,updated_at=? WHERE id=? AND lease=? AND EXISTS(SELECT 1 FROM studio_jobs WHERE id=? AND owner=?)",
+        ).bind(id, now, automationGuard.id, automationGuard.lease, id, owner.id),
+      ]);
+    } else {
+      await insert.run();
+    }
   } catch (error) {
     const concurrent = await env.VIDEO_STUDIO_DB.prepare(
       'SELECT * FROM studio_jobs WHERE owner=? AND idempotency=?',

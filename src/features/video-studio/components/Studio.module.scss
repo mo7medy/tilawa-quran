@@ -23,6 +23,9 @@
   color: var(--tilawa-link) !important;
   font-weight: 700;
 }
+.automationHistory {
+  margin-block: 24px 16px;
+}
 .workspace {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(320px, 1fr);

@@ -5,7 +5,7 @@ import { parse, serialize } from 'cookie';
 import { StudioOwner } from '../contracts';
 import { assert } from '../validation';
 
-import { sign, validCapability, capability } from './crypto';
+import { sign, validCapability, capability, sha256 } from './crypto';
 import { StudioEnv } from './runtime';
 
 import { getSupabaseConfiguration } from '@/lib/supabase/config';
@@ -42,7 +42,12 @@ export const ownerFor = async (
     });
     const { data, error } = await client.auth.getUser();
     assert(!error && data.user, 'AUTH_REQUIRED', 401);
-    return { id: `user:${data.user.id}`, registered: true, network };
+    const canAutomate =
+      !!env.STUDIO_AUTOMATION_EMAIL_HASH &&
+      !!data.user.email_confirmed_at &&
+      (await sha256((data.user.email ?? '').trim().toLowerCase())) ===
+        env.STUDIO_AUTOMATION_EMAIL_HASH;
+    return { id: `user:${data.user.id}`, registered: true, network, canAutomate };
   }
   const existing = await guestFromCookie(req, env);
   // A recently saved guest project must remain reachable for its full retention period.

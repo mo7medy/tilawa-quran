@@ -52,7 +52,10 @@
   "solid": "Solid color",
   "site-backgrounds": "Tilawa backgrounds",
   "library-image": "{{collection}} · {{orientation}} · {{number}}",
-  "background-collections": { "nature": "Nature", "sakina": "Sakina" },
+  "background-collections": {
+    "nature": "Nature",
+    "sakina": "Sakina"
+  },
   "upload": "Upload my background",
   "background-color": "Background color",
   "backgrounds": {
@@ -155,6 +158,48 @@
     "UPLOAD_TIMEOUT": "File verification took too long. Please upload it again.",
     "RENDERER_UNAVAILABLE": "The export service is temporarily unavailable.",
     "RENDERER_TIMEOUT": "The export timed out. Your quota has been restored.",
-    "RENDER_FAILED": "The video could not be exported. Your quota has been restored. Open the project to try again."
-  }
+    "RENDER_FAILED": "The video could not be exported. Your quota has been restored. Open the project to try again.",
+    "AUTOMATION_UNAVAILABLE": "Automatic generation needs Workers AI and an enabled studio.",
+    "AUTOMATION_NO_SLOT": "All generation slots for today are used.",
+    "AUTOMATION_INTERVAL": "Wait five hours after the last automated slot.",
+    "AUTOMATION_PAUSED": "Automatic generation is paused.",
+    "AUTOMATION_AI_LIMIT": "Today's AI request budget is used. It resets at midnight UTC.",
+    "AUTOMATION_INVALID_DECISION": "The model returned an invalid selection. A bounded retry will be attempted.",
+    "AUTOMATION_NO_CANDIDATES": "No verified 30–70 second recording was found in this selection round.",
+    "AUTOMATION_DURATION_CHANGED": "The recording duration changed. This export was stopped.",
+    "AUTOMATION_INPUT_LIMIT": "The selection catalogue exceeded its safe size.",
+    "AUTOMATION_MISSED": "The day's selection window expired.",
+    "AUTOMATION_RETRIES_EXHAUSTED": "Automatic retries were exhausted.",
+    "OPTIONAL_SKIPPED": "The model skipped the optional third video."
+  },
+  "automation": {
+    "title": "Automatic Quran videos",
+    "subtitle": "Workers AI chooses the passage, reciter, image, translation and design. Videos are saved in your library.",
+    "private": "This page is available only to the configured Tilawa account. Sign in with that account.",
+    "active": "Automatic generation is on",
+    "paused": "Automatic generation is paused",
+    "schedule": "Two videos daily at 09:00 and 14:00, with an optional third at 19:00 (Africa/Cairo). Each recording is 30–70 seconds.",
+    "decisions": "Selections use Tilawa's verified sources. Recent passages are excluded. Video generation does not publish to social networks.",
+    "budget": "AI requests today (UTC): {{count}} / 12",
+    "pause": "Pause new videos",
+    "enable": "Enable automatic generation",
+    "run": "Generate next video now",
+    "optional": "Allow the optional third video",
+    "pause-help": "Pausing stops new selections and exports. Cancel an export already running from your library.",
+    "run-help": "Generate now uses one of today's slots, shares your normal quota, and respects the five-hour interval.",
+    "history": "Generation history",
+    "empty": "No automated videos yet.",
+    "cairo": "Cairo time",
+    "duration": "{{seconds}} seconds · Reciter ID {{reciter}}",
+    "states": {
+      "queued": "Waiting for selection",
+      "planning": "Choosing content and design",
+      "ready": "Ready for export",
+      "submitted": "Export in progress",
+      "completed": "Ready in your library",
+      "skipped": "Skipped",
+      "failed": "Failed"
+    }
+  },
+  "open-project": "Open project"
 }

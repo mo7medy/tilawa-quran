@@ -94,6 +94,7 @@
     "/media": ["media"],
     "/video-studio": ["academy", "video-studio"],
     "/video-studio/library": ["academy", "video-studio"],
+    "/video-studio/automation": ["academy", "video-studio"],
     "/take-notes": ["take-notes"],
     "/[chapterId]/answers": ["quran-reader", "question", "reading-goal", "notes", "surah-info"],
     "/[chapterId]/answers/[questionId]": [

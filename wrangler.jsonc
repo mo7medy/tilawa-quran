@@ -7,6 +7,7 @@
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
   "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "tilawa-quran" }],
+  "ai": { "binding": "AI" },
   "r2_buckets": [
     { "binding": "NEXT_INC_CACHE_R2_BUCKET", "bucket_name": "tilawa-quran-cache" },
     { "binding": "VIDEO_STUDIO_BACKGROUNDS", "bucket_name": "tilawa-video-backgrounds" },
@@ -22,6 +23,7 @@
     }
   ],
   "vars": {
+    "STUDIO_AUTOMATION_EMAIL_HASH": "98e4f26a36e8f0a18c759a9aea8d1492bcea1e19bb200b965eaaff3fdaaaa449",
     "STUDIO_ORIGIN": "https://tilawa-quran.muhammad5mdk.workers.dev",
     "STUDIO_ENABLED": "1"
   },

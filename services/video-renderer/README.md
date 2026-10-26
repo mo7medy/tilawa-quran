@@ -1,5 +1,39 @@
 # Tilawa video studio
 
+## Automatic generation
+
+`/video-studio/automation` controls one account's automatic generation, with no social publishing.
+Bind Workers AI as `AI` and set `STUDIO_AUTOMATION_EMAIL_HASH` to the SHA-256 of the lowercase,
+trimmed account email. Only a server-verified account with that confirmed email can read or change
+the automation. The first activation binds its actual website user ID; an email or user ID supplied
+by a browser is never accepted as ownership. Apply `0003_automation.sql` before deploying this code.
+
+The existing minute cron advances a durable D1 state machine. Slots are 09:00, 14:00 and optionally
+19:00 in `Africa/Cairo`, with IANA daylight-saving handling and a five-hour minimum between
+automatic export reservations. Manual generation consumes a remaining daily slot and respects that
+interval. There is no catch-up for past days. Pausing invalidates pending selection leases; existing
+exports stay visible and cancellable in the normal library. The automation starts paused until the
+owner activates it from their verified website session.
+
+Qwen3-30B-A3B chooses from measured 30–70 second recordings, existing readers, portrait R2 images,
+translations, Quran fonts and templates. A bounded rotating sample avoids scanning all recordings on
+every run. Recently used passages are excluded for three days. The model receives identifiers and
+catalogue metadata, never credentials. It does not generate Quran text, translations or audio, and
+image selection currently uses collection/orientation metadata, not visual analysis. The server
+checks all identifiers and resolves the canonical manifest before creating a project. The existing
+renderer measures every ayah/translation before encoding and fails on overflow.
+
+Maximum twelve model requests per UTC day, at most 450 output tokens per request and 20,000 input
+characters; there is no paid model/provider fallback. This is a local automation budget, not a
+reservation of the account-wide free Workers AI allocation. Platform capacity/quota failures are
+reported with bounded retries. Each render uses the normal member quota, storage and concurrency
+checks. The selected plan is immutable, and project/job linkage is committed atomically with the run
+lease. Thirty-day automation history includes captions, selected IDs and render outcomes.
+
+Validate with the studio Vitest suite, `test_database.py`, TypeScript/ESLint and
+`tests/video-studio/automation.spec.ts`. Live verification must use this same production Worker;
+never create a second website or staging resources for automation tests.
+
 The independent pages `/video-studio` and `/video-studio/library` use the site's content gateway,
 fonts, account session and design system. Cloudflare handles identity, canonical content resolution,
 D1 reservations and private R2 access. Modal runs the shared Remotion scene with CPU workers.

@@ -1,9 +1,11 @@
 /* eslint-disable @typescript-eslint/naming-convention -- Preserve standard HTTP headers, provider payloads and D1 column names at the boundary. */
-import type { D1Database, R2Bucket } from '@cloudflare/workers-types';
+import type { Ai, D1Database, R2Bucket } from '@cloudflare/workers-types';
 
 import { StudioError } from '../validation';
 
 export interface StudioEnv {
+  AI?: Ai;
+  STUDIO_AUTOMATION_EMAIL_HASH?: string;
   VIDEO_STUDIO_DB: D1Database;
   VIDEO_STUDIO_PRIVATE: R2Bucket;
   VIDEO_STUDIO_ASSETS: R2Bucket;

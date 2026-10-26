@@ -10,7 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defaultSpec, ResolvedVideoManifest } from '../contracts';
 
 import { handleStudio } from './api';
-import { capability, sign } from './crypto';
+import { capability, sign, sha256 } from './crypto';
 import { manifestHash } from './jobs';
 import { callModal } from './jobTransport';
 import { maintainStudio } from './maintenance';
@@ -141,6 +141,44 @@ afterEach(() => {
 });
 
 describe('studio ownership and durable jobs', () => {
+  it('gates automation on the remotely verified confirmed account email, not client metadata', async () => {
+    env.STUDIO_AUTOMATION_EMAIL_HASH = await sha256('owner@example.test');
+    const accountCookie = 'sb-test-auth-token=browser-value';
+    verifiedUser.mockResolvedValue({
+      data: {
+        user: {
+          id: 'target-account',
+          email: 'Owner@Example.Test',
+          email_confirmed_at: '2026-10-01',
+        },
+      },
+      error: null,
+    });
+    expect(
+      (await (await request('session', undefined, 'GET', accountCookie)).json()).canAutomate,
+    ).toBe(true);
+    expect((await request('automation', undefined, 'GET', accountCookie)).status).toBe(200);
+    verifiedUser.mockResolvedValue({
+      data: {
+        user: {
+          id: 'other-account',
+          email: 'other@example.test',
+          email_confirmed_at: '2026-10-01',
+          user_metadata: { email: 'owner@example.test' },
+        },
+      },
+      error: null,
+    });
+    expect((await request('automation', undefined, 'GET', accountCookie)).status).toBe(403);
+    verifiedUser.mockResolvedValue({
+      data: {
+        user: { id: 'target-account', email: 'owner@example.test', email_confirmed_at: null },
+      },
+      error: null,
+    });
+    expect((await request('automation', undefined, 'GET', accountCookie)).status).toBe(403);
+    expect((await request('automation')).status).toBe(403);
+  });
   it('renews a guest session without changing ownership of a recently saved project', async () => {
     const id = await project();
     const session = await request('session');

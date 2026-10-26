@@ -41,6 +41,13 @@ const StudioEditor = (props: EditorProps): JSX.Element => {
           {t('library')}
         </AcademyLink>
       </header>
+      {session.canAutomate && (
+        <div className={styles.actions}>
+          <AcademyLink href="/video-studio/automation" className={styles.secondary}>
+            {t('automation.title')}
+          </AcademyLink>
+        </div>
+      )}
       {!catalog?.enabled && <p className={styles.notice}>{t('paused')}</p>}
       {error && (
         <p role="alert" className={styles.error}>
