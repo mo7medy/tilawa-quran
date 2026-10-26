@@ -6,18 +6,28 @@ export const assetStorage = async ({ account, bucket, token, request = fetch, sp
   if (!/^[a-f0-9]{32}$/.test(account)) throw new Error('Missing Cloudflare build account ID.');
   const base = `https://api.cloudflare.com/client/v4/accounts/${account}/r2/buckets/${bucket}/objects`;
   let next = 0;
-  const send = async (url, options = {}) => {
+  const send = async (url, options = {}, readJson = false) => {
     for (let attempt = 0; attempt < 4; attempt++) {
       const start = Math.max(Date.now(), next);
       next = start + spacing;
       await pause(Math.max(0, start - Date.now()));
-      const response = await request(url, {
-        ...options,
-        redirect: 'manual',
-        signal: AbortSignal.timeout(120000),
-        headers: { Authorization: `Bearer ${token}`, ...options.headers },
-      });
-      if (response.ok) return response;
+      let response;
+      try {
+        response = await request(url, {
+          ...options,
+          redirect: 'manual',
+          signal: AbortSignal.timeout(120000),
+          headers: { Authorization: `Bearer ${token}`, ...options.headers },
+        });
+        if (response.ok) return readJson ? await response.json() : response;
+      } catch {
+        await response?.body?.cancel().catch(() => {});
+        // Content-addressed uploads and listings can safely repeat after a lost response.
+        // Never expose a transport exception that might contain credential-bearing URLs.
+        if (attempt === 3) throw new Error('Asset storage request failed (network timeout).');
+        await pause(1000 * 2 ** attempt);
+        continue;
+      }
       if ((response.status === 429 || response.status >= 500) && attempt < 3) {
         await response.body?.cancel();
         await pause(
@@ -43,7 +53,7 @@ export const assetStorage = async ({ account, bucket, token, request = fetch, sp
       per_page: '1000',
       ...(cursor ? { cursor } : {}),
     });
-    const data = await (await send(`${base}?${query}`)).json();
+    const data = await send(`${base}?${query}`, {}, true);
     if (!Array.isArray(data.result)) throw new Error('Invalid asset listing response.');
     data.result.forEach((item) => existing.set(item.key, item));
     cursor = data.result_info?.is_truncated ? data.result_info.cursor : undefined;

@@ -63,3 +63,38 @@ test('a transient storage error retries the same bounded upload', async () => {
   assert.equal(await put(key, 'font/woff2', bytes), true);
   assert.equal(count, 3);
 });
+
+test('a timed-out listing retries without exposing the transport error', async () => {
+  let count = 0;
+  const put = await assetStorage({
+    ...options,
+    request: async () => {
+      count++;
+      if (count === 1) throw new DOMException('private transport details', 'TimeoutError');
+      return Response.json({ result: [] });
+    },
+  });
+  assert.equal(count, 2);
+  assert.equal(await put(key, 'font/woff2', bytes), true);
+});
+
+test('a listing body interrupted after headers is retried before publishing', async () => {
+  let count = 0;
+  await assetStorage({
+    ...options,
+    request: async () => {
+      count++;
+      if (count === 1) {
+        return new Response(
+          new ReadableStream({
+            start(controller) {
+              controller.error(new DOMException('private transport details', 'TimeoutError'));
+            },
+          }),
+        );
+      }
+      return Response.json({ result: [] });
+    },
+  });
+  assert.equal(count, 2);
+});
