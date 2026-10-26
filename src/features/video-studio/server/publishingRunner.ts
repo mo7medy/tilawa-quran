@@ -13,7 +13,7 @@ import {
 } from './bufferClient';
 import { publisherToken } from './publisherCrypto';
 import { claimPublication, enqueuePublications, recoverPublications } from './publishingQueue';
-import { PublicationRow, publisher } from './publishingStore';
+import { PublicationRow, publisher, publishers } from './publishingStore';
 import { StudioEnv } from './runtime';
 
 const save = async (
@@ -25,11 +25,12 @@ const save = async (
   delay = 600000,
 ): Promise<void> => {
   const now = Date.now();
-  // Only links on TikTok can appear as an external destination in the private library.
-  const link =
-    post?.externalLink && /^https:\/\/([a-z0-9-]+\.)?tiktok\.com\//i.test(post.externalLink)
-      ? post.externalLink
-      : null;
+  // Only the selected social platform can appear as the external destination.
+  const destination =
+    row.platform === 'instagram'
+      ? /^https:\/\/([a-z0-9-]+\.)?instagram\.com\//i
+      : /^https:\/\/([a-z0-9-]+\.)?tiktok\.com\//i;
+  const link = post?.externalLink && destination.test(post.externalLink) ? post.externalLink : null;
   await env.VIDEO_STUDIO_DB.prepare(
     "UPDATE studio_publications SET status=?,post_id=COALESCE(?,post_id),external_url=COALESCE(?,external_url),error=?,next_at=?,lease=NULL,lease_until=0,media_until=CASE WHEN ?='published' THEN MIN(media_until,?) ELSE media_until END,updated_at=? WHERE id=? AND lease=? AND status=?",
   )
@@ -58,7 +59,7 @@ const postStatus = (post: BufferPost): PublicationStatus => {
 const processPublication = async (env: StudioEnv, row: PublicationRow): Promise<void> => {
   let accepted: BufferPost | null = null;
   try {
-    const connection = await publisher(env);
+    const connection = await publisher(env, row.platform);
     assert(
       connection?.owner === row.owner && connection.revision === row.connection_revision,
       'BUFFER_RECONNECT',
@@ -74,7 +75,11 @@ const processPublication = async (env: StudioEnv, row: PublicationRow): Promise<
       const channels = await bufferChannels(token);
       assert(
         channels.some(
-          (c) => c.id === row.channel_id && c.organizationId === row.organization_id && c.eligible,
+          (c) =>
+            c.id === row.channel_id &&
+            c.organizationId === row.organization_id &&
+            c.platform === row.platform &&
+            c.eligible,
         ),
         'BUFFER_CHANNEL',
         409,
@@ -90,7 +95,7 @@ const processPublication = async (env: StudioEnv, row: PublicationRow): Promise<
         410,
       );
       // Recheck after read-only provider calls: pause/reconnect may have occurred while validating.
-      const active = await publisher(env);
+      const active = await publisher(env, row.platform);
       assert(
         active?.enabled && active.revision === row.connection_revision,
         'PUBLISHING_PAUSED',
@@ -104,7 +109,7 @@ const processPublication = async (env: StudioEnv, row: PublicationRow): Promise<
       assert(lease, 'BUFFER_UNCERTAIN', 409);
       const url = `${env.STUDIO_ORIGIN}/api/video-studio/publication-media/${row.id}.mp4`;
       try {
-        post = await createBufferPost(token, row.channel_id, row.text, url);
+        post = await createBufferPost(token, row.channel_id, row.text, url, row.platform);
         accepted = post;
       } catch (error) {
         // Ambiguous writes MUST NOT be retried; Buffer provides no create idempotency key.
@@ -138,9 +143,8 @@ const processPublication = async (env: StudioEnv, row: PublicationRow): Promise<
 export const maintainPublishing = async (env: StudioEnv): Promise<void> => {
   if (!env.VIDEO_STUDIO_DB || !env.STUDIO_AUTOMATION_EMAIL_HASH) return;
   await recoverPublications(env);
-  const connection = await publisher(env);
-  if (!connection) return;
-  await enqueuePublications(env, connection);
+  const connections = await publishers(env);
+  await Promise.all(connections.map((connection) => enqueuePublications(env, connection)));
   const row = await claimPublication(env);
   if (row) await processPublication(env, row);
 };

@@ -3,16 +3,25 @@ import { useState } from 'react';
 import useTranslation from 'next-translate/useTranslation';
 
 import { errorCode, studioRequest } from '../client';
-import { PublisherChannel, PublishingState } from '../publishing';
+import { PublisherChannel, PublishingPlatform, PublishingState } from '../publishing';
 
+import PublisherCredentials from './PublisherCredentials';
 import styles from './Studio.module.scss';
 
 interface PublisherConnectProps {
+  platform: PublishingPlatform;
+  canReuseToken: boolean;
   onConnected: (state: PublishingState) => Promise<unknown>;
 }
-const PublisherConnect = ({ onConnected }: PublisherConnectProps): JSX.Element => {
+const PublisherConnect = ({
+  onConnected,
+  platform,
+  canReuseToken,
+}: PublisherConnectProps): JSX.Element => {
   const { t } = useTranslation('video-studio');
   const [token, setToken] = useState('');
+  const [useNewKey, setUseNewKey] = useState(false);
+  const reuse = canReuseToken && !useNewKey;
   const [channels, setChannels] = useState<PublisherChannel[] | null>(null);
   const [channelId, setChannelId] = useState('');
   const [busy, setBusy] = useState(false);
@@ -22,16 +31,22 @@ const PublisherConnect = ({ onConnected }: PublisherConnectProps): JSX.Element =
     setError('');
     try {
       if (!channels) {
-        const result = await studioRequest<{ channels: PublisherChannel[] }>('publishing/probe', {
-          token,
-        });
+        const result = await studioRequest<{ channels: PublisherChannel[] }>(
+          `publishing/probe?platform=${platform}`,
+          {
+            ...(reuse ? {} : { token }),
+          },
+        );
         setChannels(result.channels);
         setChannelId(result.channels.find((channel) => channel.eligible)?.id ?? '');
       } else {
-        const state = await studioRequest<PublishingState>('publishing/connect', {
-          token,
-          channelId,
-        });
+        const state = await studioRequest<PublishingState>(
+          `publishing/connect?platform=${platform}`,
+          {
+            ...(reuse ? {} : { token }),
+            channelId,
+          },
+        );
         setToken('');
         setChannels(null);
         await onConnected(state);
@@ -51,7 +66,7 @@ const PublisherConnect = ({ onConnected }: PublisherConnectProps): JSX.Element =
         submit();
       }}
     >
-      <p>{t('publishing.setup')}</p>
+      <p>{t(`publishing.platforms.${platform}.setup`)}</p>
       <p>
         <a href="https://publish.buffer.com" target="_blank" rel="noreferrer">
           {t('publishing.open-buffer')}
@@ -65,29 +80,28 @@ const PublisherConnect = ({ onConnected }: PublisherConnectProps): JSX.Element =
           {t('publishing.key-help')}
         </a>
       </p>
-      <label htmlFor="buffer-api-key">
-        {t('publishing.key')}
-        <input
-          id="buffer-api-key"
-          type="password"
-          autoComplete="off"
-          spellCheck={false}
-          value={token}
-          maxLength={2048}
-          disabled={busy}
-          onChange={(event) => {
-            setToken(event.target.value);
-            setChannels(null);
-          }}
-        />
-      </label>
-      <p>{t('publishing.key-security')}</p>
+      <PublisherCredentials
+        platform={platform}
+        canReuseToken={canReuseToken}
+        useNewKey={useNewKey}
+        token={token}
+        busy={busy}
+        onKeyChange={(value) => {
+          setToken(value);
+          setChannels(null);
+        }}
+        onReuseChange={(value) => {
+          setUseNewKey(value);
+          setToken('');
+          setChannels(null);
+        }}
+      />
       {channels && (
-        <label htmlFor="buffer-channel">
-          {t('publishing.channel')}
+        <label htmlFor={`buffer-channel-${platform}`}>
+          {t(`publishing.platforms.${platform}.channel`)}
           <select
-            id="buffer-channel"
-            aria-label={t('publishing.channel')}
+            id={`buffer-channel-${platform}`}
+            aria-label={t(`publishing.platforms.${platform}.channel`)}
             value={channelId}
             disabled={busy}
             onChange={(event) => setChannelId(event.target.value)}
@@ -103,7 +117,7 @@ const PublisherConnect = ({ onConnected }: PublisherConnectProps): JSX.Element =
         </label>
       )}
       {channels && !channels.some((channel) => channel.eligible) && (
-        <p role="status">{t('publishing.no-channel')}</p>
+        <p role="status">{t(`publishing.platforms.${platform}.no-channel`)}</p>
       )}
       {error && (
         <p role="alert" className={styles.error}>
@@ -113,7 +127,7 @@ const PublisherConnect = ({ onConnected }: PublisherConnectProps): JSX.Element =
       <button
         className={styles.secondary}
         type="submit"
-        disabled={busy || !token || (!!channels && !channelId)}
+        disabled={busy || (!reuse && !token) || (!!channels && !channelId)}
       >
         {t(busy ? 'loading' : submitLabel)}
       </button>

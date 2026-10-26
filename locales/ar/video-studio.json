@@ -212,7 +212,7 @@
   "open-project": "فتح المشروع",
   "publishing": {
     "title": "النشر إلى TikTok",
-    "description": "إرسال فيديوهات القرآن التلقائية الجديدة إلى حساب TikTok الخاص بك عبر Buffer بعد اكتمال التصدير.",
+    "description": "إرسال فيديوهات القرآن التلقائية الجديدة إلى حسابك على {{platform}} عبر Buffer بعد اكتمال التصدير.",
     "setup": "اربط TikTok أولًا في Buffer من Channels وفعّل Automatic publishing. ثم أنشئ مفتاح API من Settings ← API في Buffer.",
     "open-buffer": "فتح Buffer",
     "key-help": "طريقة إنشاء مفتاح API",
@@ -230,18 +230,38 @@
     "enable": "تفعيل النشر التلقائي إلى TikTok",
     "pause": "إيقاف النشر مؤقتًا",
     "disconnect": "فصل Buffer",
-    "pause-help": "الإيقاف يمنع الإرسال الجديد. الطلبات الجاري إرسالها أو التي قبلها Buffer قد تُنشر. فصل الربط لا يحذف المنشورات من Buffer أو TikTok.",
+    "pause-help": "الإيقاف يوقف الإرسال الجديد لهذا الحساب فقط. الطلبات الجارية أو التي قبلها Buffer قد تُنشر. فصل الاتصال لا يحذف المنشورات السابقة.",
     "view": "عرض على TikTok",
     "status": {
       "queued": "بانتظار الإرسال",
       "sending": "جارٍ الإرسال إلى Buffer",
       "pending": "Buffer يتابع النشر",
-      "published": "نُشر على TikTok",
+      "published": "تم النشر",
       "review": "تحتاج مراجعة في Buffer",
       "failed": "فشل النشر",
       "unknown": "تحقق من Buffer قبل إعادة الإرسال؛ النتيجة غير مؤكدة",
       "cancelled": "أُلغي النشر"
-    }
+    },
+    "platforms": {
+      "tiktok": {
+        "title": "النشر إلى TikTok",
+        "setup": "اربط TikTok أولًا في Buffer من Channels وفعّل Automatic publishing. ثم أنشئ مفتاح API من Settings ← API في Buffer.",
+        "channel": "حساب TikTok",
+        "no-channel": "لم نجد حساب TikTok متاحًا للنشر التلقائي. اربطه في Buffer وفعّل النشر التلقائي، وتأكد أن القناة غير مقفلة وأن قائمة النشر تعمل.",
+        "enable": "تفعيل النشر التلقائي إلى TikTok",
+        "view": "عرض على TikTok"
+      },
+      "instagram": {
+        "title": "النشر إلى Instagram Reels",
+        "setup": "اربط حساب Instagram احترافيًا من نوع Business أو Creator في Buffer ← Channels وفعّل النشر التلقائي، ثم تحقق من الحسابات هنا.",
+        "channel": "حساب Instagram",
+        "no-channel": "لا يوجد حساب Instagram مؤهل. اربط حساب Business أو Creator في Buffer، وفعّل النشر التلقائي وتأكد أن القناة غير مقفلة وأن قائمة النشر تعمل.",
+        "enable": "تفعيل النشر التلقائي إلى Instagram",
+        "view": "عرض على Instagram"
+      }
+    },
+    "use-new-key": "استخدام مفتاح Buffer API مختلف",
+    "reuse-key": "استخدم اتصال Buffer المحفوظ للتحقق من الحسابات دون إدخال المفتاح مرة أخرى."
   },
   "background-motion": "حركة تكبير هادئة للصورة",
   "background-slideshow": "تبديل الصور بتلاشي ناعم",

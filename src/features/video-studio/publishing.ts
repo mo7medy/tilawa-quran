@@ -1,4 +1,6 @@
+export type PublishingPlatform = 'tiktok' | 'instagram';
 export interface PublisherChannel {
+  platform: PublishingPlatform;
   id: string;
   organizationId: string;
   name: string;
@@ -14,6 +16,7 @@ export type PublicationStatus =
   | 'unknown'
   | 'cancelled';
 export interface Publication {
+  platform: PublishingPlatform;
   id: string;
   runId: string;
   caption: string;
@@ -22,6 +25,7 @@ export interface Publication {
   externalUrl: string | null;
 }
 export interface PublishingState {
+  canReuseToken: boolean;
   connection: { channelName: string; enabled: boolean } | null;
   publications: Publication[];
 }

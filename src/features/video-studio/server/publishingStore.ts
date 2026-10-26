@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/naming-convention -- D1 column names are a persistent storage contract. */
 import { StudioOwner } from '../contracts';
-import { PublicationStatus, PublishingState } from '../publishing';
+import { PublicationStatus, PublishingPlatform, PublishingState } from '../publishing';
 import { assert } from '../validation';
 
 import { StudioEnv } from './runtime';
 
 export interface PublisherRow {
+  platform: PublishingPlatform;
   owner: string;
   token: string;
   revision: string;
@@ -16,6 +17,7 @@ export interface PublisherRow {
   activated_at: number;
 }
 export interface PublicationRow {
+  platform: PublishingPlatform;
   id: string;
   run_id: string;
   owner: string;
@@ -35,25 +37,45 @@ export interface PublicationRow {
   media_until: number;
   created_at: number;
 }
-export const publisher = (env: StudioEnv): Promise<PublisherRow | null> =>
-  env.VIDEO_STUDIO_DB.prepare('SELECT * FROM studio_publisher WHERE id=1').first<PublisherRow>();
+export const publisher = (
+  env: StudioEnv,
+  platform: PublishingPlatform = 'tiktok',
+): Promise<PublisherRow | null> =>
+  env.VIDEO_STUDIO_DB.prepare('SELECT * FROM studio_publisher WHERE platform=?')
+    .bind(platform)
+    .first<PublisherRow>();
+
+export const publishers = async (env: StudioEnv): Promise<PublisherRow[]> => {
+  const rows = await env.VIDEO_STUDIO_DB.prepare(
+    'SELECT * FROM studio_publisher ORDER BY id',
+  ).all<PublisherRow>();
+  return rows.results;
+};
 
 export const publishingState = async (
   env: StudioEnv,
   owner: StudioOwner,
+  platform: PublishingPlatform = 'tiktok',
 ): Promise<PublishingState> => {
-  const connection = await publisher(env);
-  assert(!connection || connection.owner === owner.id, 'FORBIDDEN', 403);
+  const connections = await publishers(env);
+  assert(
+    connections.every((item) => item.owner === owner.id),
+    'FORBIDDEN',
+    403,
+  );
+  const connection = connections.find((item) => item.platform === platform);
   const rows = await env.VIDEO_STUDIO_DB.prepare(
-    'SELECT id,run_id,text,status,error,external_url FROM studio_publications WHERE owner=? ORDER BY created_at DESC LIMIT 60',
+    'SELECT id,run_id,platform,text,status,error,external_url FROM studio_publications WHERE owner=? AND platform=? ORDER BY created_at DESC LIMIT 60',
   )
-    .bind(owner.id)
+    .bind(owner.id, platform)
     .all<PublicationRow>();
   return {
+    canReuseToken: connections.length > 0,
     connection: connection
       ? { channelName: connection.channel_name, enabled: !!connection.enabled }
       : null,
     publications: rows.results.map((row) => ({
+      platform: row.platform,
       id: row.id,
       runId: row.run_id,
       caption: row.text.split('\n')[0],

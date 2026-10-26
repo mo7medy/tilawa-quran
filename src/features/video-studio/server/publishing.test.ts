@@ -42,6 +42,9 @@ const channel = {
 const provider = vi.fn();
 const request = (method: string): Request =>
   new Request('https://studio.example/api/video-studio/publishing', { method });
+const instagramRequest = (method: string): Request =>
+  new Request('https://studio.example/api/video-studio/publishing?platform=instagram', { method });
+const instagram = { ...channel, id: 'instagram1', name: 'My Instagram', service: 'instagram' };
 const sql = (query: string, ...args: unknown[]): Record<string, unknown> =>
   db.prepare(query).get(...args);
 const post = (status = 'sending') => ({
@@ -125,7 +128,7 @@ const completedRun = (id = 'run1', created = Date.now() + 1): void => {
     id,
     owner.id,
     id === 'run1' ? 0 : 1,
-    JSON.stringify({ spec: defaultSpec, caption: 'تلاوة', hashtags: ['#قرآن'] }),
+    JSON.stringify({ spec: defaultSpec, caption: 'ØªÙ„Ø§ÙˆØ©', hashtags: ['#Ù‚Ø±Ø¢Ù†'] }),
     job,
     created,
     created,
@@ -330,6 +333,262 @@ describe('durable publishing queue', () => {
     await expect(
       createBufferPost(token, channel.id, 'caption', 'https://studio.example/file.mp4'),
     ).rejects.toThrow('BUFFER_REJECTED');
+  });
+});
+
+describe('independent Instagram and TikTok destinations', () => {
+  const connectInstagram = async (): Promise<void> => {
+    const normal = provider.getMockImplementation();
+    provider.mockImplementation(async (url, init) => {
+      const { query, variables } = JSON.parse(String(init.body));
+      if (query.includes('channels(')) {
+        return Response.json({ data: { channels: [channel, instagram] } });
+      }
+      if (query.includes('createPost(')) {
+        return Response.json({
+          data: {
+            createPost: {
+              __typename: 'PostActionSuccess',
+              post: {
+                ...post(),
+                id: `post-${variables.input.channelId}`,
+                channelId: variables.input.channelId,
+              },
+            },
+          },
+        });
+      }
+      if (query.includes('post(')) {
+        const isInstagram = variables.input.id === 'post-instagram1';
+        return Response.json({
+          data: {
+            post: {
+              ...post('sent'),
+              id: variables.input.id,
+              channelId: isInstagram ? instagram.id : channel.id,
+              externalLink: isInstagram
+                ? 'https://www.instagram.com/reel/test/'
+                : 'https://www.tiktok.com/@test/video/1',
+            },
+          },
+        });
+      }
+      return normal(url, init);
+    });
+    const probe = await publishingRequest(env, instagramRequest('POST'), owner, 'probe', {});
+    expect((await probe.json()).channels).toEqual([
+      expect.objectContaining({ id: instagram.id, platform: 'instagram', eligible: true }),
+    ]);
+    await publishingRequest(env, instagramRequest('POST'), owner, 'connect', {
+      channelId: instagram.id,
+    });
+    await publishingRequest(env, instagramRequest('PUT'), owner, undefined, { enabled: true });
+    provider.mockClear();
+  };
+  it('sends one video once per platform under concurrent cron and confirms each independently', async () => {
+    await connectInstagram();
+    completedRun();
+    await Promise.all([maintainPublishing(env), maintainPublishing(env), maintainPublishing(env)]);
+    expect(writes()).toBe(2);
+    const rows = db
+      .prepare('SELECT platform,job_id,status FROM studio_publications ORDER BY platform')
+      .all();
+    expect(rows).toEqual([
+      { platform: 'instagram', job_id: 'job-run1', status: 'pending' },
+      { platform: 'tiktok', job_id: 'job-run1', status: 'pending' },
+    ]);
+    const inputs = provider.mock.calls
+      .filter(([, init]) => String(init.body).includes('createPost('))
+      .map(([, init]) => JSON.parse(String(init.body)).variables.input);
+    expect(inputs.find((input) => input.channelId === instagram.id)).toMatchObject({
+      schedulingType: 'automatic',
+      metadata: { instagram: { type: 'reel', shouldShareToFeed: true } },
+    });
+    expect(inputs.find((input) => input.channelId === channel.id).metadata).toBeUndefined();
+    vi.setSystemTime(Date.now() + 600001);
+    await Promise.all([maintainPublishing(env), maintainPublishing(env)]);
+    expect(writes()).toBe(2);
+    expect((await publishingState(env, owner, 'instagram')).publications[0]).toMatchObject({
+      platform: 'instagram',
+      status: 'published',
+      externalUrl: 'https://www.instagram.com/reel/test/',
+    });
+    expect((await publishingState(env, owner)).publications[0].status).toBe('published');
+  });
+  it('pauses and disconnects Instagram without cancelling TikTok or removing its credentials', async () => {
+    await connectInstagram();
+    completedRun();
+    await enqueuePublications(env, await publisher(env));
+    await enqueuePublications(env, await publisher(env, 'instagram'));
+    await publishingRequest(env, instagramRequest('PUT'), owner, undefined, { enabled: false });
+    expect(sql("SELECT status FROM studio_publications WHERE platform='instagram'").status).toBe(
+      'cancelled',
+    );
+    expect(sql("SELECT status FROM studio_publications WHERE platform='tiktok'").status).toBe(
+      'queued',
+    );
+    await publishingRequest(env, instagramRequest('DELETE'), owner, undefined, {});
+    expect(await publisher(env, 'instagram')).toBeNull();
+    expect((await publisher(env)).enabled).toBe(1);
+    await maintainPublishing(env);
+    expect(writes()).toBe(1);
+  });
+  it('does not resend an uncertain Instagram write while TikTok continues successfully', async () => {
+    await connectInstagram();
+    completedRun();
+    const normal = provider.getMockImplementation();
+    provider.mockImplementation(async (url, init) => {
+      const { query, variables } = JSON.parse(String(init.body));
+      if (query.includes('createPost(') && variables.input.channelId === instagram.id) {
+        throw Error('timeout');
+      }
+      return normal(url, init);
+    });
+    await Promise.all([maintainPublishing(env), maintainPublishing(env)]);
+    vi.setSystemTime(Date.now() + 600001);
+    await maintainPublishing(env);
+    await maintainPublishing(env);
+    expect(sql("SELECT status FROM studio_publications WHERE platform='instagram'").status).toBe(
+      'unknown',
+    );
+    expect(sql("SELECT status FROM studio_publications WHERE platform='tiktok'").status).toBe(
+      'published',
+    );
+    expect(writes()).toBe(2);
+  });
+  it('never backfills TikTok videos published before Instagram activation', async () => {
+    completedRun();
+    await maintainPublishing(env);
+    vi.setSystemTime(Date.now() + 600001);
+    await connectInstagram();
+    await maintainPublishing(env);
+    expect(
+      sql("SELECT COUNT(*) count FROM studio_publications WHERE platform='instagram'").count,
+    ).toBe(0);
+  });
+  it('rejects cross-platform channel selection and invalid platform input', async () => {
+    await expect(
+      publishingRequest(env, instagramRequest('POST'), owner, 'connect', { channelId: channel.id }),
+    ).rejects.toThrow('BUFFER_CHANNEL');
+    await expect(
+      publishingRequest(
+        env,
+        new Request('https://studio.example/?platform=facebook'),
+        owner,
+        undefined,
+        {},
+      ),
+    ).rejects.toThrow('INVALID_INPUT');
+    expect(await publisher(env, 'instagram')).toBeNull();
+    expect((await publisher(env)).enabled).toBe(1);
+  });
+  it('refuses saved credentials to another owner even if the requested platform is not connected', async () => {
+    await expect(
+      publishingRequest(env, instagramRequest('POST'), { ...owner, id: 'user:other' }, 'probe', {}),
+    ).rejects.toThrow('FORBIDDEN');
+    expect(provider).not.toHaveBeenCalled();
+  });
+  it('requires automatic publishing for Instagram and rejects reminder-only channels', async () => {
+    await connectInstagram();
+    provider
+      .mockResolvedValueOnce(
+        Response.json({ data: { account: { organizations: [{ id: 'org1' }] } } }),
+      )
+      .mockResolvedValueOnce(
+        Response.json({
+          data: { channels: [{ ...instagram, metadata: { defaultToReminders: true } }] },
+        }),
+      );
+    await expect(
+      publishingRequest(env, instagramRequest('POST'), owner, 'connect', {
+        channelId: instagram.id,
+      }),
+    ).rejects.toThrow('BUFFER_CHANNEL');
+  });
+  it('preserves a Worker secret marker when reusing the connection and never returns credentials', async () => {
+    env.STUDIO_BUFFER_TOKEN = token;
+    db.prepare("UPDATE studio_publisher SET token='worker-secret:v1'").run();
+    await connectInstagram();
+    expect((await publisher(env, 'instagram')).token).toBe('worker-secret:v1');
+    const state = await publishingState(env, owner, 'instagram');
+    expect(state.canReuseToken).toBe(true);
+    expect(JSON.stringify(state)).not.toMatch(/worker-secret|test-provider-token/);
+    await publishingRequest(env, request('DELETE'), owner, undefined, {});
+    expect((await publisher(env, 'instagram')).enabled).toBe(1);
+  });
+  it('rejects external publication links belonging to a different platform', async () => {
+    await connectInstagram();
+    completedRun();
+    const normal = provider.getMockImplementation();
+    provider.mockImplementation(async (url, init) => {
+      const { query, variables } = JSON.parse(String(init.body));
+      if (query.includes('createPost(') && variables.input.channelId === instagram.id) {
+        return Response.json({
+          data: {
+            createPost: {
+              __typename: 'PostActionSuccess',
+              post: {
+                ...post('sent'),
+                channelId: instagram.id,
+                externalLink: 'https://www.tiktok.com/@test/video/1',
+              },
+            },
+          },
+        });
+      }
+      return normal(url, init);
+    });
+    await Promise.all([maintainPublishing(env), maintainPublishing(env)]);
+    expect((await publishingState(env, owner, 'instagram')).publications[0].externalUrl).toBeNull();
+  });
+});
+
+describe('publishing schema upgrade', () => {
+  it('preserves the existing TikTok connection and completed/leased deliveries without reposting', () => {
+    const legacy = new DatabaseSync(':memory:');
+    try {
+      readdirSync('services/video-renderer/migrations')
+        .sort()
+        .filter((file) => file < '0005')
+        .forEach((file) =>
+          legacy.exec(readFileSync(`services/video-renderer/migrations/${file}`, 'utf8')),
+        );
+      legacy.exec(`INSERT INTO studio_publisher VALUES(1,'user:owner','worker-secret:v1','original-revision','org','channel','TikTok',1,123,456);
+        INSERT INTO studio_publications(id,run_id,owner,job_id,connection_revision,organization_id,channel_id,text,status,post_id,external_url,media_until,created_at,updated_at)
+        VALUES('published','run','user:owner','job','original-revision','org','channel','caption','published','external-post','https://www.tiktok.com/@test/video/1',999,1,2);`);
+      legacy.exec(
+        readFileSync('services/video-renderer/migrations/0005_instagram_publishing.sql', 'utf8'),
+      );
+      expect(
+        legacy
+          .prepare('SELECT platform,token,revision,enabled,activated_at FROM studio_publisher')
+          .get(),
+      ).toEqual({
+        platform: 'tiktok',
+        token: 'worker-secret:v1',
+        revision: 'original-revision',
+        enabled: 1,
+        activated_at: 123,
+      });
+      expect(
+        legacy
+          .prepare('SELECT id,platform,status,post_id,external_url FROM studio_publications')
+          .get(),
+      ).toMatchObject({
+        id: 'published',
+        platform: 'tiktok',
+        status: 'published',
+        post_id: 'external-post',
+        external_url: 'https://www.tiktok.com/@test/video/1',
+      });
+      expect(() =>
+        legacy.exec(`INSERT INTO studio_publications(id,run_id,owner,job_id,connection_revision,organization_id,channel_id,text,media_until,created_at,updated_at)
+        VALUES('duplicate','run','user:owner','job','revision','org','channel','caption',999,1,2);`),
+      ).toThrow();
+      expect(legacy.prepare('SELECT COUNT(*) count FROM studio_publications').get().count).toBe(1);
+    } finally {
+      legacy.close();
+    }
   });
 });
 
