@@ -182,7 +182,7 @@
   },
   "automation": {
     "title": "Automatic Quran videos",
-    "subtitle": "Workers AI chooses the passage, reciter, image, translation and design. Videos are saved in your library.",
+    "subtitle": "Workers AI chooses the passage, reciter, translation and design. Backgrounds are drawn randomly from the site library, and videos are saved to your library.",
     "private": "This page is available only to the configured Tilawa account. Sign in with that account.",
     "active": "Automatic generation is on",
     "paused": "Automatic generation is paused",

@@ -8,6 +8,7 @@ import { assert, policy } from '../validation';
 import { automationCandidates, cachedAutomationContent } from './automationCandidates';
 import { chooseAutomationPlan } from './automationModel';
 import { AutomationRunRow, readAutomationSettings } from './automationStore';
+import { backgroundCatalog } from './backgroundLibrary';
 import { resolveManifest } from './content';
 import { catalog } from './contentSources';
 import { createJob, manifestHash } from './jobs';
@@ -18,21 +19,33 @@ export const stepAutomation = async (env: StudioEnv, row: AutomationRunRow): Pro
   const now = Date.now();
   if (row.status !== 'ready') {
     const recent = await env.VIDEO_STUDIO_DB.prepare(
-      "SELECT plan FROM studio_automation_runs WHERE owner=? AND status IN ('completed','submitted') AND plan IS NOT NULL AND created_at>? ORDER BY created_at DESC LIMIT 42",
+      "SELECT plan,created_at FROM studio_automation_runs WHERE owner=? AND status IN ('completed','submitted') AND plan IS NOT NULL ORDER BY created_at DESC LIMIT 42",
     )
-      .bind(row.owner, now - 3 * 86400000)
-      .all<{ plan: string }>();
-    const used = recent.results.map((r) => (JSON.parse(r.plan) as AutomationPlan).spec);
-    const source = await cachedAutomationContent<StudioCatalog>(env, 'catalog:ar', () =>
+      .bind(row.owner)
+      .all<{ plan: string; created_at: number }>();
+    const history = recent.results.map((r) => ({
+      ...r,
+      spec: (JSON.parse(r.plan) as AutomationPlan).spec,
+    }));
+    const used = history.filter((r) => r.created_at > now - 3 * 86400000).map((r) => r.spec);
+    const cached = await cachedAutomationContent<StudioCatalog>(env, 'catalog:ar', () =>
       catalog(env, 'ar'),
     );
+    // Backgrounds are cheap, versioned R2 metadata; new imports must not wait on the daily content cache.
+    const source = { ...cached, backgrounds: await backgroundCatalog(env) };
     // Retry rotations expand reader/passage coverage while preserving a bounded request budget.
     const seed =
       Math.floor(Date.parse(`${row.day}T00:00:00Z`) / 86400000) * 12 +
       row.slot * 4 +
       (row.attempt - 1) * 7;
     const candidates = await automationCandidates(env, source, seed, used);
-    const plan = await chooseAutomationPlan(env, candidates, source, row.slot === 2);
+    const plan = await chooseAutomationPlan(
+      env,
+      candidates,
+      source,
+      row.slot === 2,
+      history[0]?.spec.background.value,
+    );
     if (!plan) {
       await env.VIDEO_STUDIO_DB.prepare(
         "UPDATE studio_automation_runs SET status='skipped',error='OPTIONAL_SKIPPED',lease=NULL,lease_until=0,updated_at=? WHERE id=? AND lease=?",

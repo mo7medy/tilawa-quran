@@ -23,9 +23,11 @@ const mocks = vi.hoisted(() => ({
   ai: vi.fn(),
   catalogue: vi.fn(),
   candidates: vi.fn(),
+  backgrounds: vi.fn(),
 }));
 vi.mock('./content', () => ({ resolveManifest: mocks.resolve }));
 vi.mock('./contentSources', () => ({ catalog: mocks.catalogue }));
+vi.mock('./backgroundLibrary', () => ({ backgroundCatalog: mocks.backgrounds }));
 vi.mock('./automationCandidates', () => ({
   automationCandidates: mocks.candidates,
   cachedAutomationContent: (_env, _key, load) => load(),
@@ -116,6 +118,7 @@ beforeEach(() => {
     AI: { run: mocks.ai },
   } as unknown as StudioEnv;
   mocks.catalogue.mockResolvedValue(catalogue);
+  mocks.backgrounds.mockResolvedValue(catalogue.backgrounds);
   mocks.candidates.mockResolvedValue([candidate]);
   mocks.ai.mockImplementation(async () => ({
     choices: [{ message: { content: JSON.stringify(decision()) }, finish_reason: 'stop' }],
@@ -227,10 +230,13 @@ describe('automatic video generation', () => {
       AUTOMATION_MODEL,
       expect.objectContaining({ max_tokens: 450 }),
     );
-    // Workers AI's live grammar rejects this keyword; uniqueness is validated on the server.
-    expect(
-      mocks.ai.mock.calls[0][1].response_format.json_schema.properties.backgroundIds,
-    ).not.toHaveProperty('uniqueItems');
+    // The model cannot bias the first image: background IDs are assigned by the server.
+    expect(mocks.ai.mock.calls[0][1].response_format.json_schema.properties).not.toHaveProperty(
+      'backgroundId',
+    );
+    expect(mocks.ai.mock.calls[0][1].response_format.json_schema.properties).not.toHaveProperty(
+      'backgroundIds',
+    );
     await maintainAutomation(env);
     state = await readAutomation(env, owner);
     expect(state.runs[0].status).toBe('submitted');
@@ -243,6 +249,41 @@ describe('automatic video generation', () => {
     db.prepare("UPDATE studio_jobs SET status='completed'").run();
     await maintainAutomation(env);
     expect((await readAutomation(env, owner)).runs[0].status).toBe('completed');
+  });
+  it('uses fresh R2 backgrounds, skips the previous opening, and preserves the saved sequence on submission', async () => {
+    const rng = vi.spyOn(crypto, 'getRandomValues').mockImplementation((array) => {
+      (array as Uint32Array).fill(0);
+      return array;
+    });
+    try {
+      const images = [catalogue.backgrounds[0], { ...catalogue.backgrounds[0], id: 'r2-second' }];
+      mocks.backgrounds.mockResolvedValue(images);
+      await configureAutomation(env, owner, true, true);
+      await maintainAutomation(env);
+      const first = (await readAutomation(env, owner)).runs[0].plan.spec.background;
+      expect(first.value).toBe('r2-calm');
+      await maintainAutomation(env);
+      expect((await readAutomation(env, owner)).runs[0].plan.spec.background).toEqual(first);
+      db.prepare("UPDATE studio_jobs SET status='completed'").run();
+      await maintainAutomation(env);
+      // A later R2 import is available even though the public-content catalogue remains cached.
+      const fresh = { ...catalogue.backgrounds[0], id: 'r2-fresh_107' };
+      mocks.backgrounds.mockResolvedValue([images[0], fresh, images[1]]);
+      vi.setSystemTime(new Date('2026-10-26T11:00:00Z'));
+      await maintainAutomation(env);
+      const second = (await readAutomation(env, owner)).runs[0];
+      expect(second.status).toBe('ready');
+      expect(second.plan.spec.background.value).toBe('r2-fresh_107');
+      expect(second.plan.spec.background.slides).toContain('r2-second');
+      expect(catalogue.backgrounds).toHaveLength(1);
+      const saved = JSON.stringify(second.plan.spec.background);
+      await maintainAutomation(env);
+      expect(JSON.stringify((await readAutomation(env, owner)).runs[0].plan.spec.background)).toBe(
+        saved,
+      );
+    } finally {
+      rng.mockRestore();
+    }
   });
   it('cannot insert a project when pause wins a race with the model response', async () => {
     await configureAutomation(env, owner, true, true);

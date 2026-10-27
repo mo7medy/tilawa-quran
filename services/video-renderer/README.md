@@ -16,13 +16,13 @@ interval. There is no catch-up for past days. Pausing invalidates pending select
 exports stay visible and cancellable in the normal library. The automation starts paused until the
 owner activates it from their verified website session.
 
-Qwen3-30B-A3B chooses from measured 30–70 second recordings, existing readers, portrait R2 images,
-translations, Quran fonts and templates. A bounded rotating sample avoids scanning all recordings on
-every run. Recently used passages are excluded for three days. The model receives identifiers and
-catalogue metadata, never credentials. It does not generate Quran text, translations or audio, and
-image selection currently uses collection/orientation metadata, not visual analysis. The server
-checks all identifiers and resolves the canonical manifest before creating a project. The existing
-renderer measures every ayah/translation before encoding and fails on overflow.
+Qwen3-30B-A3B chooses from measured 30–70 second recordings, existing readers, translations, Quran
+fonts and templates. A bounded rotating sample avoids scanning all recordings on every run. Recently
+used passages are excluded for three days. The model receives identifiers and catalogue metadata,
+never credentials. It does not generate Quran text, translations or audio, and background selection
+does not use visual analysis. The server checks all identifiers and resolves the canonical manifest
+before creating a project. The existing renderer measures every ayah/translation before encoding and
+fails on overflow.
 
 Maximum twelve model requests per UTC day, at most 450 output tokens per request and 20,000 input
 characters; there is no paid model/provider fallback. This is a local automation budget, not a
@@ -30,6 +30,15 @@ reservation of the account-wide free Workers AI allocation. Platform capacity/qu
 reported with bounded retries. Each render uses the normal member quota, storage and concurrency
 checks. The selected plan is immutable, and project/job linkage is committed atomically with the run
 lease. Thirty-day automation history includes captions, selected IDs and render outcomes.
+
+For each new plan, the server draws the opening image uniformly from **all portrait library
+images**, excluding the most recent submitted/completed opening when alternatives exist. It then
+draws up to four different images from that collection without replacement. Web Crypto provides the
+randomness; rejection sampling avoids modulo bias. Background IDs are not model output fields, so
+model preference for the first enum option cannot choose the cover. R2 background metadata is
+reloaded for each plan, independently of the daily reciter/translation cache. Newly imported images
+therefore join the full pool immediately. The randomly ordered sequence is saved before rendering
+and is reused on submission/retry; manual projects and existing saved plans keep their own sequence.
 
 Validate with the studio Vitest suite, `test_database.py`, TypeScript/ESLint and
 `tests/video-studio/automation.spec.ts`. Live verification must use this same production Worker;
