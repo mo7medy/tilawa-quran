@@ -24,10 +24,15 @@ interface ChannelWire {
 const channelFields = `id name service organizationId allowedActions isDisconnected isLocked isQueuePaused
   metadata { ... on TiktokMetadata { defaultToReminders }
     ... on InstagramMetadata { defaultToReminders } }`;
-export const bufferChannels = async (token: string): Promise<PublisherChannel[]> => {
+export const bufferChannels = async (
+  token: string,
+  beforeRequest?: () => Promise<void>,
+): Promise<PublisherChannel[]> => {
   const data = await bufferQuery<{ account: { organizations: { id: string }[] } }>(
     token,
     'query { account { organizations { id } } }',
+    {},
+    beforeRequest,
   );
   assert(
     Array.isArray(data.account?.organizations) && data.account.organizations.length <= 10,
@@ -40,6 +45,7 @@ export const bufferChannels = async (token: string): Promise<PublisherChannel[]>
       token,
       `query($input: ChannelsInput!) { channels(input: $input) { ${channelFields} } }`,
       { input: { organizationId: organization.id } },
+      beforeRequest,
     );
     assert(Array.isArray(result.channels), 'BUFFER_RESPONSE', 503);
     result.channels
@@ -73,7 +79,8 @@ export const createBufferPost = async (
   channelId: string,
   text: string,
   url: string,
-  platform: PublishingPlatform = 'tiktok',
+  platform?: PublishingPlatform,
+  beforeRequest?: () => Promise<void>,
 ): Promise<BufferPost> => {
   const result = await bufferQuery<{ createPost: { __typename: string; post?: BufferPost } }>(
     token,
@@ -94,6 +101,7 @@ export const createBufferPost = async (
           : {}),
       },
     },
+    beforeRequest,
   );
   if (result.createPost?.__typename !== 'PostActionSuccess') {
     throw new BufferFailure('BUFFER_REJECTED');
@@ -101,12 +109,37 @@ export const createBufferPost = async (
   if (!result.createPost.post?.id) throw new BufferFailure('BUFFER_UNCERTAIN', true);
   return result.createPost.post;
 };
-export const readBufferPost = async (token: string, id: string): Promise<BufferPost> => {
+export const readBufferPost = async (
+  token: string,
+  id: string,
+  beforeRequest?: () => Promise<void>,
+): Promise<BufferPost> => {
   const result = await bufferQuery<{ post: BufferPost }>(
     token,
     `query($input: PostInput!) { post(input: $input) { ${postFields} } }`,
     { input: { id } },
+    beforeRequest,
   );
   assert(result.post?.id === id, 'BUFFER_RESPONSE', 503);
   return result.post;
+};
+
+export const bufferAccount = async (
+  token: string,
+  beforeRequest?: () => Promise<void>,
+): Promise<{ id: string; name: string }> => {
+  const result = await bufferQuery<{ account: { id: string; name: string } }>(
+    token,
+    'query { account { id name } }',
+    {},
+    beforeRequest,
+  );
+  assert(
+    typeof result.account?.id === 'string' &&
+      result.account.id.length > 0 &&
+      result.account.id.length <= 200,
+    'BUFFER_RESPONSE',
+    503,
+  );
+  return { id: result.account.id, name: String(result.account.name ?? '').slice(0, 150) };
 };

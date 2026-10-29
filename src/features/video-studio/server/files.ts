@@ -9,6 +9,7 @@ import { backgroundLibrary } from './backgroundLibrary';
 import { assetIndex } from './content';
 import { validCapability } from './crypto';
 import { JobRow } from './jobs';
+import { multiControl } from './multiControl';
 import { StudioEnv } from './runtime';
 import { UploadRow } from './uploads';
 
@@ -65,7 +66,9 @@ export const fileRequest = async (
     assert(/^[0-9a-f-]{36}\.mp4$/.test(id ?? ''), 'NOT_FOUND', 404);
     // Only a specifically authorized publication gets a stable, unguessable provider media URL.
     const row = await env.VIDEO_STUDIO_DB.prepare(
-      "SELECT j.output_key FROM studio_publications p JOIN studio_jobs j ON j.id=p.job_id AND j.owner=p.owner WHERE p.id=? AND p.status IN ('sending','pending','published','review','unknown') AND p.media_until>? AND j.status='completed' AND j.expires_at>?",
+      `SELECT j.output_key FROM ${
+        (await multiControl(env))?.cutover_day ? 'studio_deliveries' : 'studio_publications'
+      } p JOIN studio_jobs j ON j.id=p.job_id AND j.owner=p.owner WHERE p.id=? AND p.status IN ('sending','pending','published','review','unknown') AND p.media_until>? AND j.status='completed' AND j.expires_at>?`,
     )
       .bind(id.slice(0, -4), Date.now(), Date.now())
       .first<{ output_key: string }>();

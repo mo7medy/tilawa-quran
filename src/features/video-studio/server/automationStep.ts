@@ -1,3 +1,4 @@
+/* eslint-disable no-nested-ternary, max-lines -- Keep legacy-compatible and multi-account lease guards at the same export boundary. */
 /* eslint-disable import/prefer-default-export -- Named workflow entrypoints keep server imports explicit. */
 /* eslint-disable @typescript-eslint/naming-convention -- SQLite columns. */
 /* eslint-disable react-func/max-lines-per-function -- Lease-checked phase transitions keep model decisions and quota reservation durable. */
@@ -12,14 +13,32 @@ import { backgroundCatalog } from './backgroundLibrary';
 import { resolveManifest } from './content';
 import { catalog } from './contentSources';
 import { createJob, manifestHash } from './jobs';
+import { multiControl } from './multiControl';
+import { activeTaskTarget } from './multiSchedule';
 import { StudioEnv } from './runtime';
 
-export const stepAutomation = async (env: StudioEnv, row: AutomationRunRow): Promise<void> => {
+export const stepAutomation = async (
+  env: StudioEnv,
+  row: AutomationRunRow,
+  multi = false,
+): Promise<void> => {
   const owner: StudioOwner = { id: row.owner, registered: true, network: 'automation' };
   const now = Date.now();
+  const table = multi ? 'studio_automation_tasks' : 'studio_automation_runs';
+  const migrated = !!(await multiControl(env));
+  const extraGuard = multi
+    ? ` AND EXISTS(SELECT 1 FROM studio_multi_control WHERE active=1 AND maintenance=0) AND ${activeTaskTarget.replaceAll(
+        'studio_automation_tasks.id',
+        'r.id',
+      )}`
+    : migrated
+    ? ` AND NOT EXISTS(SELECT 1 FROM studio_multi_control WHERE maintenance=1 OR active=1 OR cutover_day!='')`
+    : '';
   if (row.status !== 'ready') {
     const recent = await env.VIDEO_STUDIO_DB.prepare(
-      "SELECT plan,created_at FROM studio_automation_runs WHERE owner=? AND status IN ('completed','submitted') AND plan IS NOT NULL ORDER BY created_at DESC LIMIT 42",
+      `SELECT plan,created_at FROM ${table} WHERE owner=? AND status IN ('planning','ready','completed','submitted') AND plan IS NOT NULL ORDER BY created_at DESC LIMIT ${
+        multi ? 120 : 42
+      }`,
     )
       .bind(row.owner)
       .all<{ plan: string; created_at: number }>();
@@ -37,18 +56,20 @@ export const stepAutomation = async (env: StudioEnv, row: AutomationRunRow): Pro
     const seed =
       Math.floor(Date.parse(`${row.day}T00:00:00Z`) / 86400000) * 12 +
       row.slot * 4 +
-      (row.attempt - 1) * 7;
-    const candidates = await automationCandidates(env, source, seed, used);
+      (row.attempt - 1) * 7 +
+      (multi ? Array.from(row.id).reduce((sum, c) => sum + c.charCodeAt(0), 0) * 13 : 0);
+    const candidates = await automationCandidates(env, source, seed, used, multi);
     const plan = await chooseAutomationPlan(
       env,
       candidates,
       source,
-      row.slot === 2,
-      history[0]?.spec.background.value,
+      !multi && row.slot === 2,
+      multi ? await previousMultiBackground(env, row) : history[0]?.spec.background.value,
+      multi,
     );
     if (!plan) {
       await env.VIDEO_STUDIO_DB.prepare(
-        "UPDATE studio_automation_runs SET status='skipped',error='OPTIONAL_SKIPPED',lease=NULL,lease_until=0,updated_at=? WHERE id=? AND lease=?",
+        `UPDATE ${table} SET status='skipped',error='OPTIONAL_SKIPPED',lease=NULL,lease_until=0,updated_at=? WHERE id=? AND lease=?`,
       )
         .bind(now, row.id, row.lease)
         .run();
@@ -63,8 +84,7 @@ export const stepAutomation = async (env: StudioEnv, row: AutomationRunRow): Pro
       409,
     );
     const projectId = row.id;
-    const guard =
-      "EXISTS(SELECT 1 FROM studio_automation_runs r JOIN studio_automation_settings s ON s.owner=r.owner WHERE r.id=? AND r.lease=? AND r.status='planning' AND s.enabled=1)";
+    const guard = `EXISTS(SELECT 1 FROM ${table} r JOIN studio_automation_settings s ON s.owner=r.owner WHERE r.id=? AND r.lease=? AND r.status='planning' AND s.enabled=1${extraGuard})`;
     await env.VIDEO_STUDIO_DB.batch([
       env.VIDEO_STUDIO_DB.prepare(
         `INSERT INTO studio_projects(id,owner,registered,spec,updated_at,expires_at) SELECT ?,?,1,?,?,? WHERE ${guard} ON CONFLICT(id) DO NOTHING`,
@@ -78,7 +98,7 @@ export const stepAutomation = async (env: StudioEnv, row: AutomationRunRow): Pro
         row.lease,
       ),
       env.VIDEO_STUDIO_DB.prepare(
-        `UPDATE studio_automation_runs SET status='ready',plan=?,project_id=?,lease=NULL,lease_until=0,error=NULL,updated_at=? WHERE id=? AND lease=? AND ${guard}`,
+        `UPDATE ${table} SET status='ready',plan=?,project_id=?,lease=NULL,lease_until=0,error=NULL,updated_at=? WHERE id=? AND lease=? AND ${guard}`,
       ).bind(JSON.stringify(plan), projectId, now, row.id, row.lease, row.id, row.lease),
     ]);
     return;
@@ -91,11 +111,13 @@ export const stepAutomation = async (env: StudioEnv, row: AutomationRunRow): Pro
     .first<{ id: string }>();
   let jobId = existing?.id;
   if (!jobId) {
-    const previous = await env.VIDEO_STUDIO_DB.prepare(
-      'SELECT j.id FROM studio_jobs j JOIN studio_automation_runs r ON r.job_id=j.id WHERE r.owner=? AND j.created_at>? LIMIT 1',
-    )
-      .bind(owner.id, Date.now() - AUTOMATION_GAP_MS)
-      .first();
+    const previous = multi
+      ? null
+      : await env.VIDEO_STUDIO_DB.prepare(
+          'SELECT j.id FROM studio_jobs j JOIN studio_automation_runs r ON r.job_id=j.id WHERE r.owner=? AND j.created_at>? LIMIT 1',
+        )
+          .bind(owner.id, Date.now() - AUTOMATION_GAP_MS)
+          .first();
     assert(!previous, 'AUTOMATION_INTERVAL', 409);
     const settings = await readAutomationSettings(env);
     assert(
@@ -117,12 +139,27 @@ export const stepAutomation = async (env: StudioEnv, row: AutomationRunRow): Pro
     const job = await createJob(env, owner, row.project_id, row.id, await manifestHash(manifest), {
       id: row.id,
       lease: row.lease,
+      multi,
     });
     jobId = job.id;
   }
   await env.VIDEO_STUDIO_DB.prepare(
-    "UPDATE studio_automation_runs SET status='submitted',job_id=?,lease=NULL,lease_until=0,error=NULL,updated_at=? WHERE id=? AND lease=? AND status='ready'",
+    `UPDATE ${table} SET status='submitted',job_id=?,lease=NULL,lease_until=0,error=NULL,updated_at=? WHERE id=? AND lease=? AND status='ready'`,
   )
     .bind(jobId, Date.now(), row.id, row.lease)
     .run();
+};
+
+const previousMultiBackground = async (
+  env: StudioEnv,
+  row: AutomationRunRow,
+): Promise<string[]> => {
+  const previous = await env.VIDEO_STUDIO_DB.prepare(
+    'SELECT (SELECT t.plan FROM studio_automation_tasks t JOIN studio_task_destinations td ON td.task_id=t.id WHERE t.plan IS NOT NULL AND t.id!=? AND td.destination_id=current.destination_id ORDER BY t.created_at DESC LIMIT 1) AS plan FROM studio_task_destinations current WHERE current.task_id=?',
+  )
+    .bind(row.id, row.id)
+    .all<{ plan: string | null }>();
+  return previous.results
+    .filter((p) => p.plan)
+    .map((p) => (JSON.parse(p.plan) as AutomationPlan).spec.background.value);
 };

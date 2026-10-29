@@ -7,6 +7,7 @@ import { automationRequest } from './automationApi';
 import { catalog, resolveManifest } from './content';
 import { checkRate, guestFromCookie } from './identity';
 import { cancelJob, createJob, downloadUrl, getJob, jobView, manifestHash, quota } from './jobs';
+import { adminRequest } from './multiAdmin';
 import { deleteProject, getProject, listProjects, saveProject } from './projects';
 import { publishingRequest } from './publishingApi';
 import { readBody } from './requestBody';
@@ -41,6 +42,7 @@ export const authenticated = async (
   const body = ['POST', 'PUT', 'PATCH'].includes(method)
     ? record(JSON.parse(await readBody(req)))
     : {};
+  if (group === 'admin') return adminRequest(env, req, owner, path.slice(1), body);
   if (group === 'automation') return automationRequest(env, req, owner, id, body);
   if (group === 'publishing') return publishingRequest(env, req, owner, id, body);
   if (group === 'resolve' && method === 'POST') {

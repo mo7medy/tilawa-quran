@@ -7,10 +7,23 @@ import { enqueueAutomation } from './automationSchedule';
 import { stepAutomation } from './automationStep';
 import { AutomationRunRow, readAutomationSettings } from './automationStore';
 import { studioFailure } from './errors';
+import { maintainMultiAutomation } from './multiAutomation';
+import { multiControl, legacySqlGuard } from './multiControl';
+import { migrateMultiPublishing } from './multiMigration';
 import { StudioEnv } from './runtime';
 
 export const maintainAutomation = async (env: StudioEnv): Promise<void> => {
   if (!env.VIDEO_STUDIO_DB || !env.STUDIO_AUTOMATION_EMAIL_HASH) return;
+  const control = await multiControl(env);
+  if (control?.maintenance) {
+    if (!control.active && !control.cutover_day) await migrateMultiPublishing(env);
+    return;
+  }
+  if (control?.cutover_day && !control.active) return;
+  if (control?.active) {
+    await maintainMultiAutomation(env);
+    return;
+  }
   const now = Date.now();
   const db = env.VIDEO_STUDIO_DB;
   const { day } = automationClock(now);
@@ -47,9 +60,10 @@ export const maintainAutomation = async (env: StudioEnv): Promise<void> => {
     .first<AutomationRunRow>();
   if (!pending) return;
   const lease = crypto.randomUUID();
+  const guard = await legacySqlGuard(env);
   const claimed = await db
     .prepare(
-      "UPDATE studio_automation_runs SET status=CASE WHEN status='ready' THEN 'ready' ELSE 'planning' END,attempt=attempt+CASE WHEN status='ready' THEN 0 ELSE 1 END,lease=?,lease_until=?,updated_at=? WHERE id=? AND lease_until<=? AND EXISTS(SELECT 1 FROM studio_automation_settings WHERE owner=? AND enabled=1) RETURNING *",
+      `UPDATE studio_automation_runs SET status=CASE WHEN status='ready' THEN 'ready' ELSE 'planning' END,attempt=attempt+CASE WHEN status='ready' THEN 0 ELSE 1 END,lease=?,lease_until=?,updated_at=? WHERE id=? AND lease_until<=? AND EXISTS(SELECT 1 FROM studio_automation_settings WHERE owner=? AND enabled=1)${guard} RETURNING *`,
     )
     .bind(lease, now + 600000, now, pending.id, now, settings.owner)
     .first<AutomationRunRow>();

@@ -5,6 +5,10 @@ on:
     paths:
       - 'src/features/video-studio/**'
       - 'src/pages/video-studio/**'
+      - 'src/components/Admin/**'
+      - 'src/tilawa/adminSections.ts'
+      - 'locales/*/account.json'
+      - 'i18n.json'
       - 'services/video-renderer/**'
       - 'tests/video-studio/**'
       - 'locales/*/video-studio.json'
@@ -19,6 +23,10 @@ on:
       [
         'src/features/video-studio/**',
         'src/pages/video-studio/**',
+        'src/components/Admin/**',
+        'src/tilawa/adminSections.ts',
+        'locales/*/account.json',
+        'i18n.json',
         'services/video-renderer/**',
         'locales/*/video-studio.json',
         'cloudflare-worker.js',

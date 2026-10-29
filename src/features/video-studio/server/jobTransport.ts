@@ -4,18 +4,20 @@ import { assert, policy, cairoDay, nextCairoDay } from '../validation';
 
 import { capability } from './crypto';
 import type { JobRow } from './jobs';
+import { multiControl } from './multiControl';
 import { StudioEnv } from './runtime';
 
 export const quota = async (env: StudioEnv, owner: StudioOwner): Promise<StudioQuota> => {
   const limits = policy(owner.registered);
+  const scope = (await multiControl(env)) ? " AND quota_class='manual'" : '';
   const now = Date.now();
   const result = await env.VIDEO_STUDIO_DB.prepare(
-    "SELECT COUNT(*) AS count FROM studio_jobs WHERE owner=? AND day=? AND (charged=1 OR status IN ('queued','preparing','rendering','uploading','completed','cancel_requested'))",
+    `SELECT COUNT(*) AS count FROM studio_jobs WHERE owner=? AND day=?${scope} AND (charged=1 OR status IN ('queued','preparing','rendering','uploading','completed','cancel_requested'))`,
   )
     .bind(owner.id, cairoDay())
     .first<{ count: number }>();
   const files = await env.VIDEO_STUDIO_DB.prepare(
-    "SELECT COALESCE((SELECT SUM(size) FROM studio_assets WHERE owner=? AND expires_at>? AND status!='failed'),0)+COALESCE((SELECT SUM(CASE WHEN status IN ('queued','preparing','rendering','uploading','cancel_requested') THEN output_reserved ELSE output_size END) FROM studio_jobs WHERE owner=? AND expires_at>?),0) AS bytes",
+    `SELECT COALESCE((SELECT SUM(size) FROM studio_assets WHERE owner=? AND expires_at>? AND status!='failed'),0)+COALESCE((SELECT SUM(CASE WHEN status IN ('queued','preparing','rendering','uploading','cancel_requested') THEN output_reserved ELSE output_size END) FROM studio_jobs WHERE owner=? AND expires_at>?${scope}),0) AS bytes`,
   )
     .bind(owner.id, now, owner.id, now)
     .first<{ bytes: number }>();

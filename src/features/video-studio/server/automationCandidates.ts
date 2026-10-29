@@ -7,6 +7,7 @@ import type { StudioCatalog } from '../contracts';
 import { assert } from '../validation';
 
 import { content, list } from './contentSources';
+import { expandedCandidates } from './expandedCandidates';
 import { StudioEnv } from './runtime';
 
 // Complete short surahs and bounded, continuous passages; never split an ayah to reach a duration.
@@ -82,8 +83,10 @@ export const automationCandidates = async (
   catalog: StudioCatalog,
   seed: number,
   recent: { chapterId: number; from: number; to: number }[],
+  expanded = false,
 ): Promise<AutomationCandidate[]> => {
   assert(catalog.reciters.length > 0, 'AUDIO_UNAVAILABLE');
+  if (expanded) return expandedCandidates(env, catalog, seed, recent, cachedAutomationContent);
   const available = PASSAGES.filter(
     ([chapterId, from, to]) =>
       !recent.some((r) => r.chapterId === chapterId && r.from <= to && r.to >= from),

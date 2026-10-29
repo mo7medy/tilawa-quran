@@ -16,7 +16,11 @@ import { callModal } from './jobTransport';
 import { maintainStudio } from './maintenance';
 import { StudioEnv } from './runtime';
 
-const { resolved, verifiedUser } = vi.hoisted(() => ({ resolved: vi.fn(), verifiedUser: vi.fn() }));
+const { resolved, verifiedUser, adminAccess } = vi.hoisted(() => ({
+  resolved: vi.fn(),
+  verifiedUser: vi.fn(),
+  adminAccess: vi.fn(),
+}));
 vi.mock('./content', () => ({ catalog: vi.fn(), resolveManifest: resolved, assetIndex: vi.fn() }));
 vi.mock('@/lib/supabase/config', () => ({
   getSupabaseConfiguration: () => ({
@@ -25,7 +29,10 @@ vi.mock('@/lib/supabase/config', () => ({
   }),
 }));
 vi.mock('@supabase/ssr', () => ({
-  createServerClient: (_url, _key, options) => ({ auth: { getUser: () => verifiedUser(options) } }),
+  createServerClient: (_url, _key, options) => ({
+    auth: { getUser: () => verifiedUser(options) },
+    rpc: adminAccess,
+  }),
 }));
 const fixture: ResolvedVideoManifest = {
   version: '1',
@@ -131,6 +138,7 @@ beforeEach(async () => {
     vi.fn(async () => Response.json({ callId: 'fc-test123' })),
   );
   resolved.mockResolvedValue(fixture);
+  adminAccess.mockResolvedValue({ data: { member: false, verified: false }, error: null });
   verifiedUser.mockResolvedValue({ data: { user: null }, error: new Error('Expired session') });
   const session = await request('session', undefined, 'GET', '');
   cookie = session.headers.get('set-cookie').split(';')[0];
@@ -381,5 +389,29 @@ describe('studio ownership and durable jobs', () => {
     await maintainStudio(env);
     expect(env.VIDEO_STUDIO_PRIVATE.delete).toHaveBeenCalledWith(`uploads/${upload.id}`);
     expect((await request(`uploads/${upload.id}`)).status).toBe(404);
+  });
+});
+
+describe('studio administration authorization', () => {
+  it('requires the existing server RPC membership and verified MFA session for every admin request', async () => {
+    verifiedUser.mockResolvedValue({
+      data: {
+        user: { id: 'test-admin', email: 'admin@example.test', email_confirmed_at: 'confirmed' },
+      },
+      error: null,
+    });
+    const identity = 'sb-project-auth-token=verified-cookie';
+    expect((await request('admin', undefined, 'GET', identity)).status).toBe(403);
+    adminAccess.mockResolvedValue({ data: { member: true, verified: false }, error: null });
+    const mfa = await request('admin', undefined, 'GET', identity);
+    expect((await mfa.json()).error.code).toBe('MFA_REQUIRED');
+    adminAccess.mockResolvedValue({ data: { member: true, verified: true }, error: null });
+    sqlite
+      .prepare(
+        'INSERT INTO studio_automation_settings(id,owner,updated_at,activated_at) VALUES(1,?,1,1)',
+      )
+      .run('user:automation-owner');
+    expect((await request('admin', undefined, 'GET', identity)).status).toBe(200);
+    expect(adminAccess).toHaveBeenLastCalledWith('tilawa_admin_access');
   });
 });

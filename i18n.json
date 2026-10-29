@@ -23,6 +23,7 @@
   "defaultLocale": "en",
   "localeDetection": false,
   "pages": {
+    "/1x2003/admin/[[...section]]": ["video-studio"],
     "*": ["common", "error", "radio", "quick-links", "onboarding", "login", "account"],
     "/": ["academy"],
     "/quran": ["home", "radio", "collection", "reading-goal", "reciter", "learn"],

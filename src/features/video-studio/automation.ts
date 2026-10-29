@@ -33,6 +33,16 @@ export interface AutomationState {
   settings: AutomationSettings | null;
   runs: AutomationRun[];
   aiCallsToday: number;
+  managed?: {
+    mode: string;
+    destinations: {
+      id: string;
+      name: string;
+      dailyCount: number;
+      nextCount: number;
+      paused: boolean;
+    }[];
+  };
 }
 
 /**

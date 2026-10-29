@@ -18,14 +18,15 @@ const randomIndex = (size: number): number => {
  */
 export const randomAutomationBackgrounds = (
   catalog: StudioCatalog,
-  previousFirst?: string,
+  previousFirst?: string | string[],
   draw: (size: number) => number = randomIndex,
 ): string[] => {
   const images = catalog.backgrounds.filter(
     (image) => image.type === 'image' && image.orientation === 'portrait',
   );
   assert(images.length > 0, 'CONTENT_UNAVAILABLE', 503);
-  const alternatives = images.filter((image) => image.id !== previousFirst);
+  const excluded = Array.isArray(previousFirst) ? previousFirst : [previousFirst];
+  const alternatives = images.filter((image) => !excluded.includes(image.id));
   const pool = alternatives.length ? alternatives : images;
   const first = pool[draw(pool.length)];
   const remaining = images.filter(

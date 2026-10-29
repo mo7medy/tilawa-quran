@@ -1,8 +1,10 @@
+/* eslint-disable react-func/max-lines-per-function -- Legacy-compatible reads and emergency pause transitions share the owner boundary. */
 /* eslint-disable @typescript-eslint/naming-convention -- SQLite column names are a persistent wire contract. */
 import { AutomationPlan, AutomationRun, AutomationSettings, AutomationState } from '../automation';
 import { StudioOwner } from '../contracts';
 import { assert } from '../validation';
 
+import { multiControl, auditStudio } from './multiControl';
 import { StudioEnv } from './runtime';
 
 export interface AutomationSettingsRow {
@@ -55,13 +57,34 @@ export const readAutomation = async (
 ): Promise<AutomationState> => {
   const settings = await readAutomationSettings(env);
   assert(!settings || settings.owner === owner.id, 'FORBIDDEN', 403);
+  const control = await multiControl(env);
+  const multi = !!control?.active;
+  const destinations = multi
+    ? await env.VIDEO_STUDIO_DB.prepare(
+        'SELECT id,name,daily_count,next_count,paused FROM studio_destinations WHERE owner=? AND disconnected=0',
+      )
+        .bind(owner.id)
+        .all<{
+          id: string;
+          name: string;
+          daily_count: number;
+          next_count: number;
+          paused: number;
+        }>()
+    : null;
   const [rows, budget] = await Promise.all([
     env.VIDEO_STUDIO_DB.prepare(
-      'SELECT * FROM studio_automation_runs WHERE owner=? ORDER BY created_at DESC LIMIT 60',
+      `SELECT * FROM ${
+        multi ? 'studio_automation_tasks' : 'studio_automation_runs'
+      } WHERE owner=? ORDER BY created_at DESC LIMIT 120`,
     )
       .bind(owner.id)
       .all<AutomationRunRow>(),
-    env.VIDEO_STUDIO_DB.prepare('SELECT calls FROM studio_automation_ai_budget WHERE day=?')
+    env.VIDEO_STUDIO_DB.prepare(
+      `SELECT calls FROM ${
+        multi ? 'studio_multi_ai_budget' : 'studio_automation_ai_budget'
+      } WHERE day=?`,
+    )
       .bind(new Date().toISOString().slice(0, 10))
       .first<{ calls: number }>(),
   ]);
@@ -70,6 +93,20 @@ export const readAutomation = async (
     settings: settings ? automationSettings(settings) : null,
     runs: rows.results.map(automationRun),
     aiCallsToday: budget?.calls ?? 0,
+    ...(multi
+      ? {
+          managed: {
+            mode: control.mode,
+            destinations: destinations.results.map((d) => ({
+              id: d.id,
+              name: d.name,
+              dailyCount: d.daily_count,
+              nextCount: d.next_count,
+              paused: !!d.paused,
+            })),
+          },
+        }
+      : {}),
   };
 };
 export const configureAutomation = async (
@@ -79,6 +116,26 @@ export const configureAutomation = async (
   optionalThird: unknown,
 ): Promise<void> => {
   assert(typeof enabled === 'boolean' && typeof optionalThird === 'boolean', 'INVALID_INPUT');
+  const control = await multiControl(env);
+  if (control?.active) {
+    const settings = await readAutomationSettings(env);
+    assert(settings?.owner === owner.id, 'FORBIDDEN', 403);
+    assert(enabled === false, 'PUBLISHING_REFRESH_REQUIRED', 409);
+    await env.VIDEO_STUDIO_DB.batch([
+      env.VIDEO_STUDIO_DB.prepare(
+        'UPDATE studio_automation_settings SET enabled=0,updated_at=? WHERE owner=?',
+      ).bind(Date.now(), owner.id),
+      env.VIDEO_STUDIO_DB.prepare(
+        "UPDATE studio_automation_tasks SET status='skipped',error='AUTOMATION_PAUSED',lease=NULL,lease_until=0 WHERE owner=? AND status IN ('queued','planning','ready')",
+      ).bind(owner.id),
+      env.VIDEO_STUDIO_DB.prepare(
+        "UPDATE studio_deliveries SET status='cancelled',error='PUBLISHING_PAUSED' WHERE owner=? AND status='queued'",
+      ).bind(owner.id),
+    ]);
+    await auditStudio(env, owner.id, owner.id, 'automation.emergency-stop', 'global');
+    return;
+  }
+
   assert(!enabled || (!!env.AI && env.STUDIO_ENABLED === '1'), 'AUTOMATION_UNAVAILABLE', 503);
   const now = Date.now();
   const changed = await env.VIDEO_STUDIO_DB.prepare(

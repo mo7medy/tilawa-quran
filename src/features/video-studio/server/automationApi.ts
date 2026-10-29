@@ -5,6 +5,7 @@ import { assert, StudioError } from '../validation';
 import { enqueueAutomation } from './automationSchedule';
 import { configureAutomation, readAutomation, readAutomationSettings } from './automationStore';
 import { checkRate } from './identity';
+import { multiControl } from './multiControl';
 import { json, StudioEnv } from './runtime';
 
 export const automationRequest = async (
@@ -22,6 +23,7 @@ export const automationRequest = async (
     return json(await readAutomation(env, owner));
   }
   if (req.method === 'POST' && action === 'run') {
+    assert(!(await multiControl(env))?.active, 'PUBLISHING_REFRESH_REQUIRED', 409);
     await checkRate(env, `automation-run:${owner.id}`, 3);
     const settings = await readAutomationSettings(env);
     assert(

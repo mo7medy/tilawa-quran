@@ -5,6 +5,7 @@ import { AUTOMATION_GAP_MS, automationClock, dueAutomationSlot } from '../automa
 import { assert } from '../validation';
 
 import { AutomationSettingsRow } from './automationStore';
+import { legacySqlGuard } from './multiControl';
 import { StudioEnv } from './runtime';
 
 /**
@@ -34,8 +35,9 @@ export const enqueueAutomation = async (
     return null;
   }
   const id = crypto.randomUUID();
+  const guard = await legacySqlGuard(env);
   const created = await env.VIDEO_STUDIO_DB.prepare(
-    'INSERT INTO studio_automation_runs(id,owner,day,slot,created_at,updated_at) SELECT ?,?,?,?,?,? WHERE EXISTS(SELECT 1 FROM studio_automation_settings WHERE id=1 AND owner=? AND enabled=1) AND NOT EXISTS(SELECT 1 FROM studio_automation_runs WHERE owner=? AND created_at>?) ON CONFLICT(day,slot) DO NOTHING RETURNING id',
+    `INSERT INTO studio_automation_runs(id,owner,day,slot,created_at,updated_at) SELECT ?,?,?,?,?,? WHERE EXISTS(SELECT 1 FROM studio_automation_settings WHERE id=1 AND owner=? AND enabled=1) AND NOT EXISTS(SELECT 1 FROM studio_automation_runs WHERE owner=? AND created_at>?) ${guard} ON CONFLICT(day,slot) DO NOTHING RETURNING id`,
   )
     .bind(
       id,

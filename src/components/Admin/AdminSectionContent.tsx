@@ -1,3 +1,5 @@
+import dynamic from 'next/dynamic';
+
 import { Panel } from '../Account/AccountUi';
 import { useAccountUi } from '../Account/useAccountUi';
 
@@ -9,6 +11,10 @@ import AdminSubscriptions from './AdminSubscriptions';
 import type { AdminSection } from '@/tilawa/adminSections';
 import type { Row } from '@/tilawa/backend/mappers';
 
+const AdminVideoStudio = dynamic(
+  () => import('@/features/video-studio/components/AdminVideoStudio'),
+);
+
 const AdminSectionContent = ({
   section,
   data,
@@ -17,6 +23,7 @@ const AdminSectionContent = ({
   data: Row;
 }): JSX.Element => {
   const { t } = useAccountUi();
+  if (section === 'video-studio') return <AdminVideoStudio />;
   if (section === 'overview') return <AdminOverview data={data} />;
   if (section === 'finance') return <AdminFinance />;
   if (section === 'audit') return <AdminDirectory key="audit" section="audit" />;

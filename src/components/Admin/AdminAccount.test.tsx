@@ -129,8 +129,8 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe('Website administration', () => {
-  it('isolates only the admin route family and resolves the eight sections', () => {
-    expect(ADMIN_SECTIONS).toHaveLength(8);
+  it('isolates only the admin route family and resolves the nine sections', () => {
+    expect(ADMIN_SECTIONS).toHaveLength(9);
     expect(getAdminSection()).toBe('overview');
     expect(getAdminSection('wallet')).toBeNull();
     expect(isAdminRoutePathname('/1x2003/admin')).toBe(true);
@@ -141,12 +141,12 @@ describe('Website administration', () => {
     expect(isAdminRoutePathname('/administrator')).toBe(false);
     expect(isAdminRoutePathname('/22')).toBe(false);
   });
-  it('shows a pending review queue and exactly eight navigation links', async () => {
+  it('shows a pending review queue and exactly nine navigation links', async () => {
     mount();
     await screen.findByText('Pending teacher');
     expect(screen.queryByText('Approved teacher')).toBeNull();
     const navigation = screen.getByRole('navigation');
-    expect(within(navigation).getAllByRole('link')).toHaveLength(8);
+    expect(within(navigation).getAllByRole('link')).toHaveLength(9);
     within(navigation)
       .getAllByRole('link')
       .forEach((link) => {

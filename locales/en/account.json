@@ -425,7 +425,8 @@
       "subscriptions": "Packages & subscriptions",
       "audit": "Activity log",
       "settings": "Settings",
-      "finance": "Finance"
+      "finance": "Finance",
+      "video-studio": "Video automation and publishing"
     },
     "descriptions": {
       "overview": "A focused workspace for teacher applications and the daily operation of Tilawa.",

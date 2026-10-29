@@ -1,3 +1,4 @@
+/* eslint-disable default-param-last -- Optional accounting hook preserves existing provider call signatures. */
 /* eslint-disable @typescript-eslint/naming-convention -- Provider errors and wire fields retain their documented names. */
 /* eslint-disable react-func/max-lines-per-function -- Keep the bounded transport and uncertain-write classification together. */
 /* eslint-disable no-restricted-syntax -- Streaming response reads are bounded to one MiB. */
@@ -12,8 +13,10 @@ export class BufferFailure extends StudioError {
 export const bufferQuery = async <T>(
   token: string,
   document: string,
-  variables = {},
+  variables: Record<string, unknown> = {},
+  beforeRequest?: () => Promise<void>,
 ): Promise<T> => {
+  await beforeRequest?.();
   let response: Response;
   try {
     response = await fetch('https://api.buffer.com', {

@@ -47,7 +47,15 @@ export const ownerFor = async (
       !!data.user.email_confirmed_at &&
       (await sha256((data.user.email ?? '').trim().toLowerCase())) ===
         env.STUDIO_AUTOMATION_EMAIL_HASH;
-    return { id: `user:${data.user.id}`, registered: true, network, canAutomate };
+    let adminVerified = false;
+    if (new URL(req.url).pathname.startsWith('/api/video-studio/admin')) {
+      const access = await client.rpc('tilawa_admin_access');
+      const permission = access.data as { member?: boolean; verified?: boolean } | null;
+      assert(!access.error && permission?.member === true, 'ADMIN_REQUIRED', 403);
+      assert(permission.verified === true, 'MFA_REQUIRED', 403);
+      adminVerified = true;
+    }
+    return { id: `user:${data.user.id}`, registered: true, network, canAutomate, adminVerified };
   }
   const existing = await guestFromCookie(req, env);
   // A recently saved guest project must remain reachable for its full retention period.

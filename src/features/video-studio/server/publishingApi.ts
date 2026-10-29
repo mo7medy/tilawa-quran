@@ -7,6 +7,7 @@ import { assert, StudioError } from '../validation';
 import { readAutomationSettings } from './automationStore';
 import { bufferChannels } from './bufferClient';
 import { checkRate } from './identity';
+import { multiControl } from './multiControl';
 import { encryptPublisherToken, publisherToken } from './publisherCrypto';
 import { publishers, publishingState } from './publishingStore';
 import { json, StudioEnv } from './runtime';
@@ -18,6 +19,12 @@ export const publishingRequest = async (
   action: string | undefined,
   body: Record<string, unknown>,
 ): Promise<Response> => {
+  const control = await multiControl(env);
+  assert(
+    !control?.active && !control?.maintenance && !control?.cutover_day,
+    'PUBLISHING_REFRESH_REQUIRED',
+    409,
+  );
   assert(owner.registered && owner.canAutomate, 'FORBIDDEN', 403);
   const automation = await readAutomationSettings(env);
   assert(!automation || automation.owner === owner.id, 'FORBIDDEN', 403);

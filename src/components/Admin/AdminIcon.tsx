@@ -1,6 +1,8 @@
+/* eslint-disable @typescript-eslint/naming-convention -- Section route names are stable URL keys. */
 import type { AdminSection } from '@/tilawa/adminSections';
 
 const paths: Record<AdminSection, string> = {
+  'video-studio': 'M3 5h12v14H3zM15 10l6-4v12l-6-4z',
   overview: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
   teachers: 'm2 8 10-5 10 5-10 5L2 8Zm4 2v6c4 3 8 3 12 0v-6M22 8v7',
   students:

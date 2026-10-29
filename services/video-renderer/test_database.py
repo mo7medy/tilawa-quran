@@ -94,6 +94,29 @@ class QuotaTests(unittest.TestCase):
         with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
             self.assertEqual(sum(pool.map(claim, range(5))), 2)
 
+    def test_automation_has_separate_daily_and_storage_quotas(self):
+        with self.connect() as db:
+            for index in range(30):
+                db.execute("INSERT INTO studio_jobs(id,owner,project_id,revision,day,daily_limit,duration_ms,manifest,idempotency,created_at,expires_at,storage_limit,output_reserved,output_size,status,quota_class) VALUES(?,'user:automation','project',1,'2026-10-29',30,30000,'{}',?,1,9999999999999,10737418240,1000,2000000,'completed','automation')", (f"auto-{index}", f"auto-{index}"))
+            with self.assertRaisesRegex(sqlite3.IntegrityError, "DAILY_LIMIT"):
+                db.execute("INSERT INTO studio_jobs(id,owner,project_id,revision,day,daily_limit,duration_ms,manifest,idempotency,created_at,expires_at,storage_limit,output_reserved,quota_class) VALUES('auto-over','user:automation','project',1,'2026-10-29',30,30000,'{}','auto-over',1,9999999999999,10737418240,1000,'automation')")
+            db.execute("UPDATE studio_jobs SET output_size=1000000000 WHERE id='auto-0'")
+            db.execute("INSERT INTO studio_jobs(id,owner,project_id,revision,day,daily_limit,duration_ms,manifest,idempotency,created_at,expires_at,storage_limit,output_reserved,quota_class) VALUES('manual','user:automation','project',1,'2026-10-29',10,30000,'{}','manual',1,9999999999999,1073741824,1000,'manual')")
+            self.assertEqual(db.execute("SELECT COUNT(*) FROM studio_jobs WHERE quota_class='manual'").fetchone()[0], 1)
+
+    def test_connection_limit_survives_concurrent_inserts(self):
+        def connect_account(index):
+            try:
+                with self.connect() as db:
+                    db.execute("INSERT INTO studio_buffer_connections(id,owner,account_id,name,token,revision,created_at,updated_at) VALUES(?,'user:owner',?,'Buffer','ciphertext','revision',1,1)", (str(index), str(index)))
+                return "ok"
+            except sqlite3.IntegrityError as error:
+                return str(error)
+        with concurrent.futures.ThreadPoolExecutor(max_workers=9) as pool:
+            results = list(pool.map(connect_account, range(9)))
+        self.assertEqual(results.count("ok"), 3)
+        self.assertEqual(results.count("CONNECTION_LIMIT"), 6)
+
 
 if __name__ == "__main__":
     unittest.main()

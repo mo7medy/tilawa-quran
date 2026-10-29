@@ -15,7 +15,7 @@ export const maintainStudio = async (env: StudioEnv): Promise<void> => {
   const db = env.VIDEO_STUDIO_DB;
   const lost = await db
     .prepare(
-      "SELECT * FROM studio_jobs WHERE (status IN ('preparing','rendering','uploading','cancel_requested') AND lease_until<?) OR (status='queued' AND created_at<?) LIMIT 40",
+      "SELECT * FROM studio_jobs WHERE (status IN ('preparing','rendering','uploading','cancel_requested') AND lease_until<?) OR (status='queued' AND created_at<?) LIMIT 8",
     )
     .bind(now, now - 1200000)
     .all<JobRow>();
@@ -45,7 +45,7 @@ export const maintainStudio = async (env: StudioEnv): Promise<void> => {
   }
   const expiredJobs = await db
     .prepare(
-      'SELECT * FROM studio_jobs WHERE expires_at<=? AND (output_key IS NOT NULL OR manifest!=?) LIMIT 100',
+      'SELECT * FROM studio_jobs WHERE expires_at<=? AND (output_key IS NOT NULL OR manifest!=?) LIMIT 8',
     )
     .bind(now, '{}')
     .all<JobRow>();
@@ -60,7 +60,7 @@ export const maintainStudio = async (env: StudioEnv): Promise<void> => {
   }
   const assets = await db
     .prepare(
-      "SELECT id,object_key FROM studio_assets WHERE expires_at<=? OR status='failed' LIMIT 100",
+      "SELECT id,object_key FROM studio_assets WHERE expires_at<=? OR status='failed' LIMIT 8",
     )
     .bind(now)
     .all<{ id: string; object_key: string }>();

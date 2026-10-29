@@ -7,6 +7,7 @@ import { assert, policy } from '../validation';
 
 import { capability } from './crypto';
 import { callModal } from './jobs';
+import { multiControl } from './multiControl';
 import { StudioEnv } from './runtime';
 
 export interface UploadRow {
@@ -44,8 +45,9 @@ export const initUpload = async (
   const id = crypto.randomUUID();
   const now = Date.now();
   const limits = policy(owner.registered);
+  const scope = (await multiControl(env)) ? " AND quota_class='manual'" : '';
   const row = await env.VIDEO_STUDIO_DB.prepare(
-    "INSERT INTO studio_assets(id,owner,registered,object_key,size,mime,created_at,expires_at) SELECT ?,?,?,?,?,?,?,? WHERE COALESCE((SELECT SUM(size) FROM studio_assets WHERE owner=? AND expires_at>? AND status!='failed'),0)+COALESCE((SELECT SUM(CASE WHEN status IN ('queued','preparing','rendering','uploading','cancel_requested') THEN output_reserved ELSE output_size END) FROM studio_jobs WHERE owner=? AND expires_at>?),0)+?<=? RETURNING id",
+    `INSERT INTO studio_assets(id,owner,registered,object_key,size,mime,created_at,expires_at) SELECT ?,?,?,?,?,?,?,? WHERE COALESCE((SELECT SUM(size) FROM studio_assets WHERE owner=? AND expires_at>? AND status!='failed'),0)+COALESCE((SELECT SUM(CASE WHEN status IN ('queued','preparing','rendering','uploading','cancel_requested') THEN output_reserved ELSE output_size END) FROM studio_jobs WHERE owner=? AND expires_at>?${scope}),0)+?<=? RETURNING id`,
   )
     .bind(
       id,

@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Owner controls and scoped automation history share one page. */
 import { useState } from 'react';
 
 import useTranslation from 'next-translate/useTranslation';
@@ -82,41 +83,71 @@ const StudioAutomation = (): JSX.Element => {
             <h2 id="automation-settings">
               {t(current.settings?.enabled ? 'automation.active' : 'automation.paused')}
             </h2>
-            <p>{t('automation.schedule')}</p>
+            <p>{t(current.managed ? 'admin.schedule' : 'automation.schedule')}</p>
+            {current.managed && (
+              <>
+                <AcademyLink href="/1x2003/admin/video-studio">{t('admin.open-admin')}</AcademyLink>
+                <ul>
+                  {current.managed.destinations.map((d) => (
+                    <li key={d.id}>
+                      {d.name} · {t('admin.applied', { count: d.dailyCount })} ·{' '}
+                      {t(d.paused ? 'admin.paused' : 'admin.eligible')}
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
             <p>{t('automation.decisions')}</p>
-            <p>{t('automation.budget', { count: current.aiCallsToday })}</p>
+            <p>
+              {t(current.managed ? 'admin.ai' : 'automation.budget', {
+                count: current.aiCallsToday,
+                limit: 60,
+              })}
+            </p>
             {!current.configured && <p role="alert">{t('errors.AUTOMATION_UNAVAILABLE')}</p>}
             <div className={styles.actions}>
               <button
                 type="button"
                 className={styles.primary}
-                disabled={busy || (!current.configured && !current.settings?.enabled)}
+                disabled={
+                  busy ||
+                  (!!current.managed && !current.settings?.enabled) ||
+                  (!current.configured && !current.settings?.enabled)
+                }
                 onClick={() =>
                   update(!current.settings?.enabled, current.settings?.optionalThird ?? true)
                 }
               >
                 {t(busy ? 'loading' : toggleLabel)}
               </button>
-              <button type="button" disabled={busy || !current.settings?.enabled} onClick={runNow}>
-                {t('automation.run')}
-              </button>
-              <label htmlFor="automation-optional-third">
-                <input
-                  id="automation-optional-third"
-                  type="checkbox"
-                  checked={current.settings?.optionalThird ?? true}
-                  disabled={busy}
-                  onChange={(event) =>
-                    update(current.settings?.enabled ?? false, event.target.checked)
-                  }
-                />{' '}
-                {t('automation.optional')}
-              </label>
+              {!current.managed && (
+                <>
+                  <button
+                    type="button"
+                    disabled={busy || !current.settings?.enabled}
+                    onClick={runNow}
+                  >
+                    {t('automation.run')}
+                  </button>
+                  <label htmlFor="automation-optional-third">
+                    <input
+                      id="automation-optional-third"
+                      type="checkbox"
+                      checked={current.settings?.optionalThird ?? true}
+                      disabled={busy}
+                      onChange={(event) =>
+                        update(current.settings?.enabled ?? false, event.target.checked)
+                      }
+                    />{' '}
+                    {t('automation.optional')}
+                  </label>
+                </>
+              )}
             </div>
             <p>{t('automation.pause-help')}</p>
-            <p>{t('automation.run-help')}</p>
+            {!current.managed && <p>{t('automation.run-help')}</p>}
           </section>
-          <PublishingControls key={session.scope} scope={session.scope} />
+          {!current.managed && <PublishingControls key={session.scope} scope={session.scope} />}
           <h2 className={styles.automationHistory}>{t('automation.history')}</h2>
           {!current.runs.length && <p className={styles.notice}>{t('automation.empty')}</p>}
           <div className={styles.library} aria-live="polite">

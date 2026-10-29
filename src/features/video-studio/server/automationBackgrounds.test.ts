@@ -43,6 +43,14 @@ describe('random automatic video backgrounds', () => {
     expect(first[0]).toBe('r2-portrait_1');
     expect(next[0]).toBe('r2-portrait_2');
   });
+  it('excludes every target previous opening when sharing a video', () => {
+    const result = randomAutomationBackgrounds(
+      catalog([image(1), image(2), image(3)]),
+      ['r2-portrait_1', 'r2-portrait_2'],
+      () => 0,
+    );
+    expect(result[0]).toBe('r2-portrait_3');
+  });
   it('draws a unique shuffled sequence of at most five without changing the catalogue', () => {
     const source = catalog(Array.from({ length: 8 }, (unused, index) => image(index + 1)));
     const original = JSON.stringify(source);

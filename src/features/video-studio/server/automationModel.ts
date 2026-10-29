@@ -16,13 +16,18 @@ export const chooseAutomationPlan = async (
   candidates: AutomationCandidate[],
   catalog: StudioCatalog,
   optional: boolean,
-  previousBackground?: string,
+  previousBackground?: string | string[],
+  multi = false,
 ): Promise<AutomationPlan | null> => {
   assert(env.AI, 'AUTOMATION_UNAVAILABLE', 503);
-  // At most twelve bounded requests per UTC day: no paid-only model or external provider fallback.
+  // Reserve the bounded UTC budget before using the existing Workers AI model.
   const day = new Date().toISOString().slice(0, 10);
   const budget = await env.VIDEO_STUDIO_DB.prepare(
-    'INSERT INTO studio_automation_ai_budget(day,calls) VALUES(?,1) ON CONFLICT(day) DO UPDATE SET calls=calls+1 WHERE calls<12 RETURNING calls',
+    `INSERT INTO ${
+      multi ? 'studio_multi_ai_budget' : 'studio_automation_ai_budget'
+    }(day,calls) VALUES(?,1) ON CONFLICT(day) DO UPDATE SET calls=calls+1 WHERE calls<${
+      multi ? 60 : 12
+    } RETURNING calls`,
   )
     .bind(day)
     .first();

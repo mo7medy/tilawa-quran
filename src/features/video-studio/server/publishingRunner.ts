@@ -1,3 +1,4 @@
+/* eslint-disable max-lines -- Preserve legacy sender until the fenced production cutover. */
 /* eslint-disable @typescript-eslint/naming-convention -- D1 result fields retain their storage names. */
 /* eslint-disable react-func/max-lines-per-function -- The write boundary must distinguish ambiguous sends from safe read retries. */
 /* eslint-disable import/prefer-default-export -- Named cron entrypoint is shared by the Worker and integration tests. */
@@ -11,6 +12,8 @@ import {
   createBufferPost,
   readBufferPost,
 } from './bufferClient';
+import { multiControl } from './multiControl';
+import { maintainMultiPublishing } from './multiPublishingRunner';
 import { publisherToken } from './publisherCrypto';
 import { claimPublication, enqueuePublications, recoverPublications } from './publishingQueue';
 import { PublicationRow, publisher, publishers } from './publishingStore';
@@ -96,6 +99,12 @@ const processPublication = async (env: StudioEnv, row: PublicationRow): Promise<
       );
       // Recheck after read-only provider calls: pause/reconnect may have occurred while validating.
       const active = await publisher(env, row.platform);
+      const control = await multiControl(env);
+      assert(
+        !control?.active && !control?.maintenance && !control?.cutover_day,
+        'PUBLISHING_PAUSED',
+        409,
+      );
       assert(
         active?.enabled && active.revision === row.connection_revision,
         'PUBLISHING_PAUSED',
@@ -142,6 +151,12 @@ const processPublication = async (env: StudioEnv, row: PublicationRow): Promise<
 };
 export const maintainPublishing = async (env: StudioEnv): Promise<void> => {
   if (!env.VIDEO_STUDIO_DB || !env.STUDIO_AUTOMATION_EMAIL_HASH) return;
+  const control = await multiControl(env);
+  if (control?.maintenance || (control?.cutover_day && !control.active)) return;
+  if (control?.active) {
+    await maintainMultiPublishing(env);
+    return;
+  }
   await recoverPublications(env);
   const connections = await publishers(env);
   await Promise.all(connections.map((connection) => enqueuePublications(env, connection)));
