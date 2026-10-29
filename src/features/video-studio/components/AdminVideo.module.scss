@@ -31,6 +31,7 @@
     max-inline-size: 100%;
   }
   button {
+    white-space: normal;
     cursor: pointer;
     color: var(--tilawa-link);
   }
@@ -43,6 +44,8 @@
     outline-offset: 3px;
   }
   label {
+    min-inline-size: 0;
+    max-inline-size: 100%;
     display: grid;
     gap: 8px;
   }
@@ -60,12 +63,18 @@
   display: grid;
   gap: 16px;
   max-inline-size: 620px;
+  min-inline-size: 0;
+  inline-size: 100%;
 }
 .actions {
   display: flex;
   flex-wrap: wrap;
   align-items: end;
   gap: 12px;
+  > * {
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
 }
 .connection {
   display: grid;
@@ -96,6 +105,8 @@
   }
 }
 .table {
+  min-inline-size: 0;
+  max-inline-size: 100%;
   overflow-x: auto;
   table {
     border-collapse: collapse;
