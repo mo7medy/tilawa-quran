@@ -12,10 +12,13 @@ import { defaultSpec, StudioOwner, StudioCatalog, ResolvedVideoManifest } from '
 
 import { automationRequest } from './automationApi';
 import { chooseAutomationPlan } from './automationModel';
+import { previousMultiBackground } from './automationStep';
+import { AutomationRunRow } from './automationStore';
 import { createJob, manifestHash } from './jobs';
 import { quota } from './jobTransport';
 import { adminRequest } from './multiAdmin';
 import { adminState } from './multiAdminState';
+import { maintainMultiAutomation } from './multiAutomation';
 import { tomorrowCairo } from './multiControl';
 import { migrateMultiPublishing } from './multiMigration';
 import { maintainMultiPublishing } from './multiPublishingRunner';
@@ -593,4 +596,129 @@ it('keeps daily planning and outbox insertion under the Free-plan SQL query limi
   await enqueueDeliveries(env);
   expect(queries.mock.calls.length).toBe(1);
   expect(sql('SELECT COUNT(*) AS n FROM studio_deliveries').n).toBe(27);
+});
+
+it('locally advances a timing-derived plan through one durable render without touching a provider', async () => {
+  const c = await connection();
+  await destination(c);
+  tomorrow();
+  const catalogue = {
+    enabled: true,
+    chapters: [{ id: 3, name: 'Ali Imran', count: 200 }],
+    reciters: [{ id: 7, name: 'Reader' }],
+    translations: [{ id: 20, name: 'English', language: 'english' }],
+    backgrounds: [],
+  };
+  db.prepare('INSERT INTO studio_automation_cache(key,value,expires_at) VALUES(?,?,?)').run(
+    'catalog:ar',
+    JSON.stringify(catalogue),
+    Date.now() + 86400000,
+  );
+  const timing = {
+    audio_files: [
+      {
+        audio_url: 'https://audio.qurancdn.com/test.mp3',
+        verse_timings: Array.from({ length: 200 }, (_, i) => ({
+          verse_key: `3:${i + 1}`,
+          timestamp_from: i * 15000,
+          timestamp_to: (i + 1) * 15000,
+        })),
+      },
+    ],
+  };
+  db.prepare('INSERT INTO studio_automation_cache(key,value,expires_at) VALUES(?,?,?)').run(
+    'timing:7:3',
+    JSON.stringify(timing),
+    Date.now() + 86400000,
+  );
+  env.VIDEO_STUDIO_BACKGROUNDS = {
+    get: async () => ({
+      size: 100,
+      text: async () =>
+        JSON.stringify([
+          {
+            name: 'portrait_1',
+            path: 'portrait/portrait_1.jpg',
+            type: 'portrait',
+            width: 1080,
+            height: 1920,
+          },
+        ]),
+    }),
+  } as unknown as StudioEnv['VIDEO_STUDIO_BACKGROUNDS'];
+  const ai = vi.fn(async (_model: string, input: { messages: { content: string }[] }) => {
+    const candidate = JSON.parse(input.messages[1].content).candidates[0];
+    return {
+      choices: [
+        {
+          message: {
+            content: JSON.stringify({
+              candidateId: candidate.id,
+              translationId: 20,
+              font: defaultSpec.font,
+              template: 'center',
+              caption: 'Quran recitation',
+              hashtags: ['#Quran'],
+              skipOptional: false,
+            }),
+          },
+          finish_reason: 'stop',
+        },
+      ],
+    };
+  });
+  env.AI = { run: ai } as unknown as StudioEnv['AI'];
+  resolved.mockImplementation(async (_env: unknown, _owner: unknown, spec: unknown) => ({
+    version: '1',
+    renderVersion: 'studio-2',
+    spec,
+    verses: [],
+    fonts: [],
+    audio: { url: 'https://audio.example/test.mp3', startMs: 0, endMs: 30000 },
+    background: { type: 'image', url: 'https://studio.example/background' },
+    durationMs: 30000,
+    width: 1080,
+    height: 1920,
+    fps: 30,
+  }));
+  const queries = vi.spyOn(env.VIDEO_STUDIO_DB, 'prepare');
+  await maintainMultiAutomation(env);
+  expect(sql("SELECT COUNT(*) AS n FROM studio_automation_tasks WHERE status='ready'").n).toBe(1);
+  expect(queries.mock.calls.length).toBeLessThan(50);
+  queries.mockClear();
+  await maintainMultiAutomation(env);
+  expect(sql("SELECT COUNT(*) AS n FROM studio_jobs WHERE quota_class='automation'").n).toBe(1);
+  expect(sql("SELECT COUNT(*) AS n FROM studio_automation_tasks WHERE status='submitted'").n).toBe(
+    1,
+  );
+  expect(queries.mock.calls.length).toBeLessThan(50);
+  expect(ai).toHaveBeenCalledOnce();
+  await maintainMultiAutomation(env);
+  expect(ai).toHaveBeenCalledOnce();
+});
+
+it('uses the immediately preceding slot opening when a whole day shares a creation timestamp', async () => {
+  const c = await connection();
+  const d = await destination(c);
+  tomorrow();
+  await planMultiDay(env, owner);
+  const tasks = db
+    .prepare('SELECT * FROM studio_automation_tasks ORDER BY slot')
+    .all() as AutomationRunRow[];
+  for (const task of tasks.slice(0, 2)) {
+    db.prepare('UPDATE studio_automation_tasks SET plan=? WHERE id=?').run(
+      JSON.stringify({
+        spec: {
+          ...defaultSpec,
+          background: { ...defaultSpec.background, value: `r2-slot-${task.slot}` },
+        },
+      }),
+      task.id,
+    );
+  }
+  expect(await previousMultiBackground(env, tasks[2])).toEqual(['r2-slot-1']);
+  expect(
+    sql('SELECT destination_id FROM studio_task_destinations WHERE task_id=?', tasks[2].id)
+      .destination_id,
+  ).toBe(d);
 });

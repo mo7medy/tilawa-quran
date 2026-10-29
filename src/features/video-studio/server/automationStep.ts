@@ -150,12 +150,12 @@ export const stepAutomation = async (
     .run();
 };
 
-const previousMultiBackground = async (
+export const previousMultiBackground = async (
   env: StudioEnv,
   row: AutomationRunRow,
 ): Promise<string[]> => {
   const previous = await env.VIDEO_STUDIO_DB.prepare(
-    'SELECT (SELECT t.plan FROM studio_automation_tasks t JOIN studio_task_destinations td ON td.task_id=t.id WHERE t.plan IS NOT NULL AND t.id!=? AND td.destination_id=current.destination_id ORDER BY t.created_at DESC LIMIT 1) AS plan FROM studio_task_destinations current WHERE current.task_id=?',
+    'SELECT (SELECT t.plan FROM studio_automation_tasks t JOIN studio_task_destinations td ON td.task_id=t.id WHERE t.plan IS NOT NULL AND t.id!=? AND td.destination_id=current.destination_id ORDER BY t.day DESC,t.slot DESC,t.created_at DESC LIMIT 1) AS plan FROM studio_task_destinations current WHERE current.task_id=?',
   )
     .bind(row.id, row.id)
     .all<{ plan: string | null }>();
