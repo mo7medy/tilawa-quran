@@ -168,9 +168,19 @@ for (const locale of ['en', 'ar']) {
     expect(mutations).toContainEqual({ dailyCount: 0 });
     for (const width of [375, 768, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });
-      expect(
-        await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
-      ).toBe(true);
+      const layout = await page.evaluate(() => ({
+        viewport: window.innerWidth,
+        scroll: document.documentElement.scrollWidth,
+        overflow: [...document.querySelectorAll('body *')]
+          .map((element) => ({
+            tag: element.tagName,
+            className: element.className,
+            left: element.getBoundingClientRect().left,
+            right: element.getBoundingClientRect().right,
+          }))
+          .filter((element) => element.left < 0 || element.right > window.innerWidth),
+      }));
+      expect(layout.scroll, JSON.stringify(layout)).toBeLessThanOrEqual(layout.viewport);
     }
     await page.setViewportSize({ width: 768, height: 900 });
     await page.evaluate(() => {
