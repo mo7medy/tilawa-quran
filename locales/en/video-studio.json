@@ -167,6 +167,7 @@
     "AUTOMATION_INVALID_DECISION": "The model returned an invalid selection. A bounded retry will be attempted.",
     "AUTOMATION_NO_CANDIDATES": "No verified 30–70 second recording was found in this selection round.",
     "AUTOMATION_DURATION_CHANGED": "The recording duration changed. This export was stopped.",
+    "AUTOMATION_READER_EXCLUDED": "This export was stopped because the reciter is excluded from automation.",
     "AUTOMATION_INPUT_LIMIT": "The selection catalogue exceeded its safe size.",
     "AUTOMATION_MISSED": "The day's selection window expired.",
     "AUTOMATION_RETRIES_EXHAUSTED": "Automatic retries were exhausted.",

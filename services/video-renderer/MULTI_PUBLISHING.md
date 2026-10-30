@@ -33,6 +33,22 @@ account identity must match. Disconnect destinations and reconnect them through 
 picker to preserve historical identities. A credential update alone does not reactivate disconnected
 destinations.
 
+## Automatic content preferences
+
+The automatic picker offers adult Muhammad Siddiq al-Minshawi whenever that source recording is
+available, alongside rotating established reciters from Tilawa's existing catalogue (including
+AbdulBaset, Mishari al-Afasy, Yasser ad-Dussary and al-Husary). Abdur-Rahman as-Sudais is excluded
+at candidate selection and decision validation. A previously prepared excluded-reader selection is
+stopped before reserving another render. The manual studio catalogue is independent of this policy.
+
+Featured ayah anchors are editorial preferences, not live TikTok/Instagram trend measurements. They
+include An-Najm 53:39–41 from the
+[user's reference video](https://www.tiktok.com/@abo.3aid/video/7671728791101689096). Up to two
+featured surahs and one rotating source surah are offered per selection pass. Candidate recordings
+still require complete consecutive ayah timings and 30–70 seconds; short anchors can be extended
+with following whole ayahs. Three-day overlap exclusion and random background selection remain
+enforced. Model instructions prohibit inventing current trend rankings or view counts.
+
 ## Production cutover
 
 1. Run the automated checks and deploy the compatible code through production CI. Confirm 100% of

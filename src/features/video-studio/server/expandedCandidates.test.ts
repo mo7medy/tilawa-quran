@@ -15,14 +15,14 @@ const catalog: StudioCatalog = {
   translations: [],
   backgrounds: [],
 };
-const metadata = (length = 100): Record<string, unknown> => ({
+const metadata = (length = 100, chapter = 3, stepMs = 10000): Record<string, unknown> => ({
   audio_files: [
     {
       audio_url: 'https://audio.qurancdn.com/recording.mp3',
       verse_timings: Array.from({ length }, (unused, i) => ({
-        verse_key: `3:${i + 1}`,
-        timestamp_from: i * 10000,
-        timestamp_to: (i + 1) * 10000,
+        verse_key: `${chapter}:${i + 1}`,
+        timestamp_from: i * stepMs,
+        timestamp_to: (i + 1) * stepMs,
       })),
     },
   ],
@@ -31,6 +31,33 @@ const cache = (value: Record<string, unknown>): typeof cachedAutomationContent =
   (async () => value) as typeof cachedAutomationContent;
 
 describe('expanded timing-derived candidates', () => {
+  it('prioritizes the referenced Najm passage and extends with whole ayahs to reach thirty seconds', async () => {
+    const source = { ...catalog, chapters: [{ id: 53, name: 'An-Najm', count: 62 }] };
+    const candidates = await expandedCandidates(
+      {} as StudioEnv,
+      source,
+      0,
+      [],
+      cache(metadata(62, 53, 5000)),
+    );
+    expect(candidates).toEqual([
+      expect.objectContaining({
+        chapterId: 53,
+        from: 39,
+        to: 44,
+        durationMs: 30000,
+        familiar: true,
+      }),
+    ]);
+    const next = await expandedCandidates(
+      {} as StudioEnv,
+      source,
+      0,
+      [{ chapterId: 53, from: 39, to: 44 }],
+      cache(metadata(62, 53, 5000)),
+    );
+    next.forEach((c) => expect(c.to < 39 || c.from > 44).toBe(true));
+  });
   it('offers contiguous whole-ayah windows outside the old fixed passage list and excludes three-day overlap', async () => {
     const candidates = await expandedCandidates(
       {} as StudioEnv,

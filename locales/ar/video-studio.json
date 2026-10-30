@@ -167,6 +167,7 @@
     "AUTOMATION_INVALID_DECISION": "أعاد النموذج اختيارًا غير صالح. يعيد النظام المحاولة ضمن الحد المسموح.",
     "AUTOMATION_NO_CANDIDATES": "لم يتوفر تسجيل متحقق منه بمدة 30–70 ثانية في جولة الاختيار هذه.",
     "AUTOMATION_DURATION_CHANGED": "تغيّرت مدة التسجيل، فأُوقفت عملية التصدير هذه.",
+    "AUTOMATION_READER_EXCLUDED": "أُوقف هذا التصدير لأن القارئ مستبعد من التوليد التلقائي.",
     "AUTOMATION_INPUT_LIMIT": "تجاوز كتالوج الاختيار الحجم المسموح.",
     "AUTOMATION_MISSED": "انتهت نافذة التوليد لهذا اليوم.",
     "AUTOMATION_RETRIES_EXHAUSTED": "اكتمل الحد المسموح لإعادة المحاولة.",

@@ -84,7 +84,7 @@ export const maintainAutomation = async (env: StudioEnv): Promise<void> => {
     // Bounded retries; selected projects are immutable. Normal render jobs retain their own retry policy.
     await db
       .prepare(
-        "UPDATE studio_automation_runs SET failures=failures+1,status=CASE WHEN failures>=2 OR (attempt>=3 AND status!='ready') OR ? IN ('AUTOMATION_AI_LIMIT','AUTOMATION_PAUSED','DAILY_LIMIT','GLOBAL_LIMIT','STORAGE_LIMIT') THEN 'failed' WHEN status='ready' THEN 'ready' ELSE 'queued' END,error=?,lease=NULL,lease_until=0,next_at=?,updated_at=? WHERE id=? AND lease=?",
+        "UPDATE studio_automation_runs SET failures=failures+1,status=CASE WHEN failures>=2 OR (attempt>=3 AND status!='ready') OR ? IN ('AUTOMATION_AI_LIMIT','AUTOMATION_PAUSED','DAILY_LIMIT','GLOBAL_LIMIT','STORAGE_LIMIT','AUTOMATION_READER_EXCLUDED') THEN 'failed' WHEN status='ready' THEN 'ready' ELSE 'queued' END,error=?,lease=NULL,lease_until=0,next_at=?,updated_at=? WHERE id=? AND lease=?",
       )
       .bind(code, code, now + 60000, now, claimed.id, lease)
       .run();

@@ -8,6 +8,7 @@ import { assert, policy } from '../validation';
 
 import { automationCandidates, cachedAutomationContent } from './automationCandidates';
 import { chooseAutomationPlan } from './automationModel';
+import { isExcludedAutomationReader } from './automationPreferences';
 import { AutomationRunRow, readAutomationSettings } from './automationStore';
 import { backgroundCatalog } from './backgroundLibrary';
 import { resolveManifest } from './content';
@@ -128,6 +129,7 @@ export const stepAutomation = async (
       409,
     );
     const plan = JSON.parse(row.plan) as AutomationPlan;
+    assert(!isExcludedAutomationReader(plan.spec.reciterId), 'AUTOMATION_READER_EXCLUDED', 409);
     const manifest = await resolveManifest(env, owner, plan.spec);
     assert(
       manifest.durationMs >= 30000 &&

@@ -6,6 +6,7 @@
 import type { StudioCatalog } from '../contracts';
 import { assert } from '../validation';
 
+import { automationReaders } from './automationPreferences';
 import { content, list } from './contentSources';
 import { expandedCandidates } from './expandedCandidates';
 import { StudioEnv } from './runtime';
@@ -46,6 +47,7 @@ export interface AutomationCandidate {
   reciter: string;
   chapter: string;
   durationMs: number;
+  familiar?: boolean;
 }
 interface Cached {
   value: string;
@@ -95,14 +97,7 @@ export const automationCandidates = async (
     { length: Math.min(4, available.length) },
     (_, i) => available[(seed + i) % available.length],
   );
-  // Hash the rotation so catalogues whose size shares a factor with the schedule do not
-  // permanently exclude the same readers. Selection remains deterministic across retries.
-  // eslint-disable-next-line no-bitwise -- Cheap deterministic mixing, not a security primitive.
-  const readerOffset = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b) >>> 0;
-  const readers = Array.from(
-    { length: Math.min(3, catalog.reciters.length) },
-    (_, i) => catalog.reciters[(readerOffset + i) % catalog.reciters.length],
-  );
+  const readers = automationReaders(catalog, seed);
   const candidates: AutomationCandidate[] = [];
   for (const [chapterId, from, to] of passages) {
     for (const reader of readers) {

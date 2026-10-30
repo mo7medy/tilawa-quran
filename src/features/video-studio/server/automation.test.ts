@@ -345,6 +345,27 @@ describe('automatic video generation', () => {
       ),
     ).toThrow('AUTOMATION_INVALID_DECISION');
   });
+  it('rejects Sudais even if a model is supplied an outdated candidate list', () => {
+    expect(() =>
+      validateAutomationDecision(
+        decision(),
+        [{ ...candidate, reciterId: 3, reciter: 'Abdur-Rahman as-Sudais' }],
+        catalogue,
+        false,
+      ),
+    ).toThrow('AUTOMATION_INVALID_DECISION');
+  });
+  it('does not render a persisted ready selection of an excluded reader', async () => {
+    await configureAutomation(env, owner, true, true);
+    await maintainAutomation(env);
+    db.prepare("UPDATE studio_automation_runs SET plan=json_set(plan,'$.spec.reciterId',3)").run();
+    await maintainAutomation(env);
+    expect(sql('SELECT count(*) AS count FROM studio_jobs')).toEqual({ count: 0 });
+    expect((await readAutomation(env, owner)).runs[0]).toMatchObject({
+      status: 'failed',
+      error: 'AUTOMATION_READER_EXCLUDED',
+    });
+  });
   it.each([
     { candidateId: 'injected' },
     { backgroundId: 'https://evil.test/image' },

@@ -73,7 +73,7 @@ export const maintainMultiAutomation = async (env: StudioEnv): Promise<void> => 
     }
     await db
       .prepare(
-        "UPDATE studio_automation_tasks SET failures=failures+1,status=CASE WHEN failures>=2 OR (attempt>=3 AND status!='ready') OR ? IN ('AUTOMATION_AI_LIMIT','AUTOMATION_PAUSED','DAILY_LIMIT','GLOBAL_LIMIT','STORAGE_LIMIT') THEN 'failed' WHEN status='ready' THEN 'ready' ELSE 'queued' END,error=?,lease=NULL,lease_until=0,next_at=?,updated_at=? WHERE id=? AND lease=?",
+        "UPDATE studio_automation_tasks SET failures=failures+1,status=CASE WHEN failures>=2 OR (attempt>=3 AND status!='ready') OR ? IN ('AUTOMATION_AI_LIMIT','AUTOMATION_PAUSED','DAILY_LIMIT','GLOBAL_LIMIT','STORAGE_LIMIT','AUTOMATION_READER_EXCLUDED') THEN 'failed' WHEN status='ready' THEN 'ready' ELSE 'queued' END,error=?,lease=NULL,lease_until=0,next_at=?,updated_at=? WHERE id=? AND lease=?",
       )
       .bind(code, code, now + 60000, now, row.id, row.lease)
       .run();

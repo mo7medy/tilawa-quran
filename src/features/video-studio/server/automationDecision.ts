@@ -8,6 +8,7 @@ import { defaultSpec, StudioCatalog } from '../contracts';
 import { assert, record, validateSpec } from '../validation';
 
 import { AutomationCandidate } from './automationCandidates';
+import { isExcludedAutomationReader } from './automationPreferences';
 
 interface Decision extends Record<string, unknown> {
   candidateId: string;
@@ -32,7 +33,10 @@ export const validateAutomationDecision = (
   assert(!d.skipOptional, 'AUTOMATION_INVALID_DECISION');
   const candidate = candidates.find((c) => c.id === d.candidateId);
   assert(
-    candidate && candidate.durationMs >= 30000 && candidate.durationMs <= 70000,
+    candidate &&
+      !isExcludedAutomationReader(candidate.reciterId, candidate.reciter) &&
+      candidate.durationMs >= 30000 &&
+      candidate.durationMs <= 70000,
     'AUTOMATION_INVALID_DECISION',
   );
   assert(

@@ -5,6 +5,7 @@ import { StudioCatalog } from '../contracts';
 import { assert } from '../validation';
 
 import type { AutomationCandidate, cachedAutomationContent } from './automationCandidates';
+import { AUTOMATION_FEATURED_PASSAGES, automationReaders } from './automationPreferences';
 import { content, list } from './contentSources';
 import { StudioEnv } from './runtime';
 
@@ -16,16 +17,24 @@ export const expandedCandidates = async (
   cached: typeof cachedAutomationContent,
 ): Promise<AutomationCandidate[]> => {
   const candidates: AutomationCandidate[] = [];
-  const chapters = Array.from(
-    { length: Math.min(3, catalog.chapters.length) },
-    (unused, i) => catalog.chapters[(seed + i * 37) % catalog.chapters.length],
+  const featured = AUTOMATION_FEATURED_PASSAGES.filter(
+    ([id, from, to]) =>
+      catalog.chapters.some((c) => c.id === id) &&
+      !recent.some((r) => r.chapterId === id && r.from <= to && r.to >= from),
   );
-  // eslint-disable-next-line no-bitwise -- Deterministic mixing avoids excluding readers when catalogue sizes share factors.
-  const readerOffset = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b) >>> 0;
-  const readers = Array.from(
-    { length: Math.min(3, catalog.reciters.length) },
-    (unused, i) => catalog.reciters[(readerOffset + i) % catalog.reciters.length],
+  const featuredChapters = featured.length
+    ? Array.from(
+        new Set(featured.map((unused, i) => featured[(seed + i) % featured.length][0])),
+      ).slice(0, 2)
+    : [];
+  const rotated = Array.from(
+    { length: catalog.chapters.length },
+    (unused, i) => catalog.chapters[(seed + i) % catalog.chapters.length].id,
   );
+  const chapters = Array.from(new Set([...featuredChapters, ...rotated]))
+    .slice(0, 3)
+    .map((id) => catalog.chapters.find((c) => c.id === id));
+  const readers = automationReaders(catalog, seed);
   for (const chapter of chapters) {
     for (const reader of readers) {
       try {
@@ -40,6 +49,7 @@ export const expandedCandidates = async (
           const from = Number(String(timings[start].verse_key).split(':')[1]);
           const begin = Number(timings[start].timestamp_from);
           if (!Number.isInteger(from) || from < 1 || !Number.isFinite(begin)) continue;
+          const anchor = featured.find(([id, first]) => id === chapter.id && first === from);
           for (let end = start; end < Math.min(timings.length, start + 40); end += 1) {
             const current = timings[end];
             const previous = end > start ? Number(timings[end - 1].timestamp_to) : begin;
@@ -59,6 +69,7 @@ export const expandedCandidates = async (
             const to = from + end - start;
             if (
               durationMs >= 30000 &&
+              (!anchor || to >= anchor[2]) &&
               !recent.some((r) => r.chapterId === chapter.id && r.from <= to && r.to >= from)
             ) {
               windows.push({
@@ -70,16 +81,16 @@ export const expandedCandidates = async (
                 reciter: reader.name,
                 chapter: chapter.name,
                 durationMs,
+                ...(anchor ? { familiar: true } : {}),
               });
               break;
             }
           }
         }
         if (windows.length) {
-          candidates.push(windows[seed % windows.length]);
-          if (windows.length > 1) {
-            candidates.push(windows[(seed + Math.floor(windows.length / 2)) % windows.length]);
-          }
+          const familiar = windows.filter((w) => w.familiar);
+          const choices = familiar.length ? familiar : windows;
+          candidates.push(choices[seed % choices.length]);
         }
       } catch {
         // Missing source recordings are excluded before selection; selected audio is never replaced.
