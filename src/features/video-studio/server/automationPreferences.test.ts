@@ -69,6 +69,15 @@ describe('automatic reciter preferences', () => {
       Math.max(...Array.from(counts.values())) - Math.min(...Array.from(counts.values())),
     ).toBeLessThanOrEqual(1);
   });
+  it('covers all twenty current catalogue variants within a complete rotation', () => {
+    const ids = [1, 2, 158, 4, 19, 160, 5, 161, 159, 6, 7, 9, 13, 10, 176, 175, 12, 173, 168, 174];
+    const source = { reciters: ids.map((id) => ({ id, name: `Reader ${id}` })) } as StudioCatalog;
+    const offered = new Set<number>();
+    ids.forEach((unused, seed) =>
+      automationReaders(source, seed).forEach((r) => offered.add(r.id)),
+    );
+    expect(Array.from(offered).sort((a, b) => a - b)).toEqual([...ids].sort((a, b) => a - b));
+  });
   it('counts variants of the same reciter together and prefers less-used available voices', () => {
     const candidates = [168, 173, 6].map((id) => ({ reciterId: id } as AutomationCandidate));
     expect(diverseAutomationCandidates(candidates, [9, 9, 7]).map((c) => c.reciterId)).toEqual([6]);

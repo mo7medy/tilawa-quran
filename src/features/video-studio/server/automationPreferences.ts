@@ -69,8 +69,8 @@ export const automationReaders = (
   const eligible = catalog.reciters.filter((r) => !isExcludedAutomationReader(r.id, r.name));
   assert(eligible.length, 'AUDIO_UNAVAILABLE', 503);
   const usage = readerUsage(history);
-  // eslint-disable-next-line no-bitwise -- Deterministic tie rotation avoids catalogue-order bias.
-  const offset = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b) >>> 0;
+  // A direct cycle visits every catalogue position, even when the catalogue size shares factors.
+  const offset = seed % eligible.length;
   const rotated = Array.from(
     { length: eligible.length },
     (unused, i) => eligible[(offset + i) % eligible.length],
