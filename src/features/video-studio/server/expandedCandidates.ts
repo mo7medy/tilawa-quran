@@ -5,7 +5,11 @@ import { StudioCatalog } from '../contracts';
 import { assert } from '../validation';
 
 import type { AutomationCandidate, cachedAutomationContent } from './automationCandidates';
-import { AUTOMATION_FEATURED_PASSAGES, automationReaders } from './automationPreferences';
+import {
+  AUTOMATION_FEATURED_PASSAGES,
+  automationReaders,
+  diverseAutomationCandidates,
+} from './automationPreferences';
 import { content, list } from './contentSources';
 import { StudioEnv } from './runtime';
 
@@ -15,6 +19,7 @@ export const expandedCandidates = async (
   seed: number,
   recent: { chapterId: number; from: number; to: number }[],
   cached: typeof cachedAutomationContent,
+  readerHistory: number[] = [],
 ): Promise<AutomationCandidate[]> => {
   const candidates: AutomationCandidate[] = [];
   const featured = AUTOMATION_FEATURED_PASSAGES.filter(
@@ -34,7 +39,7 @@ export const expandedCandidates = async (
   const chapters = Array.from(new Set([...featuredChapters, ...rotated]))
     .slice(0, 3)
     .map((id) => catalog.chapters.find((c) => c.id === id));
-  const readers = automationReaders(catalog, seed);
+  const readers = automationReaders(catalog, seed, readerHistory);
   for (const chapter of chapters) {
     for (const reader of readers) {
       try {
@@ -98,5 +103,5 @@ export const expandedCandidates = async (
     }
   }
   assert(candidates.length > 0, 'AUTOMATION_NO_CANDIDATES', 503);
-  return candidates.slice(0, 12);
+  return diverseAutomationCandidates(candidates, readerHistory).slice(0, 12);
 };

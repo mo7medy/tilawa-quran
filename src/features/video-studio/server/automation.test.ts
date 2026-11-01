@@ -345,6 +345,17 @@ describe('automatic video generation', () => {
       ),
     ).toThrow('AUTOMATION_INVALID_DECISION');
   });
+  it('passes the recent durable reciter selections to the next planning round', async () => {
+    await configureAutomation(env, owner, true, true);
+    await maintainAutomation(env);
+    db.prepare(
+      "UPDATE studio_automation_runs SET status='completed',plan=json_set(plan,'$.spec.reciterId',9)",
+    ).run();
+    vi.setSystemTime(new Date('2026-10-26T11:00:00Z'));
+    await maintainAutomation(env);
+    expect(mocks.candidates).toHaveBeenCalledTimes(2);
+    expect(mocks.candidates.mock.calls[1][5]).toEqual([9]);
+  });
   it('rejects Sudais even if a model is supplied an outdated candidate list', () => {
     expect(() =>
       validateAutomationDecision(

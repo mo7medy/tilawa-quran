@@ -31,6 +31,48 @@ const cache = (value: Record<string, unknown>): typeof cachedAutomationContent =
   (async () => value) as typeof cachedAutomationContent;
 
 describe('expanded timing-derived candidates', () => {
+  it('keeps heavily repeated Minshawi out of model choices when other recordings are available', async () => {
+    const source = {
+      ...catalog,
+      reciters: [
+        { id: 9, name: 'Minshawi' },
+        { id: 168, name: 'Minshawi with kids' },
+        { id: 175, name: 'New reader' },
+        { id: 176, name: 'Another reader' },
+        { id: 3, name: 'Sudais' },
+      ],
+    };
+    const candidates = await expandedCandidates(
+      {} as StudioEnv,
+      source,
+      0,
+      [],
+      cache(metadata()),
+      [9, 9, 9, 9],
+    );
+    expect(candidates.length).toBeGreaterThan(0);
+    candidates.forEach((c) => expect([175, 176]).toContain(c.reciterId));
+  });
+  it('uses an available rotating alternative if the least-used recordings are missing', async () => {
+    const source = {
+      ...catalog,
+      reciters: [
+        { id: 1001, name: 'Missing reader' },
+        { id: 1002, name: 'Missing reader two' },
+        { id: 9, name: 'Minshawi' },
+      ],
+    };
+    const checked: string[] = [];
+    const cached = (async (_env, key) => {
+      checked.push(key);
+      if (!key.startsWith('timing:9:')) throw new Error('Recording unavailable');
+      return metadata();
+    }) as typeof cachedAutomationContent;
+    const candidates = await expandedCandidates({} as StudioEnv, source, 0, [], cached, [9, 9]);
+    expect(candidates.length).toBeGreaterThan(0);
+    expect(candidates.every((c) => c.reciterId === 9)).toBe(true);
+    expect(checked).toHaveLength(3);
+  });
   it('prioritizes the referenced Najm passage and extends with whole ayahs to reach thirty seconds', async () => {
     const source = { ...catalog, chapters: [{ id: 53, name: 'An-Najm', count: 62 }] };
     const candidates = await expandedCandidates(

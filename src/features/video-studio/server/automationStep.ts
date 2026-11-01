@@ -37,7 +37,7 @@ export const stepAutomation = async (
     : '';
   if (row.status !== 'ready') {
     const recent = await env.VIDEO_STUDIO_DB.prepare(
-      `SELECT plan,created_at FROM ${table} WHERE owner=? AND status IN ('planning','ready','completed','submitted') AND plan IS NOT NULL ORDER BY created_at DESC LIMIT ${
+      `SELECT plan,created_at FROM ${table} WHERE owner=? AND status IN ('planning','ready','completed','submitted') AND plan IS NOT NULL ORDER BY day DESC,slot DESC,updated_at DESC LIMIT ${
         multi ? 120 : 42
       }`,
     )
@@ -59,7 +59,14 @@ export const stepAutomation = async (
       row.slot * 4 +
       (row.attempt - 1) * 7 +
       (multi ? Array.from(row.id).reduce((sum, c) => sum + c.charCodeAt(0), 0) * 13 : 0);
-    const candidates = await automationCandidates(env, source, seed, used, multi);
+    const candidates = await automationCandidates(
+      env,
+      source,
+      seed,
+      used,
+      multi,
+      used.map((s) => s.reciterId),
+    );
     const plan = await chooseAutomationPlan(
       env,
       candidates,

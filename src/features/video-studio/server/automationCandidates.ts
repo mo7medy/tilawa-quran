@@ -6,7 +6,7 @@
 import type { StudioCatalog } from '../contracts';
 import { assert } from '../validation';
 
-import { automationReaders } from './automationPreferences';
+import { automationReaders, diverseAutomationCandidates } from './automationPreferences';
 import { content, list } from './contentSources';
 import { expandedCandidates } from './expandedCandidates';
 import { StudioEnv } from './runtime';
@@ -86,9 +86,12 @@ export const automationCandidates = async (
   seed: number,
   recent: { chapterId: number; from: number; to: number }[],
   expanded = false,
+  readerHistory: number[] = [],
 ): Promise<AutomationCandidate[]> => {
   assert(catalog.reciters.length > 0, 'AUDIO_UNAVAILABLE');
-  if (expanded) return expandedCandidates(env, catalog, seed, recent, cachedAutomationContent);
+  if (expanded) {
+    return expandedCandidates(env, catalog, seed, recent, cachedAutomationContent, readerHistory);
+  }
   const available = PASSAGES.filter(
     ([chapterId, from, to]) =>
       !recent.some((r) => r.chapterId === chapterId && r.from <= to && r.to >= from),
@@ -97,7 +100,7 @@ export const automationCandidates = async (
     { length: Math.min(4, available.length) },
     (_, i) => available[(seed + i) % available.length],
   );
-  const readers = automationReaders(catalog, seed);
+  const readers = automationReaders(catalog, seed, readerHistory);
   const candidates: AutomationCandidate[] = [];
   for (const [chapterId, from, to] of passages) {
     for (const reader of readers) {
@@ -147,5 +150,5 @@ export const automationCandidates = async (
     }
   }
   assert(candidates.length > 0, 'AUTOMATION_NO_CANDIDATES', 503);
-  return candidates;
+  return diverseAutomationCandidates(candidates, readerHistory);
 };

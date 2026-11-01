@@ -1,8 +1,16 @@
 import type { StudioCatalog } from '../contracts';
 import { assert } from '../validation';
 
-// Editorial preferences, not a live social-platform ranking. IDs come from Tilawa's catalogue.
-const PREFERRED_READERS = [9, 1, 2, 7, 174, 6, 12, 19, 13, 159, 4, 5, 158, 173];
+import type { AutomationCandidate } from './automationCandidates';
+
+// Catalogue variants of one voice share usage; this is not an allowlist.
+const READER_FAMILIES: Record<number, number> = { 2: 1, 12: 6, 168: 9, 173: 7 };
+const readerFamily = (id: number): number => READER_FAMILIES[id] ?? id;
+const readerUsage = (history: number[]): Map<number, number> => {
+  const usage = new Map<number, number>();
+  history.forEach((id) => usage.set(readerFamily(id), (usage.get(readerFamily(id)) ?? 0) + 1));
+  return usage;
+};
 
 // Whole-ayah anchors. Source timings determine whether they can fit a 30–70 second video.
 // 53:39–41 is the user's reference: https://www.tiktok.com/@abo.3aid/video/7671728791101689096
@@ -56,20 +64,41 @@ export const isExcludedAutomationReader = (id: number, name = ''): boolean =>
 export const automationReaders = (
   catalog: StudioCatalog,
   seed: number,
+  history: number[] = [],
 ): StudioCatalog['reciters'] => {
-  const preferred = PREFERRED_READERS.map((id) => catalog.reciters.find((r) => r.id === id))
-    .filter((r): r is StudioCatalog['reciters'][number] => !!r)
-    .filter((r) => !isExcludedAutomationReader(r.id, r.name));
-  assert(preferred.length, 'AUDIO_UNAVAILABLE', 503);
-  const minshawi = preferred.find((r) => r.id === 9);
-  const rotating = preferred.filter((r) => r.id !== minshawi?.id);
-  // eslint-disable-next-line no-bitwise -- Preserve deterministic retry rotation without favoring catalogue order.
+  const eligible = catalog.reciters.filter((r) => !isExcludedAutomationReader(r.id, r.name));
+  assert(eligible.length, 'AUDIO_UNAVAILABLE', 503);
+  const usage = readerUsage(history);
+  // eslint-disable-next-line no-bitwise -- Deterministic tie rotation avoids catalogue-order bias.
   const offset = Math.imul(seed ^ (seed >>> 16), 0x45d9f3b) >>> 0;
-  return [
-    ...(minshawi ? [minshawi] : []),
-    ...Array.from(
-      { length: Math.min(minshawi ? 2 : 3, rotating.length) },
-      (unused, i) => rotating[(offset + i) % rotating.length],
-    ),
-  ];
+  const rotated = Array.from(
+    { length: eligible.length },
+    (unused, i) => eligible[(offset + i) % eligible.length],
+  );
+  const distinct = rotated.filter(
+    (r, i) => rotated.findIndex((other) => readerFamily(other.id) === readerFamily(r.id)) === i,
+  );
+  const ranked = [...distinct].sort(
+    (a, b) => (usage.get(readerFamily(a.id)) ?? 0) - (usage.get(readerFamily(b.id)) ?? 0),
+  );
+  const selected = ranked.slice(0, 2);
+  // Keep one rotating alternative so missing recordings do not trap the least-used voices.
+  const alternate = distinct.find(
+    (r) => !selected.some((other) => readerFamily(other.id) === readerFamily(r.id)),
+  );
+  return alternate ? [...selected, alternate] : selected;
+};
+
+// Balance only after source validation: a missing recording must not block an available voice.
+export const diverseAutomationCandidates = (
+  candidates: AutomationCandidate[],
+  history: number[],
+): AutomationCandidate[] => {
+  if (!history.length) return candidates;
+  const usage = readerUsage(history);
+  const least = Math.min(...candidates.map((c) => usage.get(readerFamily(c.reciterId)) ?? 0));
+  const balanced = candidates.filter((c) => (usage.get(readerFamily(c.reciterId)) ?? 0) === least);
+  const previous = history[0];
+  const alternatives = balanced.filter((c) => readerFamily(c.reciterId) !== readerFamily(previous));
+  return alternatives.length ? alternatives : balanced;
 };
