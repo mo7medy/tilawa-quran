@@ -57,9 +57,16 @@ export const AUTOMATION_FEATURED_PASSAGES = [
   [97, 1, 5],
 ] as const;
 
-export const isExcludedAutomationReader = (id: number, name = ''): boolean =>
-  id === 3 ||
-  /sudais|sudeys|السديس/i.test(name.normalize('NFKC').replace(/[\u064B-\u065F\u0670]/g, ''));
+export const isExcludedAutomationReader = (id: number, name = ''): boolean => {
+  const normalized = name.normalize('NFKC').replace(/[\u064B-\u065F\u0670]/g, '');
+  return (
+    id === 3 ||
+    id === 168 ||
+    /sudais|sudeys|السديس/i.test(normalized) ||
+    (/minshawi|minshawy|منشاوي/i.test(normalized) &&
+      /\bkids\b|\bchildren\b|أطفال|اطفال|طفل/i.test(normalized))
+  );
+};
 
 export const automationReaders = (
   catalog: StudioCatalog,

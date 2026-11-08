@@ -356,27 +356,35 @@ describe('automatic video generation', () => {
     expect(mocks.candidates).toHaveBeenCalledTimes(2);
     expect(mocks.candidates.mock.calls[1][5]).toEqual([9]);
   });
-  it('rejects Sudais even if a model is supplied an outdated candidate list', () => {
+  it.each([
+    [3, 'Abdur-Rahman as-Sudais'],
+    [168, 'Muhammad Siddiq al-Minshawi(with kids)'],
+  ])('rejects excluded reader %s from an outdated model candidate list', (reciterId, reciter) => {
     expect(() =>
       validateAutomationDecision(
         decision(),
-        [{ ...candidate, reciterId: 3, reciter: 'Abdur-Rahman as-Sudais' }],
+        [{ ...candidate, reciterId, reciter }],
         catalogue,
         false,
       ),
     ).toThrow('AUTOMATION_INVALID_DECISION');
   });
-  it('does not render a persisted ready selection of an excluded reader', async () => {
-    await configureAutomation(env, owner, true, true);
-    await maintainAutomation(env);
-    db.prepare("UPDATE studio_automation_runs SET plan=json_set(plan,'$.spec.reciterId',3)").run();
-    await maintainAutomation(env);
-    expect(sql('SELECT count(*) AS count FROM studio_jobs')).toEqual({ count: 0 });
-    expect((await readAutomation(env, owner)).runs[0]).toMatchObject({
-      status: 'failed',
-      error: 'AUTOMATION_READER_EXCLUDED',
-    });
-  });
+  it.each([3, 168])(
+    'does not render a persisted ready selection of excluded reader %s',
+    async (id) => {
+      await configureAutomation(env, owner, true, true);
+      await maintainAutomation(env);
+      db.prepare("UPDATE studio_automation_runs SET plan=json_set(plan,'$.spec.reciterId',?)").run(
+        id,
+      );
+      await maintainAutomation(env);
+      expect(sql('SELECT count(*) AS count FROM studio_jobs')).toEqual({ count: 0 });
+      expect((await readAutomation(env, owner)).runs[0]).toMatchObject({
+        status: 'failed',
+        error: 'AUTOMATION_READER_EXCLUDED',
+      });
+    },
+  );
   it.each([
     { candidateId: 'injected' },
     { backgroundId: 'https://evil.test/image' },

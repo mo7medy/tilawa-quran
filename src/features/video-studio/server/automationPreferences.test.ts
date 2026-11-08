@@ -24,18 +24,19 @@ const catalog = {
 
 // eslint-disable-next-line react-func/max-lines-per-function -- Group the reader rotation contract scenarios in one Vitest suite.
 describe('automatic reciter preferences', () => {
-  it('offers every catalogue reader except Sudais without a reserved Minshawi position', () => {
+  it('offers every catalogue reader except Sudais and Minshawi with kids', () => {
     const rotated = new Set<number>();
     Array.from({ length: 60 }, (unused, seed) => {
       const readers = automationReaders(catalog, seed);
       expect(readers).toHaveLength(3);
       readers.forEach((r) => {
         expect(r.id).not.toBe(3);
+        expect(r.id).not.toBe(168);
         rotated.add(r.id);
       });
       return null;
     });
-    expect(Array.from(rotated).sort((a, b) => a - b)).toEqual([1, 7, 9, 168, 174, 999]);
+    expect(Array.from(rotated).sort((a, b) => a - b)).toEqual([1, 7, 9, 174, 999]);
     expect(
       automationReaders(
         { reciters: [{ id: 1001, name: 'New catalogue reader' }] } as StudioCatalog,
@@ -69,18 +70,22 @@ describe('automatic reciter preferences', () => {
       Math.max(...Array.from(counts.values())) - Math.min(...Array.from(counts.values())),
     ).toBeLessThanOrEqual(1);
   });
-  it('covers all twenty current catalogue variants within a complete rotation', () => {
+  it('covers every eligible catalogue variant within a complete rotation', () => {
     const ids = [1, 2, 158, 4, 19, 160, 5, 161, 159, 6, 7, 9, 13, 10, 176, 175, 12, 173, 168, 174];
     const source = { reciters: ids.map((id) => ({ id, name: `Reader ${id}` })) } as StudioCatalog;
     const offered = new Set<number>();
     ids.forEach((unused, seed) =>
       automationReaders(source, seed).forEach((r) => offered.add(r.id)),
     );
-    expect(Array.from(offered).sort((a, b) => a - b)).toEqual([...ids].sort((a, b) => a - b));
+    expect(Array.from(offered).sort((a, b) => a - b)).toEqual(
+      ids.filter((id) => id !== 168).sort((a, b) => a - b),
+    );
   });
   it('counts variants of the same reciter together and prefers less-used available voices', () => {
-    const candidates = [168, 173, 6].map((id) => ({ reciterId: id } as AutomationCandidate));
-    expect(diverseAutomationCandidates(candidates, [9, 9, 7]).map((c) => c.reciterId)).toEqual([6]);
+    const candidates = [9, 173, 6].map((id) => ({ reciterId: id } as AutomationCandidate));
+    expect(diverseAutomationCandidates(candidates, [168, 168, 7]).map((c) => c.reciterId)).toEqual([
+      6,
+    ]);
     expect(diverseAutomationCandidates(candidates, [9, 7, 6]).map((c) => c.reciterId)).toEqual([
       173, 6,
     ]);
@@ -90,11 +95,19 @@ describe('automatic reciter preferences', () => {
     expect(isExcludedAutomationReader(3)).toBe(true);
     expect(isExcludedAutomationReader(900, 'عبد الرحمن السُّدَيْس')).toBe(true);
     expect(isExcludedAutomationReader(901, 'Abdul Rahman Al Sudais')).toBe(true);
+    expect(isExcludedAutomationReader(168)).toBe(true);
+    expect(isExcludedAutomationReader(902, 'Muhammad Siddiq al-Minshawi(with kids)')).toBe(true);
+    expect(isExcludedAutomationReader(903, 'المنشاوي مع الأطفال')).toBe(true);
+    expect(isExcludedAutomationReader(904, 'Al Minshawy with children')).toBe(true);
     expect(isExcludedAutomationReader(9, 'محمد صديق المنشاوي')).toBe(false);
+    expect(isExcludedAutomationReader(9, 'Muhammad Siddiq al-Minshawi')).toBe(false);
   });
   it('fails clearly when the catalogue contains only the excluded reciter', () => {
     expect(() =>
-      automationReaders({ reciters: [catalog.reciters[0]] } as StudioCatalog, 1),
+      automationReaders(
+        { reciters: [catalog.reciters[0], catalog.reciters[5]] } as StudioCatalog,
+        1,
+      ),
     ).toThrow('AUDIO_UNAVAILABLE');
   });
 });

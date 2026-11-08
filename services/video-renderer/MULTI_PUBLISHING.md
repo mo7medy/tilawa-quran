@@ -36,13 +36,14 @@ destinations.
 ## Automatic content preferences
 
 The automatic picker rotates through every reader in Tilawa's catalogue except Abdur-Rahman
-as-Sudais. No reader has a reserved position or model priority. Recent three-day selections weight
-the next reader pool: two less-used voices and a rotating alternative, with only the least-used
-source-validated candidates offered to the model. Recording variants of the same voice share usage.
-An equally used alternative prevents consecutive repetition when available. Missing recordings can
-fall back to an available voice within the existing request budget. Sudais remains excluded at
-candidate selection, decision validation and pre-render checks. The manual catalogue is independent
-of this automatic policy.
+as-Sudais and Minshawi with kids (reader 168). Solo Minshawi remains eligible. No reader has a
+reserved position or model priority. Recent three-day selections weight the next reader pool: two
+less-used voices and a rotating alternative, with only the least-used source-validated candidates
+offered to the model. Recording variants of the same voice share usage. An equally used alternative
+prevents consecutive repetition when available. Missing recordings can fall back to an available
+voice within the existing request budget. Both excluded recordings are blocked at candidate
+selection, decision validation and pre-render checks. The manual catalogue is independent of this
+automatic policy.
 
 Featured ayah anchors are editorial preferences, not live TikTok/Instagram trend measurements. They
 include An-Najm 53:39–41 from the
