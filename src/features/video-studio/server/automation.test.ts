@@ -228,15 +228,15 @@ describe('automatic video generation', () => {
     expect(mocks.ai).toHaveBeenCalledTimes(1);
     expect(mocks.ai).toHaveBeenCalledWith(
       AUTOMATION_MODEL,
-      expect.objectContaining({ max_tokens: 450 }),
+      expect.objectContaining({ max_completion_tokens: 450 }),
     );
     // The model cannot bias the first image: background IDs are assigned by the server.
-    expect(mocks.ai.mock.calls[0][1].response_format.json_schema.properties).not.toHaveProperty(
-      'backgroundId',
-    );
-    expect(mocks.ai.mock.calls[0][1].response_format.json_schema.properties).not.toHaveProperty(
-      'backgroundIds',
-    );
+    expect(
+      mocks.ai.mock.calls[0][1].response_format.json_schema.schema.properties,
+    ).not.toHaveProperty('backgroundId');
+    expect(
+      mocks.ai.mock.calls[0][1].response_format.json_schema.schema.properties,
+    ).not.toHaveProperty('backgroundIds');
     await maintainAutomation(env);
     state = await readAutomation(env, owner);
     expect(state.runs[0].status).toBe('submitted');
@@ -249,6 +249,31 @@ describe('automatic video generation', () => {
     db.prepare("UPDATE studio_jobs SET status='completed'").run();
     await maintainAutomation(env);
     expect((await readAutomation(env, owner)).runs[0].status).toBe('completed');
+  });
+  it('uses the supported structured-output schema without reasoning tokens', async () => {
+    await chooseAutomationPlan(env, [candidate], catalogue, false);
+    expect(mocks.ai).toHaveBeenCalledWith(
+      '@cf/google/gemma-4-26b-a4b-it',
+      expect.objectContaining({
+        max_completion_tokens: 450,
+        chat_template_kwargs: { enable_thinking: false },
+        response_format: {
+          type: 'json_schema',
+          json_schema: expect.objectContaining({
+            name: 'video_studio_plan',
+            strict: true,
+            schema: expect.objectContaining({ type: 'object', additionalProperties: false }),
+          }),
+        },
+      }),
+    );
+  });
+  it('records a model outage without creating a render or exposing provider error details', async () => {
+    await configureAutomation(env, owner, true, true);
+    mocks.ai.mockRejectedValueOnce(new Error('Model deprecated; private provider details'));
+    await maintainAutomation(env);
+    expect((await readAutomation(env, owner)).runs[0].error).toBe('AUTOMATION_MODEL_UNAVAILABLE');
+    expect(sql('SELECT count(*) AS count FROM studio_jobs')).toEqual({ count: 0 });
   });
   it('uses fresh R2 backgrounds, skips the previous opening, and preserves the saved sequence on submission', async () => {
     const rng = vi.spyOn(crypto, 'getRandomValues').mockImplementation((array) => {

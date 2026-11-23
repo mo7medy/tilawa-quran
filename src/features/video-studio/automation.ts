@@ -1,6 +1,6 @@
 import type { VideoProjectSpec } from './contracts';
 
-export const AUTOMATION_MODEL = '@cf/qwen/qwen3-30b-a3b-fp8';
+export const AUTOMATION_MODEL = '@cf/google/gemma-4-26b-a4b-it';
 export const AUTOMATION_HOURS = [9, 14, 19] as const;
 export const AUTOMATION_GAP_MS = 5 * 3600000;
 export interface AutomationPlan {
