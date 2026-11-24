@@ -2,7 +2,8 @@
 /* eslint-disable @typescript-eslint/naming-convention -- SQLite fields. */
 import type { D1PreparedStatement } from '@cloudflare/workers-types';
 
-import { AUTOMATION_HOURS, automationClock } from '../automation';
+import { automationClock } from '../automation';
+import { MULTI_AUTOMATION_HOURS } from '../multiPublishing';
 import { assert } from '../validation';
 
 import { multiControl, SQL_UUID } from './multiControl';
@@ -10,9 +11,12 @@ import { StudioEnv } from './runtime';
 
 // Find a local slot through IANA conversion, including Cairo's daylight saving transitions.
 export const cairoSlotAt = (day: string, slot: number): number => {
-  const utc = Date.parse(`${day}T${String(AUTOMATION_HOURS[slot]).padStart(2, '0')}:00:00Z`);
+  const utc = Date.parse(`${day}T${String(MULTI_AUTOMATION_HOURS[slot]).padStart(2, '0')}:00:00Z`);
   const probe = automationClock(utc);
-  return utc - (probe.hour - AUTOMATION_HOURS[slot]) * 3600000;
+  const at = utc - (probe.hour - MULTI_AUTOMATION_HOURS[slot]) * 3600000;
+  if (slot !== 3) return at;
+  // Cairo skips midnight at the spring transition; use the first valid hour of that day.
+  return automationClock(at).day === day ? at : at + 3600000;
 };
 export const activeTaskTarget = `EXISTS(SELECT 1 FROM studio_task_destinations td JOIN studio_destinations d ON d.id=td.destination_id AND d.revision=td.revision JOIN studio_buffer_connections c ON c.id=d.connection_id WHERE td.task_id=studio_automation_tasks.id AND d.paused=0 AND d.disconnected=0 AND c.disconnected=0)`;
 
@@ -77,20 +81,20 @@ export const dayTaskStatements = (
   now: number,
 ): D1PreparedStatement[] => {
   const db = env.VIDEO_STUDIO_DB;
-  const slots = [0, 1, 2].map((slot) => cairoSlotAt(day, slot));
+  const slots = MULTI_AUTOMATION_HOURS.map((unused, slot) => cairoSlotAt(day, slot));
   return [
     db
       .prepare(
         `INSERT OR IGNORE INTO studio_automation_tasks(id,owner,day,slot,stream_key,status,error,next_at,created_at,updated_at)
    SELECT ${SQL_UUID},a.owner,a.day,s.slot,CASE WHEN a.mode='shared' THEN 'shared' ELSE d.destination_id END,
     CASE WHEN ? > s.hour THEN 'skipped' ELSE 'queued' END,CASE WHEN ?>s.hour THEN 'AUTOMATION_MISSED' ELSE NULL END,
-    CASE s.slot WHEN 0 THEN ? WHEN 1 THEN ? ELSE ? END,?,?
+    CASE s.slot WHEN 0 THEN ? WHEN 1 THEN ? WHEN 2 THEN ? ELSE ? END,?,?
    FROM studio_automation_days a JOIN studio_day_destinations d ON d.owner=a.owner AND d.day=a.day
-   CROSS JOIN (SELECT 0 AS slot,9 AS hour UNION ALL SELECT 1,14 UNION ALL SELECT 2,19) s
+   CROSS JOIN (SELECT 0 AS slot,9 AS hour UNION ALL SELECT 1,14 UNION ALL SELECT 2,19 UNION ALL SELECT 3,?) s
    WHERE a.owner=? AND a.day=? AND d.daily_count>s.slot
    GROUP BY a.owner,a.day,s.slot,CASE WHEN a.mode='shared' THEN 'shared' ELSE d.destination_id END`,
       )
-      .bind(hour, hour, ...slots, now, now, owner, day),
+      .bind(hour, hour, ...slots, now, now, automationClock(slots[3]).hour, owner, day),
     db
       .prepare(
         `INSERT OR IGNORE INTO studio_task_destinations(task_id,destination_id,revision)

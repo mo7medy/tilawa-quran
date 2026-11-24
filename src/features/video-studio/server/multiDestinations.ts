@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention -- SQLite fields. */
 /* eslint-disable react-func/max-lines-per-function -- Keep validated resource transitions together. */
 /* eslint-disable import/prefer-default-export -- Named authenticated resource handler. */
+import { MAX_DAILY_VIDEOS } from '../multiPublishing';
 import { assert, StudioError } from '../validation';
 
 import { auditStudio, tomorrowCairo } from './multiControl';
@@ -58,7 +59,10 @@ export const destinationAction = async (
   const destination = await destinationById(env, owner, id);
   if (req.method === 'PUT' && !action) {
     const count = body.dailyCount;
-    assert(Number.isInteger(count) && Number(count) >= 0 && Number(count) <= 3, 'INVALID_INPUT');
+    assert(
+      Number.isInteger(count) && Number(count) >= 0 && Number(count) <= MAX_DAILY_VIDEOS,
+      'INVALID_INPUT',
+    );
     assert(!destination.disconnected, 'BUFFER_RECONNECT', 409);
     const connection = await connectionById(env, owner, destination.connection_id);
     assert(!connection.disconnected, 'BUFFER_RECONNECT', 409);

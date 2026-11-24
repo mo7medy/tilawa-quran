@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/naming-convention -- SQLite fields. */
 /* eslint-disable react-func/max-lines-per-function -- Return one bounded, credential-free administration snapshot. */
 import { AUTOMATION_GAP_MS, automationClock } from '../automation';
-import { StudioAdminState } from '../multiPublishing';
+import { MAX_DAILY_VIDEOS, StudioAdminState } from '../multiPublishing';
 import { assert } from '../validation';
 
 import { AutomationRunRow, automationRun, readAutomationSettings } from './automationStore';
@@ -53,7 +53,7 @@ export const adminState = async (env: StudioEnv, owner: string): Promise<StudioA
         .all<DestinationStats>(),
       db
         .prepare(
-          'SELECT t.*, (SELECT GROUP_CONCAT(destination_id) FROM studio_task_destinations WHERE task_id=t.id) AS targets FROM studio_automation_tasks t WHERE owner=? ORDER BY created_at DESC,slot DESC LIMIT 120',
+          'SELECT t.*, (SELECT GROUP_CONCAT(destination_id) FROM studio_task_destinations WHERE task_id=t.id) AS targets FROM studio_automation_tasks t WHERE owner=? ORDER BY day DESC,next_at DESC,created_at DESC LIMIT 120',
         )
         .bind(owner)
         .all<AutomationRunRow & { targets: string | null }>(),
@@ -119,12 +119,12 @@ export const adminState = async (env: StudioEnv, owner: string): Promise<StudioA
         ? null
         : d.paused
         ? d.next_count > 0
-          ? cairoSlotAt(d.effective_day, 0)
+          ? cairoSlotAt(d.effective_day, d.next_count === MAX_DAILY_VIDEOS ? 3 : 0)
           : null
         : d.next_at
         ? Math.max(d.next_at, now, d.last_sent_at + AUTOMATION_GAP_MS)
         : d.next_count > 0
-        ? cairoSlotAt(tomorrowCairo(now), 0)
+        ? cairoSlotAt(tomorrowCairo(now), d.next_count === MAX_DAILY_VIDEOS ? 3 : 0)
         : null,
       required: d.required,
       generated: d.generated,

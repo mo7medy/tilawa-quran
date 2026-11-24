@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import useTranslation from 'next-translate/useTranslation';
 
 import { errorCode, studioRequest } from '../client';
-import { PublishingDestination } from '../multiPublishing';
+import { MAX_DAILY_VIDEOS, PublishingDestination } from '../multiPublishing';
 
 import styles from './AdminVideo.module.scss';
 
@@ -80,7 +80,7 @@ const AdminVideoDestination = ({
             onChange={(event) => setCount(Number(event.target.value))}
             disabled={busy || disabled || destination.disconnected}
           >
-            {[0, 1, 2, 3].map((n) => (
+            {Array.from({ length: MAX_DAILY_VIDEOS + 1 }, (unused, n) => n).map((n) => (
               <option key={n} value={n}>
                 {n}
               </option>

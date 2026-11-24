@@ -37,7 +37,7 @@ export const stepAutomation = async (
     : '';
   if (row.status !== 'ready') {
     const recent = await env.VIDEO_STUDIO_DB.prepare(
-      `SELECT plan,created_at FROM ${table} WHERE owner=? AND status IN ('planning','ready','completed','submitted') AND plan IS NOT NULL ORDER BY day DESC,slot DESC,updated_at DESC LIMIT ${
+      `SELECT plan,created_at FROM ${table} WHERE owner=? AND status IN ('planning','ready','completed','submitted') AND plan IS NOT NULL ORDER BY day DESC,next_at DESC,updated_at DESC LIMIT ${
         multi ? 120 : 42
       }`,
     )
@@ -164,7 +164,7 @@ export const previousMultiBackground = async (
   row: AutomationRunRow,
 ): Promise<string[]> => {
   const previous = await env.VIDEO_STUDIO_DB.prepare(
-    'SELECT (SELECT t.plan FROM studio_automation_tasks t JOIN studio_task_destinations td ON td.task_id=t.id WHERE t.plan IS NOT NULL AND t.id!=? AND td.destination_id=current.destination_id ORDER BY t.day DESC,t.slot DESC,t.created_at DESC LIMIT 1) AS plan FROM studio_task_destinations current WHERE current.task_id=?',
+    'SELECT (SELECT t.plan FROM studio_automation_tasks t JOIN studio_task_destinations td ON td.task_id=t.id WHERE t.plan IS NOT NULL AND t.id!=? AND td.destination_id=current.destination_id ORDER BY t.day DESC,t.next_at DESC,t.created_at DESC LIMIT 1) AS plan FROM studio_task_destinations current WHERE current.task_id=?',
   )
     .bind(row.id, row.id)
     .all<{ plan: string | null }>();

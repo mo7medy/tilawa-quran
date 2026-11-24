@@ -1,5 +1,9 @@
-import type { AutomationRun } from './automation';
+import { AUTOMATION_HOURS, AutomationRun } from './automation';
 import type { Publication, PublisherChannel, PublishingPlatform } from './publishing';
+
+// Midnight adds a fourth video while preserving the existing slots for lower counts.
+export const MULTI_AUTOMATION_HOURS = [...AUTOMATION_HOURS, 0] as const;
+export const MAX_DAILY_VIDEOS = MULTI_AUTOMATION_HOURS.length;
 
 export type DistributionMode = 'independent' | 'shared';
 export interface BufferConnection {

@@ -24,7 +24,7 @@ export const enqueueDeliveries = async (env: StudioEnv): Promise<void> => {
  WHERE t.day=? AND t.status IN ('submitted','completed') AND j.status='completed' AND j.output_key IS NOT NULL AND j.expires_at>?
  AND d.paused=0 AND d.disconnected=0 AND c.disconnected=0 AND EXISTS(SELECT 1 FROM studio_multi_control WHERE active=1 AND maintenance=0)
  AND EXISTS(SELECT 1 FROM studio_automation_settings WHERE owner=t.owner AND enabled=1)
- AND NOT EXISTS(SELECT 1 FROM studio_deliveries p WHERE p.run_id=t.id AND p.destination_id=d.id) ORDER BY t.slot,d.id LIMIT 27`,
+ AND NOT EXISTS(SELECT 1 FROM studio_deliveries p WHERE p.run_id=t.id AND p.destination_id=d.id) ORDER BY t.next_at,d.id LIMIT 27`,
   )
     .bind(now, now, automationClock(now).day, now + 86400000)
     .run();

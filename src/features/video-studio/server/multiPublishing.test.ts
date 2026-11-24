@@ -227,6 +227,104 @@ describe('multi-account automation and publishing', () => {
     );
     expect(sql('SELECT COUNT(*) AS n FROM studio_buffer_connections').n).toBe(1);
   });
+  it('plans eight independent videos for two accounts set to four, without changing today', async () => {
+    const c = await connection();
+    const a = await destination(c, 0, 0, 4);
+    await destination(c, 1, 0, 4);
+    await planMultiDay(env, owner);
+    expect(sql('SELECT COUNT(*) AS n FROM studio_automation_tasks').n).toBe(0);
+    await expect(api(['destinations', a], { dailyCount: 5 }, 'PUT')).rejects.toMatchObject({
+      code: 'INVALID_INPUT',
+    });
+    vi.setSystemTime(new Date('2026-10-30T00:00:00+02:00'));
+    await Promise.all([planMultiDay(env, owner), planMultiDay(env, owner)]);
+    expect(sql('SELECT COUNT(*) AS n FROM studio_automation_tasks').n).toBe(8);
+    expect(sql('SELECT COUNT(*) AS n FROM studio_task_destinations').n).toBe(8);
+    const times = db
+      .prepare('SELECT DISTINCT next_at FROM studio_automation_tasks ORDER BY next_at')
+      .all()
+      .map((r) => Number(r.next_at));
+    expect(times.map((at) => automationClock(at).hour)).toEqual([0, 9, 14, 19]);
+    for (let n = 1; n < times.length; n += 1) {
+      expect(times[n] - times[n - 1]).toBeGreaterThanOrEqual(5 * 3600000);
+    }
+    expect(cairoSlotAt('2026-10-31', 3) - times[3]).toBe(5 * 3600000);
+    expect((await adminState(env, owner)).destinations.every((d) => d.required === 4)).toBe(true);
+  });
+  it('shares four renders for four-video accounts and does not backfill a missed midnight slot', async () => {
+    const c = await connection();
+    await destination(c, 0, 0, 4);
+    await destination(c, 1, 0, 4);
+    await api(['policy'], { mode: 'shared' }, 'PUT');
+    tomorrow();
+    await planMultiDay(env, owner);
+    expect(sql('SELECT COUNT(*) AS n FROM studio_automation_tasks').n).toBe(4);
+    expect(
+      sql(
+        "SELECT COUNT(*) AS n FROM studio_automation_tasks WHERE slot=3 AND status='skipped' AND error='AUTOMATION_MISSED'",
+      ).n,
+    ).toBe(1);
+    expect(sql('SELECT COUNT(*) AS n FROM studio_task_destinations').n).toBe(8);
+  });
+  it('preserves records, indexes and limits when migrating an existing publishing database', async () => {
+    const c = await connection();
+    await destination(c);
+    tomorrow();
+    await planMultiDay(env, owner);
+    const old = new DatabaseSync(':memory:');
+    try {
+      readdirSync('services/video-renderer/migrations')
+        .sort()
+        .filter((file) => file < '0007')
+        .forEach((file) =>
+          old.exec(readFileSync(`services/video-renderer/migrations/${file}`, 'utf8')),
+        );
+      const tables = [
+        'studio_buffer_connections',
+        'studio_destinations',
+        'studio_day_destinations',
+        'studio_automation_tasks',
+        'studio_task_destinations',
+      ];
+      for (const table of tables) {
+        for (const row of db.prepare(`SELECT * FROM ${table}`).all()) {
+          const keys = Object.keys(row);
+          old
+            .prepare(
+              `INSERT INTO ${table}(${keys.join(',')}) VALUES(${keys.map(() => '?').join(',')})`,
+            )
+            .run(...Object.values(row));
+        }
+      }
+      old.exec(
+        readFileSync('services/video-renderer/migrations/0007_four_daily_videos.sql', 'utf8'),
+      );
+      for (const table of tables) {
+        expect(old.prepare(`SELECT * FROM ${table}`).all()).toEqual(
+          db.prepare(`SELECT * FROM ${table}`).all(),
+        );
+      }
+      old.exec('UPDATE studio_destinations SET next_count=4');
+      expect(() => old.exec('UPDATE studio_destinations SET next_count=5')).toThrow();
+      expect(
+        old
+          .prepare(
+            "SELECT count(*) AS n FROM sqlite_master WHERE type='trigger' AND name LIKE 'studio_destination%'",
+          )
+          .get(),
+      ).toEqual({ n: 2 });
+      expect(
+        old
+          .prepare(
+            "SELECT count(*) AS n FROM sqlite_master WHERE type='index' AND name IN ('studio_tasks_pending','studio_destinations_connection')",
+          )
+          .get(),
+      ).toEqual({ n: 2 });
+      expect(old.prepare('PRAGMA foreign_key_check').all()).toEqual([]);
+    } finally {
+      old.close();
+    }
+  });
   it('builds exactly 27 distinct tasks, atomically and without backfill for newly activated accounts', async () => {
     for (let i = 0; i < 3; i += 1) {
       const c = await connection(i);
@@ -414,6 +512,23 @@ describe('multi-account automation and publishing', () => {
       optionalThird: true,
     });
     expect(sql('SELECT enabled FROM studio_automation_settings').enabled).toBe(0);
+  });
+  it('runs the skipped spring midnight at the first valid hour instead of marking it missed', async () => {
+    vi.setSystemTime(new Date('2026-04-23T10:00:00Z'));
+    const c = await connection();
+    await destination(c, 0, 0, 4);
+    vi.setSystemTime(new Date(cairoSlotAt('2026-04-24', 3)));
+    await planMultiDay(env, owner);
+    expect(sql('SELECT status,error FROM studio_automation_tasks WHERE slot=3')).toEqual({
+      status: 'queued',
+      error: null,
+    });
+  });
+  it('keeps the midnight slot on the intended day across Cairo clock changes', () => {
+    expect(automationClock(cairoSlotAt('2026-04-24', 3))).toEqual({ day: '2026-04-24', hour: 1 });
+    expect(cairoSlotAt('2026-04-24', 3) - cairoSlotAt('2026-04-23', 2)).toBe(5 * 3600000);
+    expect(automationClock(cairoSlotAt('2026-10-30', 3))).toEqual({ day: '2026-10-30', hour: 0 });
+    expect(cairoSlotAt('2026-10-30', 3) - cairoSlotAt('2026-10-29', 2)).toBe(6 * 3600000);
   });
   it('uses IANA Cairo time across summer time and the October transition', () => {
     expect(automationClock(cairoSlotAt('2026-07-01', 0))).toEqual({ day: '2026-07-01', hour: 9 });

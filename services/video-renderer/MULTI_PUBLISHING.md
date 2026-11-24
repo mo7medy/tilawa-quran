@@ -12,8 +12,9 @@ recorded separately in audit events.
 - New channels start paused at zero. Counts 1–3 and distribution changes apply tomorrow in
   `Africa/Cairo`; zero/disconnect cancels unsent work immediately. Accepted Buffer posts remain
   tracked.
-- Immutable day snapshots assign slots 09:00, 14:00 and 19:00 Cairo. Independent content is the
-  default; shared mode creates one render per slot with separate destination results.
+- Immutable day snapshots assign slots 09:00, 14:00 and 19:00 Cairo, plus 00:00 for a count of four.
+  Existing slot IDs are retained. Counts range from 0 to 4. Independent content is the default;
+  shared mode creates one render per slot with separate destination results.
 - Each destination has a five-hour send interval. Work not submitted by midnight closes without
   backfill.
 - Automation: 30 renders/day, 10 GiB, 60 model requests/UTC day; manual quotas remain independent.
